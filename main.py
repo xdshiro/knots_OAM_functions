@@ -15,11 +15,14 @@ if __name__ == '__main__':
 
     propagation = True
     if propagation:
-        testProp = fg.simple_propagator_3D(field1[:, :, 25], dz=1, zSteps=50, n0=1, k0=1)
-        fg.plot_2D(np.abs(testProp[:, :, -1]))
+        fieldProp = fg.simple_propagator_3D(field1[:, :, 25], dz=1, zSteps=50, n0=1, k0=1)
         # fg.plot_3D_density(np.angle(testProp[:, :, :]), resDecrease=[1, 1, 1])
+        fhl.plot_knot_dots(fieldProp)
         plt.show()
-        exit()
+
+    knot_from_math = True
+    if knot_from_math:
+
     test_efild = False
     if test_efild:
 

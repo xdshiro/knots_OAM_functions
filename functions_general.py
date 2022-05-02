@@ -3,6 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.fft import fftn, ifftn, fftshift, ifftshift
 import scipy.io as sio
+from scipy.special import assoc_laguerre
 
 # common parameters
 # global fig, ax
@@ -144,7 +145,7 @@ def simple_propagator_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, k0=1
 
     KxyMesh = np.array(np.meshgrid(kxArray, kyArray, indexing='ij'))
 
-    def Nonlinearity_spec(E):
+    def nonlinearity_spec(E):
         return dz * 0
 
     # works fine!
@@ -159,7 +160,7 @@ def simple_propagator_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, k0=1
     fieldReturn[:, :, 0] = E
     for k in range(1, zResolution):
         fieldReturn[:, :, k] = linear_step(fieldReturn[:, :, k - 1])
-        fieldReturn[:, :, k] = fieldReturn[:, :, k] * np.exp(Nonlinearity_spec(fieldReturn[:, :, k]))
+        fieldReturn[:, :, k] = fieldReturn[:, :, k] * np.exp(nonlinearity_spec(fieldReturn[:, :, k]))
 
     return fieldReturn
 
@@ -216,8 +217,8 @@ def plot_3D_density(E, resDecrease=None,
     if resDecrease is not None:
         shape = (shape // resDecrease)
     X, Y, Z = np.mgrid[xMinMax[0]:xMinMax[1]:shape[0] * 1j,
-              yMinMax[0]:yMinMax[1]:shape[1] * 1j,
-              zMinMax[0]:zMinMax[1]:shape[2] * 1j]
+                       yMinMax[0]:yMinMax[1]:shape[1] * 1j,
+                       zMinMax[0]:zMinMax[1]:shape[2] * 1j]
     fig = go.Figure(data=go.Volume(
         x=X.flatten(),  # collapsed into 1 dimension
         y=Y.flatten(),
@@ -314,3 +315,5 @@ def plot_scatter_3D(X, Y, Z, ax=None):
     # plt.show()
     # plt.close()
     return ax
+
+
