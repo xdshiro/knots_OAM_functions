@@ -54,6 +54,17 @@ def actual_trefoil(x, y, z, w, width=1, k0=1, z0=0.):
     return field
 
 
+def actual_knot(x, y, z, w, width=1, k0=1, z0=0., knot=None):
+    if knot is None:
+        knot = 'trefoil'
+    if knot == 'trefoil':
+        return actual_trefoil(x, y, z, w, width=width, k0=k0, z0=z0)
+    elif knot == 'hopf':
+        print('add the HOPF!')
+    elif knot == 'link':
+        return actual_link(x, y, z, w, width=width, k0=k0, z0=z0)
+
+
 # this one hasn't been checked yet
 def Jz_calc(EArray, xArray, yArray):
     x0 = (xArray[-1] + xArray[0]) / 2
@@ -71,3 +82,24 @@ def Jz_calc(EArray, xArray, yArray):
                     (x[i] * dEy - y[j] * dEx))
 
     return np.imag(sum * dx * dy)
+
+
+# ploting and saving math trefoil
+def knot_field_plot_save(xyMax=3, zMax=1, xyRes=50, zRes=50, w=1, width=1, k0=1,
+                         knot=None,
+                         save=False, saveName='rename_me', plot=True, plotLayer=None):
+    xMin, xMax = -xyMax, xyMax
+    yMin, yMax = -xyMax, xyMax
+    zMin, zMax = -zMax, zMax
+    xArray = np.linspace(xMin, xMax, xyRes)
+    yArray = np.linspace(yMin, yMax, xyRes)
+    zArray = np.linspace(zMin, zMax, zRes)
+    xyzMesh = np.array(np.meshgrid(xArray, yArray, zArray, indexing='ij'))
+    field = actual_knot(xyzMesh[0], xyzMesh[1], z=xyzMesh[2], w=w, width=width, k0=k0, knot=knot)
+    if plot:
+        if plotLayer is None:
+            plotLayer = zRes // 2
+        fg.plot_2D(np.abs(field)[:, :, plotLayer], xArray, yArray)
+        fg.plot_2D(np.angle(field)[:, :, plotLayer], xArray, yArray, map='hsv')
+    if save:
+        np.save(saveName, field)
