@@ -10,18 +10,22 @@ import functions_high_lvl as fhl
 # plt.show()
 # exit()
 if __name__ == '__main__':
+    field1 = np.load('field_test2.npy')
+    fieldTurb = fg.readingFile('Efield_100_500_SR_1.000000e-02.mat', fieldToRead="Efield", printV=False)
 
-    test_efild = True
+    propagation = True
+    if propagation:
+        testProp = fg.simple_propagator_3D(field1[:, :, 25], dz=0.5, zSteps=10, n0=1, k0=1)
+        fg.plot_2D(np.abs(testProp[:, :, -1]))
+        plt.show()
+        exit()
+    test_efild = False
     if test_efild:
 
         field = np.load('field_test2.npy')
         values = (field[:, :, :])
-        """testProp = fg.simple_propagator_3D(values[:, :, 25], dz=0.5, zSteps=10, n0=1, k0=1)
-        fg.plot_2D(np.abs(testProp[:, :, -1]))
-        plt.show()
-        exit()"""
-        if 0:
-            fieldTurb = fg.readingFile('Efield_100_500_SR_1.000000e-02.mat', fieldToRead="Efield", printV=False)
+
+        if 1:
             fhl.plot_knot_dots(fieldTurb[185:327, 185:327, :])
             plt.show()
             exit()
