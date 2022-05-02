@@ -42,7 +42,7 @@ def cut_middle_values(E, min, max, midValue=0, minValue=None, maxValue=None):
     return ans
 
 
-def check_dot_oam(E):
+def check_dot_oam_helper(E):
     flagPlus, flagMinus = True, True
     minIndex = np.argmin(E)
     for i in range(minIndex - len(E), minIndex - 1, 1):
@@ -61,7 +61,7 @@ def check_dot_oam(E):
     return False, 0
 
 
-def fill_dict_as_matrix(E, dots=None, nonValue=0, check=False):
+def fill_dict_as_matrix_helper(E, dots=None, nonValue=0, check=False):
     if dots is None:
         dots = {}
     shape = np.shape(E)
@@ -77,6 +77,8 @@ def fill_dict_as_matrix(E, dots=None, nonValue=0, check=False):
     return dots
 
 
+# this function finds singularities
+# returns [3D Array, dots only]
 def cut_non_oam(E, value=1, nonValue=0, bigSingularity=False, axesAll=False, cbrt=False):
     ans = np.copy(E)
     shape = np.shape(ans)
@@ -89,7 +91,7 @@ def cut_non_oam(E, value=1, nonValue=0, bigSingularity=False, axesAll=False, cbr
                                    E[i + 1, j - 1], E[i, j - 1]])
                 # if len(Echeck[Echeck>2.0]) != 0 and len(Echeck[Echeck<-2.0]) != 0:
                 #    print(Echeck)
-                oamFlag, oamValue = check_dot_oam(Echeck)
+                oamFlag, oamValue = check_dot_oam_helper(Echeck)
                 # print(oamFlag, oamValue)
                 if oamFlag:
                     ans[i, j] = oamValue * value
@@ -106,35 +108,22 @@ def cut_non_oam(E, value=1, nonValue=0, bigSingularity=False, axesAll=False, cbr
         for i in range(shape[2]):
             ans[:, :, i] = cut_non_oam(ans[:, :, i], value=value, nonValue=nonValue,
                                        bigSingularity=bigSingularity)[0]
-        dots = fill_dict_as_matrix(ans)
+        dots = fill_dict_as_matrix_helper(ans)
 
         if axesAll:
             for i in range(shape[1]):
                 ans[:, i, :] += cut_non_oam(E[:, i, :], value=value, nonValue=nonValue,
                                             bigSingularity=bigSingularity)[0]
-            dots = fill_dict_as_matrix(ans, dots, check=True)
+            dots = fill_dict_as_matrix_helper(ans, dots, check=True)
             for i in range(shape[0]):
                 ans[i, :, :] += cut_non_oam(E[i, :, :], value=value, nonValue=nonValue,
                                             bigSingularity=bigSingularity)[0]
-            dots = fill_dict_as_matrix(ans, dots, check=True)
+            dots = fill_dict_as_matrix_helper(ans, dots, check=True)
             if cbrt:
                 ans = np.array(np.cbrt(ans), dtype=int)
 
     # print(ans)
     return [ans, dots]
-
-
-def cut_fourier_filter(E, radiusPix=1):
-    ans = np.copy(E)
-    ans = fftshift(fftn(ans))
-    xCenter, yCenter = np.shape(ans)[0] // 2, np.shape(ans)[0] // 2
-    for i in range(np.shape(ans)[0]):
-        for j in range(np.shape(ans)[1]):
-            if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2) > radiusPix:
-                ans[i, j] = 0
-    ans = ifftn(ifftshift(ans))
-    print(np.shape(ans))
-    return ans
 
 
 def simple_propagator_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, k0=1):
@@ -175,17 +164,32 @@ def simple_propagator_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, k0=1
     return fieldReturn
 
 
-def cut_fourier_filter_3D(E, radiusPix=1):
+# just a fourier filter in XZ cross-section
+def cut_fourier_filter(E, radiusPix=1):
     ans = np.copy(E)
     ans = fftshift(fftn(ans))
-    xCenter, yCenter, zCenter = np.shape(ans)[0] // 2, np.shape(ans)[1] // 2, np.shape(ans)[2] // 2
+    xCenter, yCenter = np.shape(ans)[0] // 2, np.shape(ans)[0] // 2
     for i in range(np.shape(ans)[0]):
         for j in range(np.shape(ans)[1]):
-            for k in range(np.shape(ans)[2]):
-                if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2 + 3 * (zCenter - k) ** 2) > radiusPix:
-                    ans[i, j, k] = 0
+            if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2) > radiusPix:
+                ans[i, j] = 0
     ans = ifftn(ifftshift(ans))
+    print(np.shape(ans))
     return ans
+
+
+# testing 3d filtering
+# def cut_fourier_filter_3D(E, radiusPix=1):
+#     ans = np.copy(E)
+#     ans = fftshift(fftn(ans))
+#     xCenter, yCenter, zCenter = np.shape(ans)[0] // 2, np.shape(ans)[1] // 2, np.shape(ans)[2] // 2
+#     for i in range(np.shape(ans)[0]):
+#         for j in range(np.shape(ans)[1]):
+#             for k in range(np.shape(ans)[2]):
+#                 if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2 + 3 * (zCenter - k) ** 2) > radiusPix:
+#                     ans[i, j, k] = 0
+#     ans = ifftn(ifftshift(ans))
+#     return ans
 
 
 def readingFile(fileName, fieldToRead="p_charges", printV=False):
@@ -198,8 +202,8 @@ def readingFile(fileName, fieldToRead="p_charges", printV=False):
 
 def plot_3D_density(E, resDecrease=None,
                     xMinMax=None, yMinMax=None, zMinMax=None,
-                    surface_count=2,
-                    opacity=1,
+                    surface_count=20,
+                    opacity=0.5,
                     opacityscale=None):
     if zMinMax is None:
         zMinMax = [0, 1]

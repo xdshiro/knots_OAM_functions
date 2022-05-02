@@ -15,8 +15,9 @@ if __name__ == '__main__':
 
     propagation = True
     if propagation:
-        testProp = fg.simple_propagator_3D(field1[:, :, 25], dz=0.5, zSteps=10, n0=1, k0=1)
+        testProp = fg.simple_propagator_3D(field1[:, :, 25], dz=1, zSteps=50, n0=1, k0=1)
         fg.plot_2D(np.abs(testProp[:, :, -1]))
+        # fg.plot_3D_density(np.angle(testProp[:, :, :]), resDecrease=[1, 1, 1])
         plt.show()
         exit()
     test_efild = False
