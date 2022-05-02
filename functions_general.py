@@ -317,3 +317,9 @@ def plot_scatter_3D(X, Y, Z, ax=None):
     return ax
 
 
+def rho(x, y):
+    return np.sqrt(x ** 2 + y ** 2)
+
+
+def phi(x, y):
+    return np.angle(x + 1j * y)

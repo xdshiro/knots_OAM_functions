@@ -4,16 +4,39 @@ import matplotlib.pyplot as plt
 # mine
 import functions_general as fg
 import functions_high_lvl as fhl
+import functions_OAM_knots as fOAM
 
-# field = fg.readingFile('trefoil_300x300um.mat', fieldToRead="z")
-# fg.plot_2D(field)
-# plt.show()
-# exit()
+def saving_knot_field(xyMax=3, xyMaxLim=3, xrRes=50, w=1, width=1, k0=1, save=False, plot=True):
+    xyMinMax = [-xyMaxLim, xyMaxLim, -xyMaxLim, xyMaxLim]
+    xMin, xMax = -xyMax, xyMax
+    yMin, yMax = -xyMax, xyMax
+    zMin, zMax = -0.6, 0.6
+    # w = 1.2
+    # z1 = 0.5  # 25 how long is propagation
+    # z0 = 0  # 3 where we start (z0 meters before the center of the waist
+    # dz = 0.02
+    xArray = np.linspace(xMin, xMax, xrRes)
+    yArray = np.linspace(yMin, yMax, xrRes)
+    zArray = np.linspace(zMin, zMax, 50)
+    # xyMesh = np.array(np.meshgrid(xArray, yArray, indexing='ij'))
+    xyzMesh = np.array(np.meshgrid(xArray, yArray, zArray, indexing='ij'))
+    # fieldInitial = (100 * np.exp(1j * np.angle(fOAM.actual_trefoil(xyMesh[0], xyMesh[1], 0, w=w, z0=z0)))
+    #                 * fOAM.LG_simple(xyMesh[0], xyMesh[1], z=z0, l=0, p=0, width=rho0 * 1.5, k0=k0))
+    # plot_fast_2D(np.abs(fieldInitial), xArray, yArray, xyminmax=xyMinMax)
+    # plot_fast_2D(np.angle(fieldInitial), xArray, yArray, xyminmax=xyMinMax)
+    field = fOAM.actual_trefoil(xyzMesh[0], xyzMesh[1], z=xyzMesh[2], w=w, width=width, k0=k0)
+    if plot:
+        fg.plot_2D(np.abs(field), xArray, yArray)
+        fg.plot_2D(np.angle(field), xArray, yArray, map='hsv')
+    if save:
+        np.save('C:/WORK/CODES/Knot Paper Final/field_test2', fOAM.actual_trefoil(
+            xyzMesh[0], xyzMesh[1], z=xyzMesh[2], w=w, width=width, k0=k0))
+
 if __name__ == '__main__':
     field1 = np.load('field_test2.npy')
     fieldTurb = fg.readingFile('Efield_100_500_SR_1.000000e-02.mat', fieldToRead="Efield", printV=False)
 
-    propagation = True
+    propagation = False
     if propagation:
         fieldProp = fg.simple_propagator_3D(field1[:, :, 25], dz=1, zSteps=50, n0=1, k0=1)
         # fg.plot_3D_density(np.angle(testProp[:, :, :]), resDecrease=[1, 1, 1])
@@ -22,6 +45,7 @@ if __name__ == '__main__':
 
     knot_from_math = True
     if knot_from_math:
+        saving_knot_field(xyMax=3, xyMaxLim=3, xrRes=50, w=1, width=1, k0=1, save=False, plot=True)
 
     test_efild = False
     if test_efild:

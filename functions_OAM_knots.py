@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.special import assoc_laguerre
+import functions_general as fg
 
 
 def laguerre_polynomial(x, l, p):
@@ -10,20 +11,13 @@ def LG_simple(x, y, z, l=1, p=0, width=1, k0=1, x0=0, y0=0):
     x = x - x0
     y = y - y0
     zR = k0 * width ** 2
-    print("Rayleigh Range: ", zR, f"k0={k0}")
-
-    def rho(x, y):
-        return np.sqrt(x ** 2 + y ** 2)
-
-    def phi(x, y):
-        return np.angle(x + 1j * y)
 
     E = (np.sqrt(np.math.factorial(p) / (np.pi * np.math.factorial(np.abs(l) + p)))
-         * rho(x, y) ** np.abs(l) * np.exp(1j * l * phi(x, y))
+         * fg.rho(x, y) ** np.abs(l) * np.exp(1j * l * fg.phi(x, y))
          / (width ** (np.abs(l) + 1) * (1 + 1j * z / zR) ** (np.abs(l) + 1))
          * ((1 - 1j * z / zR) / (1 + 1j * z / zR)) ** p
-         * np.exp(-rho(x, y) ** 2 / (2 * width ** 2 * (1 + 1j * z / zR)))
-         * laguerre_polynomial(rho(x, y) ** 2 / (width ** 2 * (1 + z ** 2 / zR ** 2)), np.abs(l), p)
+         * np.exp(-fg.rho(x, y) ** 2 / (2 * width ** 2 * (1 + 1j * z / zR)))
+         * laguerre_polynomial(fg.rho(x, y) ** 2 / (width ** 2 * (1 + z ** 2 / zR ** 2)), np.abs(l), p)
          )
     return E
 
