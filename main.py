@@ -31,7 +31,7 @@ if __name__ == '__main__':
         directoryName = f'C:\\SCIENCE\\programming\\Python\\gitHub\\' \
                         f'knots_OAM_functions\\temp_data\\SR = {SR}\\{knot}\\w = {w}/'
         tableName = f'{knot}, SR={SR}, w={w}'
-        kc.creat_knot_table(directoryName, tableName)
+        kc.creat_knot_table(directoryName, tableName, show=False)
 
 
 

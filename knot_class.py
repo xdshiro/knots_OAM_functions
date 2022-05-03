@@ -351,24 +351,27 @@ def creat_knot_table(directoryName, tableName, show=True):
     list_of_alex = []
     for fileName in listOfFiles[::]:
         print(fileName[:-4])
-
+        pathName = directoryName[-20:-0]
         ap = making_knot(directoryName + fileName, show=show)
 
         t = sympy.symbols("t")
         if ap == t ** 6 - t ** 5 + t ** 4 - t ** 3 + t ** 2 - t + 1:
-            list_of_file_names.append(directoryName + fileName)
+            list_of_file_names.append(f'{pathName}{fileName}')
             list_of_alex.append(str(ap))
         elif ap == -t ** 4 + t ** 3 - t ** 2 + t - 1:  # -t**2 + t - 1
-            list_of_file_names.append(directoryName + fileName)
+            list_of_file_names.append(f'{pathName}{fileName}')
             list_of_alex.append(str(ap))
         elif ap == -t ** 2 + t - 1:
-            list_of_file_names.append(directoryName + fileName)
+            list_of_file_names.append(f'{pathName}{fileName}')
             list_of_alex.append(str(ap))
             # list_of_alex.append(str(ap))9
         elif show:
-            list_of_file_names.append(directoryName + fileName)
+            list_of_file_names.append(f'{pathName}{fileName}')
             formula = input()
             list_of_alex.append(formula)
+        else:
+            list_of_file_names.append(f'{pathName}{fileName}')
+            list_of_alex.append(str(ap))
         plt.close()
 
     good = pd.DataFrame({'file': list_of_file_names,
@@ -376,3 +379,8 @@ def creat_knot_table(directoryName, tableName, show=True):
     bad = pd.DataFrame({'file': list_of_file_names_bad})
     knot_sheets = {'good': good, 'bad': bad}
     writer = pd.ExcelWriter(f'{tableName}.xlsx', engine='xlsxwriter')
+
+    for sheet_name in knot_sheets.keys():
+        knot_sheets[sheet_name].to_excel(writer, sheet_name=sheet_name, index=False)
+
+    writer.save()
