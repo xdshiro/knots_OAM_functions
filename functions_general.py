@@ -11,7 +11,7 @@ xyLabelFontSize = 20
 legendFontSize = 20
 
 
-def resolutionDecrease(E, resDecrease=None):
+def resolution_decrease(E, resDecrease=None):
     if resDecrease is None:
         resDecrease = [1, 1, 1]
     newE = E[::resDecrease[0], ::resDecrease[1], ::resDecrease[2]]
@@ -211,7 +211,7 @@ def plot_3D_density(E, resDecrease=None,
         yMinMax = [0, 1]
     if xMinMax is None:
         xMinMax = [0, 1]
-    values = resolutionDecrease(E, resDecrease)
+    values = resolution_decrease(E, resDecrease)
     shape = np.array(np.shape(E))
     if resDecrease is not None:
         shape = (shape // resDecrease)

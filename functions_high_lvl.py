@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+# plotting dot's only from the Array of +-1
 def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=True):
     dotsFull, dotsOnly = fg.cut_non_oam(np.angle(field),
                                         bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
