@@ -311,10 +311,10 @@ class Knots(object):
         if len(self.knots[0]) / 3 < len(knot.knot):
             self.knots.append(knot.knot)
 
-def making_knot(name):
+
+def making_knot(name, show=True):
     knot = Knot3(dotsFileName=name, dz=4, clean=0.44, angleCheck=180, distCheck=5, layersStep=1)
     knot.plotDots(initial=0)
-    show = True
     try:
         knot.creatingKnot2(knotLength=None)
         knots = Knots(knot)
@@ -344,7 +344,7 @@ def making_knot(name):
         return 0
 
 
-def creat_knot_table(directoryName, tableName):
+def creat_knot_table(directoryName, tableName, show=True):
     listOfFiles = [f for f in os.listdir(directoryName) if f.endswith(".mat")]
     list_of_file_names = []
     list_of_file_names_bad = []
@@ -352,7 +352,7 @@ def creat_knot_table(directoryName, tableName):
     for fileName in listOfFiles[::]:
         print(fileName[:-4])
 
-        ap = making_knot(directoryName + fileName)
+        ap = making_knot(directoryName + fileName, show=show)
 
         t = sympy.symbols("t")
         if ap == t ** 6 - t ** 5 + t ** 4 - t ** 3 + t ** 2 - t + 1:
@@ -365,7 +365,7 @@ def creat_knot_table(directoryName, tableName):
             list_of_file_names.append(directoryName + fileName)
             list_of_alex.append(str(ap))
             # list_of_alex.append(str(ap))9
-        else:
+        elif show:
             list_of_file_names.append(directoryName + fileName)
             formula = input()
             list_of_alex.append(formula)

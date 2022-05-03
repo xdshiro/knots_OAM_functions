@@ -11,12 +11,11 @@ import knot_class as kc
 
 
 if __name__ == '__main__':
-
     propagation = 0
     if propagation:
         fhl.resizing_knot_test()
 
-    knot_from_math = 1
+    knot_from_math = 0
     if knot_from_math:
         fOAM.knot_field_plot_save(xyMax=7, zMax=1.5, xyRes=133, zRes=51, w=1.5, width=1.5, k0=1,
                                   knot='trefoil',
@@ -24,9 +23,9 @@ if __name__ == '__main__':
                                   plot=True, plotLayer=None)
         plt.show()
 
-    creating_table_knots = False  # making_table1
+    creating_table_knots = 1  # making_table1
     if creating_table_knots:
-        SR = '0.001'
+        SR = '0.1'
         knot = 'Trefoil'
         w = '1.1'  # Dima Cmex-
         directoryName = f'C:\\SCIENCE\\programming\\Python\\gitHub\\' \
