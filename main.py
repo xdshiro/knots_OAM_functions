@@ -9,33 +9,28 @@ import functions_OAM_knots as fOAM
 import knot_class as kc
 
 
+
 if __name__ == '__main__':
 
-    propagation = False
+    propagation = 0
     if propagation:
-        field1 = np.load('trefoil_math_01.npy')
-        fieldTurb = fg.readingFile('Efield_100_500_SR_1.000000e-02.mat', fieldToRead="Efield", printV=False)
+        fhl.resizing_knot_test()
 
-        fieldProp = fg.simple_propagator_3D(field1[:, :, np.shape(field1[2]//2)],
-                                            dz=1, zSteps=50, n0=1, k0=1)
-        # fg.plot_3D_density(np.angle(testProp[:, :, :]), resDecrease=[1, 1, 1])
-        fhl.plot_knot_dots(fieldProp)
-        plt.show()
-
-    knot_from_math = False
+    knot_from_math = 1
     if knot_from_math:
-        fOAM.knot_field_plot_save(xyMax=5, zMax=0.7, xyRes=273, zRes=51, w=1.4, width=1.4, k0=1,
+        fOAM.knot_field_plot_save(xyMax=7, zMax=1.5, xyRes=133, zRes=51, w=1.5, width=1.5, k0=1,
                                   knot='trefoil',
                                   save=True, saveName='trefoil_math_01',
                                   plot=True, plotLayer=None)
         plt.show()
 
-    creating_table_knots = True  # making_table1
+    creating_table_knots = False  # making_table1
     if creating_table_knots:
         SR = '0.001'
-        knot = 'trefoil'
-        w = '1.1'
-        directoryName = f'C:\\Users\\Dima\\Box\\Knots Exp\\New_Data\\SR = {SR}\\{knot}\\w = {w}/'
+        knot = 'Trefoil'
+        w = '1.1'  # Dima Cmex-
+        directoryName = f'C:\\SCIENCE\\programming\\Python\\gitHub\\' \
+                        f'knots_OAM_functions\\temp_data\\SR = {SR}\\{knot}\\w = {w}/'
         tableName = f'{knot}, SR={SR}, w={w}'
         kc.creat_knot_table(directoryName, tableName)
 

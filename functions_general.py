@@ -128,9 +128,9 @@ def cut_non_oam(E, value=1, nonValue=0, bigSingularity=False, axesAll=False, cbr
 
 def simple_propagator_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, k0=1):
     if xArray is None:
-        xArray = range(np.shape(E)[0])
+        xArray = np.array(range(np.shape(E)[0]))
     if yArray is None:
-        yArray = range(np.shape(E)[1])
+        yArray = np.array(range(np.shape(E)[1]))
     xResolution, yResolution = len(xArray), len(yArray)
     zResolution = zSteps + 1
     intervalX = xArray[-1] - xArray[0]
@@ -216,8 +216,8 @@ def plot_3D_density(E, resDecrease=None,
     if resDecrease is not None:
         shape = (shape // resDecrease)
     X, Y, Z = np.mgrid[xMinMax[0]:xMinMax[1]:shape[0] * 1j,
-                       yMinMax[0]:yMinMax[1]:shape[1] * 1j,
-                       zMinMax[0]:zMinMax[1]:shape[2] * 1j]
+              yMinMax[0]:yMinMax[1]:shape[1] * 1j,
+              zMinMax[0]:zMinMax[1]:shape[2] * 1j]
     fig = go.Figure(data=go.Volume(
         x=X.flatten(),  # collapsed into 1 dimension
         y=Y.flatten(),
@@ -322,4 +322,3 @@ def rho(x, y):
 
 def phi(x, y):
     return np.angle(x + 1j * y)
-
