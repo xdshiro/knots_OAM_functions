@@ -103,3 +103,4 @@ def knot_field_plot_save(xyMax=3, zMax=1, xyRes=50, zRes=50, w=1, width=1, k0=1,
         fg.plot_2D(np.angle(field)[:, :, plotLayer], xArray, yArray, map='hsv')
     if save:
         np.save(saveName, field)
+
