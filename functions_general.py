@@ -11,6 +11,22 @@ xyLabelFontSize = 20
 legendFontSize = 20
 
 
+def create_mesh_XYZ(xMin, yMin, zMin, xRes, yRes, zRes,
+                    xMax=None, yMax=None, zMax=None, indexing='ij'):
+    if xMax is None:
+        xMax = -xMin
+    if yMax is None:
+        yMax = -yMin
+    if zMax is None:
+        zMax = -zMin
+    if zMax is None:
+        zMax = -zMin
+    xArray = np.linspace(xMin, xMax, xRes)
+    yArray = np.linspace(yMin, yMax, yRes)
+    zArray = np.linspace(zMin, zMax, zRes)
+    return np.array(np.meshgrid(xArray, yArray, zArray, indexing=indexing))
+
+
 def resolution_decrease(E, resDecrease=None):
     if resDecrease is None:
         resDecrease = [1, 1, 1]

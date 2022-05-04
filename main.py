@@ -15,15 +15,15 @@ if __name__ == '__main__':
     if propagation:
         fhl.resizing_knot_test()
 
-    knot_from_math = 0
+    knot_from_math = 1
     if knot_from_math:
         fOAM.knot_field_plot_save(xyMax=7, zMax=1.5, xyRes=133, zRes=51, w=1.5, width=1.5, k0=1,
                                   knot='trefoil',
-                                  save=True, saveName='trefoil_math_01',
+                                  save=False, saveName='trefoil_math_01',
                                   plot=True, plotLayer=None)
         plt.show()
 
-    creating_table_knots = 1  # making_table1
+    creating_table_knots = 0  # making_table1
     if creating_table_knots:
         SR = '0.001'
         knot = 'Trefoil'
@@ -33,7 +33,10 @@ if __name__ == '__main__':
         tableName = f'{knot}, SR={SR}, w={w}'
         kc.creat_knot_table(directoryName, tableName, show=True, cut=0.45)
 
-
+    studying_3D_OAM = 0
+    if studying_3D_OAM:
+        x = np.lin
+        fOAM.LG_simple(x, y, z, l=1, p=0, width=1, k0=1, x0=0, y0=0)
 
 
 
