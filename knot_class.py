@@ -30,7 +30,6 @@ def distancePoints(point1, point2):
 
 
 def vectorAngle2D(vector1, vector2):
-
     vector1[2] = 0
     vector2[2] = 0
     return np.arccos(vectorDotProduct(vector1, vector2) / (vectorAbs(vector1) * vectorAbs(vector2)))
@@ -138,16 +137,16 @@ class Knot3(object):
         self.distCheck = distCheck
         self.layersStep = layersStep
         self.knot = []
-        #self.dotsDeleted = np.array([[1, 1, 1]])
+        # self.dotsDeleted = np.array([[1, 1, 1]])
         self.initialProcedures(clean=clean)
         self.planes = []
 
     def initialProcedures(self, clean=1):
         # sorting the dots in z
         self.dots = np.array([self.dots[i] for i in np.argsort(self.dots[:, 2], axis=0)])
-        #self.dotsDeleted = np.delete(self.dotsDeleted, 0, axis=0)
+        # self.dotsDeleted = np.delete(self.dotsDeleted, 0, axis=0)
         # don't know how to make the right array size so adding and deleting te element
-        #self.dotsDeleted = np.delete(self.dotsDeleted, 0, axis=0)
+        # self.dotsDeleted = np.delete(self.dotsDeleted, 0, axis=0)
         if clean != 1:  # Removing a cylinder of garbage dots
             self.deleteGarbageDots(distanceNorm=clean)
         if len(self.dots) <= 2:
@@ -155,7 +154,7 @@ class Knot3(object):
         self.knot = np.array([self.dots[0]])
         # first dot is in the knot
         self.dots = np.delete(self.dots, 0, axis=0)
-        #self.dotsDeleted = np.append(self.dotsDeleted, [self.knot[-1]], axis=0)
+        # self.dotsDeleted = np.append(self.dotsDeleted, [self.knot[-1]], axis=0)
 
     def creatingKnot2(self, knotLength=None):
         if knotLength is None:
@@ -191,8 +190,9 @@ class Knot3(object):
         tempDistance = self.distCheck * self.dz
         foundDot = False
         for i in range(len(self.dots)):
-            if abs(self.dots[i][2] - self.knot[-1][2]) < (self.layersStep + 1) * self.dz:  #  and self.dots[i][2] - self.knot[-1][2] != 0:  #self.dots[i][2] != self.knot[-1][2] or self.dots[i][2] == self.knot[-1][2]
-                distance = fg.distancePoints2D(self.dots[i], self.knot[-1])  # distancePoints2D
+            if abs(self.dots[i][2] - self.knot[-1][2]) < (
+                    self.layersStep + 1) * self.dz:  # and self.dots[i][2] - self.knot[-1][2] != 0:  #self.dots[i][2] != self.knot[-1][2] or self.dots[i][2] == self.knot[-1][2]
+                distance = distancePoints2D(self.dots[i], self.knot[-1])  # distancePoints2D
                 if distance < tempDistance:
                     tempDistance = distance
                     tempIndex = i
@@ -251,14 +251,14 @@ class Knot3(object):
                 plt.text(dot[0], dot[1], f'{dotInd}', fontsize=25)
                 dotInd += 1
             if around:
-                if len(newPlanes) != 0: # index != 0:
+                if len(newPlanes) != 0:  # index != 0:
                     for dot in newPlanes[-1]:  # self.planes[index - 1]:
                         plt.scatter(dot[0], dot[1], s=120, c='g')
                 if index != len(self.planes) - 1:
-                    for dot in self.planes[index+1]:
+                    for dot in self.planes[index + 1]:
                         plt.scatter(dot[0], dot[1], s=150, c='b', marker='x')
                     if index != len(self.planes) - 2:
-                        for dot in self.planes[index+2]:
+                        for dot in self.planes[index + 2]:
                             plt.scatter(dot[0], dot[1], s=150, c='y', marker='+')
             plt.title(f'z={plane[0][2]}, g=prv, b=next')
             plt.xlim(0, maxDist)
@@ -279,16 +279,14 @@ class Knot3(object):
         self.knot = np.array([self.dots[0]])
         self.dots = np.delete(self.dots, 0, axis=0)
 
-
-            #plt.plot()
-
+        # plt.plot()
 
     def plotKnotDots(self):
-        #fig = plt.figure(figsize=(4, 4))
+        # fig = plt.figure(figsize=(4, 4))
         plotDots(self.knot)
 
     def plotDots(self, initial=0):
-        #fig = plt.figure(figsize=(4, 4))
+        # fig = plt.figure(figsize=(4, 4))
         if initial:
             plotDots(self.initialDots)
         else:
@@ -312,8 +310,8 @@ class Knots(object):
             self.knots.append(knot.knot)
 
 
-def making_knot(name, show=True):
-    knot = Knot3(dotsFileName=name, dz=4, clean=0.44, angleCheck=180, distCheck=5, layersStep=1)
+def making_knot(name, show=True, cut=1):
+    knot = Knot3(dotsFileName=name, dz=4, clean=cut, angleCheck=180, distCheck=5, layersStep=1)
     knot.plotDots(initial=0)
     try:
         knot.creatingKnot2(knotLength=None)
@@ -327,9 +325,9 @@ def making_knot(name, show=True):
 
         ap = k.alexander_polynomial(variable=t)
         print(ap)
-        if ap != -t ** 2 + t - 1 and ap != -t**4 + t**3 - t**2 + t - 1 and ap != t**6 - t**5 + t**4 - t**3 + t**2 - t + 1:
+        if ap != -t ** 2 + t - 1 and ap != -t ** 4 + t ** 3 - t ** 2 + t - 1 and ap != t ** 6 - t ** 5 + t ** 4 - t ** 3 + t ** 2 - t + 1:
             print("Weird")
-            #plt.savefig(directoryNamePlots + fileName[:-4] + '.png', format="png")
+            # plt.savefig(directoryNamePlots + fileName[:-4] + '.png', format="png")
 
             if show:
                 plt.show()
@@ -344,7 +342,7 @@ def making_knot(name, show=True):
         return 0
 
 
-def creat_knot_table(directoryName, tableName, show=True):
+def creat_knot_table(directoryName, tableName, show=True, cut=1):
     listOfFiles = [f for f in os.listdir(directoryName) if f.endswith(".mat")]
     list_of_file_names = []
     list_of_file_names_bad = []
@@ -352,7 +350,7 @@ def creat_knot_table(directoryName, tableName, show=True):
     for fileName in listOfFiles[::]:
         print(fileName[:-4])
         pathName = directoryName[-20:-0]
-        ap = making_knot(directoryName + fileName, show=show)
+        ap = making_knot(directoryName + fileName, show=show, cut=cut)
 
         t = sympy.symbols("t")
         if ap == t ** 6 - t ** 5 + t ** 4 - t ** 3 + t ** 2 - t + 1:

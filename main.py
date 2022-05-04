@@ -25,13 +25,13 @@ if __name__ == '__main__':
 
     creating_table_knots = 1  # making_table1
     if creating_table_knots:
-        SR = '0.1'
+        SR = '0.001'
         knot = 'Trefoil'
-        w = '1.1'  # Dima Cmex-
+        w = '1.05'  # Dima Cmex-
         directoryName = f'C:\\SCIENCE\\programming\\Python\\gitHub\\' \
                         f'knots_OAM_functions\\temp_data\\SR = {SR}\\{knot}\\w = {w}/'
         tableName = f'{knot}, SR={SR}, w={w}'
-        kc.creat_knot_table(directoryName, tableName, show=False)
+        kc.creat_knot_table(directoryName, tableName, show=True, cut=0.45)
 
 
 
