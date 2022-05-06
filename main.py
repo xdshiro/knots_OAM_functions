@@ -10,12 +10,13 @@ import knot_class as kc
 
 
 
+
 if __name__ == '__main__':
     propagation = 0
     if propagation:
         fhl.resizing_knot_test()
 
-    knot_from_math = 1
+    knot_from_math = 0
     if knot_from_math:
         fOAM.knot_field_plot_save(xyMax=7, zMax=1.5, xyRes=133, zRes=51, w=1.5, width=1.5, k0=1,
                                   knot='trefoil',
@@ -23,11 +24,13 @@ if __name__ == '__main__':
                                   plot=True, plotLayer=None)
         plt.show()
 
-    creating_table_knots = 0  # making_table1
+    creating_table_knots = 1  # making_table1
     if creating_table_knots:
-        SR = '0.001'
+        SR = '0.1'
         knot = 'Trefoil'
-        w = '1.05'  # Dima Cmex-
+        w = '1.5'  # Dima Cmex-
+        # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
+        #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
         directoryName = f'C:\\SCIENCE\\programming\\Python\\gitHub\\' \
                         f'knots_OAM_functions\\temp_data\\SR = {SR}\\{knot}\\w = {w}/'
         tableName = f'{knot}, SR={SR}, w={w}'
@@ -37,9 +40,6 @@ if __name__ == '__main__':
     if studying_3D_OAM:
         x = np.lin
         fOAM.LG_simple(x, y, z, l=1, p=0, width=1, k0=1, x0=0, y0=0)
-
-
-
 
     test_efild = False
     if test_efild:

@@ -264,7 +264,7 @@ def plot_1D(x, y, noX=False, label=None, xname='', yname='', ls='-', lw=4, color
             marker='', markersize=12, markeredgecolor='k',
             loc='lower right',
             axis_equal=False,
-            ax=None):
+            ax=None, title=None):
     if noX:
         x = range(len(y))
     if ax is None:
@@ -280,6 +280,7 @@ def plot_1D(x, y, noX=False, label=None, xname='', yname='', ls='-', lw=4, color
     plt.yticks(fontname='Times New Roman', fontsize=ticksFontSize)
     ax.set_xlabel(xname, fontsize=xyLabelFontSize, fontname='Times New Roman')
     ax.set_ylabel(yname, fontsize=xyLabelFontSize, fontname='Times New Roman')
+    ax.set_title(title, fontsize=xyLabelFontSize, fontname='Times New Roman')
     if axis_equal:
         ax.set_aspect('equal', adjustable='box')
     plt.tight_layout()
