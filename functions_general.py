@@ -11,16 +11,14 @@ xyLabelFontSize = 20
 legendFontSize = 20
 
 
-def create_mesh_XYZ(xMin, yMin, zMin, xRes, yRes, zRes,
-                    xMax=None, yMax=None, zMax=None, indexing='ij'):
-    if xMax is None:
-        xMax = -xMin
-    if yMax is None:
-        yMax = -yMin
-    if zMax is None:
-        zMax = -zMin
-    if zMax is None:
-        zMax = -zMin
+def create_mesh_XYZ(xMax, yMax, zMax, xRes, yRes, zRes,
+                    xMin=None, yMin=None, zMin=None, indexing='ij'):
+    if xMin is None:
+        xMin = -xMax
+    if yMin is None:
+        yMin = -yMax
+    if zMin is None:
+        zMin = -zMax
     xArray = np.linspace(xMin, xMax, xRes)
     yArray = np.linspace(yMin, yMax, yRes)
     zArray = np.linspace(zMin, zMax, zRes)

@@ -8,9 +8,6 @@ import functions_high_lvl as fhl
 import functions_OAM_knots as fOAM
 import knot_class as kc
 
-
-
-
 if __name__ == '__main__':
     propagation = 0
     if propagation:
@@ -31,15 +28,66 @@ if __name__ == '__main__':
         w = '1.5'  # Dima Cmex-
         # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
         #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
-        directoryName = f'C:\\SCIENCE\\programming\\Python\\gitHub\\' \
-                        f'knots_OAM_functions\\temp_data\\SR = {SR}\\{knot}\\w = {w}/'
+        # directoryName = f'C:\\SCIENCE\\programming\\Python\\gitHub\\' \
+        if creating_table_knots:
+            SR = '0.1'
+            knot = 'Trefoil'
+            w = '1.5'  # Dima Cmex-
+            # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
+            #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
+            directoryName = f'C:\\WORK\\CODES\\knots_OAM_functions' \
+                            f'knots_OAM_functions\\temp_data\\SR = {SR}\\{knot}\\w = {w}/'
         tableName = f'{knot}, SR={SR}, w={w}'
         kc.creat_knot_table(directoryName, tableName, show=True, cut=0.45)
 
     studying_3D_OAM = 0
     if studying_3D_OAM:
-        x = np.lin
-        fOAM.LG_simple(x, y, z, l=1, p=0, width=1, k0=1, x0=0, y0=0)
+        print(1/4-1/4-7/4-7/4+1/2+0-1/2+3/2+0+0-3/2+1/2+(3/4-1/2)+1/4+1/4-1/4)
+        xyzMesh = fg.create_mesh_XYZ(3, 3, 3, 251, 251, 251)
+        fieldOAM = fOAM.LG_simple(xyzMesh[0], xyzMesh[1], xyzMesh[2],
+                                  l=1, p=0, width=1, k0=1, x0=0, y0=0)
+        shape = np.shape(fieldOAM)
+        fg.plot_2D(np.angle(fieldOAM[shape[0] // 2 - 1:shape[0] // 2 + 2,
+                            shape[1] // 2 - 1:shape[1] // 2 + 2,
+                            np.shape(fieldOAM)[2] // 2]), map='hsv')
+        xM, yM, zM = np.array(shape) // 2
+
+
+        def angles_differences(array):
+            minIndex = np.argmin(array)
+            massiveAnglesDif = [array[i + 1] - array[i] for i in
+                                range(minIndex - len(array), minIndex, 1)]
+            print(np.sum(massiveAnglesDif[:-1]), massiveAnglesDif[-1])
+            return massiveAnglesDif
+
+        print(np.angle(fieldOAM[xM - 1, yM - 1, zM - 1]))
+        exit()
+        massiveAngles = [np.angle(fieldOAM[x, y, z]) for [x, y, z] in
+                         [[xM - 1, yM - 1, zM], [xM, yM - 1, zM], [xM + 1, yM - 1, zM],
+                          [xM + 1, yM, zM],
+                          [xM + 1, yM + 1, zM], [xM, yM + 1, zM], [xM - 1, yM + 1, zM],
+                          [xM - 1, yM, zM]]]
+        angles_differences(massiveAngles)
+        print(massiveAngles)
+        massiveAngles2 = [np.angle(fieldOAM[x, y, z]) for [x, y, z] in
+                          [[xM - 1, yM, zM - 1], [xM - 1, yM, zM], [xM - 1, yM, zM + 1],
+                           [xM, yM, zM + 1],
+                           [xM + 1, yM, zM + 1], [xM + 1, yM, zM], [xM + 1, yM, zM - 1],
+                           [xM, yM, zM - 1]]]
+        print(massiveAngles2)
+        angles_differences(massiveAngles2)
+        massiveAngles3 = [np.angle(fieldOAM[x, y, z]) for [x, y, z] in
+                          [[xM, yM - 1, zM - 1], [xM, yM - 1, zM], [xM, yM - 1, zM + 1],
+                           [xM, yM, zM + 1],
+                           [xM, yM + 1, zM + 1], [xM, yM + 1, zM], [xM, yM + 1, zM - 1],
+                           [xM, yM, zM - 1]]]
+        print(massiveAngles3)
+        angles_differences(massiveAngles2)
+
+        # print(np.angle(fieldOAM[shape[0] // 2 - 1:shape[0] // 2 + 2,
+        #       shape[1] // 2 - 1:shape[1] // 2 + 2,
+        #       shape[2] // 2 - 1:shape[2] // 2 + 0]))
+        plt.show()
 
     test_efild = False
     if test_efild:
@@ -48,7 +96,7 @@ if __name__ == '__main__':
         values = (field[:, :, :])
 
         if 1:
-            fhl.plot_knot_dots(fieldTurb[185:327, 185:327, :])
+            fhl.plot_knot_dots(field[185:327, 185:327, :])
             plt.show()
             exit()
 
