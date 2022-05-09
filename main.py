@@ -9,6 +9,10 @@ import functions_OAM_knots as fOAM
 import knot_class as kc
 
 if __name__ == '__main__':
+
+    A = fg.readingFile('Efield_0_0_SR_9.000000e-01.mat', printV=False )
+    fg.plot_2D(np.abs(A))
+    plt.show()
     propagation = 0
     if propagation:
         fhl.resizing_knot_test()
@@ -24,16 +28,16 @@ if __name__ == '__main__':
     creating_table_knots = 0  # making_table1
 
     if creating_table_knots:
-        SR = '0.1'
+        SR = '0.9'
         knot = 'Trefoil'
-        w = '1.3 (3)'  # Dima Cmex-
+        w = '1.4'  # Dima Cmex-
         # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
         #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
         directoryName = (
             f'C:\\WORK\\CODES\\knots_OAM_functions'
             f'\\temp_data\\SR = {SR}\\{knot}\\w = {w}\\')
         tableName = f'{knot}, SR={SR}, w={w}'
-        kc.creat_knot_table(directoryName, tableName, show=True, cut=0.45)
+        kc.creat_knot_table(directoryName, tableName, show=True, cut=0.35)
 
     studying_3D_OAM = 0
     if studying_3D_OAM:
