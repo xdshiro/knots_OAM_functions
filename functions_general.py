@@ -337,3 +337,13 @@ def rho(x, y):
 
 def phi(x, y):
     return np.angle(x + 1j * y)
+
+
+def crop_array_3D(field, cropX, cropY, cropZ, xPos=None, yPos=None, zPos=None):
+    shape = np.shape(field)
+    if xPos is None:
+
+    y,x,c = img.shape
+    startx = x//2 - cropx//2
+    starty = y//2 - cropy//2
+    return img[starty:starty+cropy, startx:startx+cropx, :]

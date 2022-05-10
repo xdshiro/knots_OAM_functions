@@ -8,6 +8,33 @@ import functions_high_lvl as fhl
 import functions_OAM_knots as fOAM
 import knot_class as kc
 
+
+def knot_1_plane_propagation():
+    field1 = np.load('trefoil_math_01.npy')
+    fieldTurb = fg.readingFile('Efield_100_500_SR_1.000000e-02.mat', fieldToRead='Efield')
+    fg.plot_3D_density(np.angle(fieldTurb), resDecrease=[16, 16, 10])
+    print(np.shape(fieldTurb))
+    exit()
+    # fg.plot_2D(np.abs(field1[:, :, np.shape(field1)[2] // 2 + 20]))
+    # fg.plot_2D(np.angle(field1[:, :, np.shape(field1)[2] // 2 + 20]), map='hsv')
+    # # fhl.plot_knot_dots(field1)
+    # plt.show()
+    # exit()
+    stepNumber = 36
+    fieldProp1 = fg.simple_propagator_3D(
+        field1[:, :, np.shape(field1)[2] // 2],
+        dz=-2, zSteps=stepNumber, n0=1, k0=1)
+    fieldProp2 = fg.simple_propagator_3D(
+        field1[:, :, np.shape(field1)[2] // 2],
+        dz=2, zSteps=stepNumber, n0=1, k0=1)
+    fieldProp = np.concatenate((np.flip(fieldProp1, axis=2), fieldProp2), axis=2)
+    # fg.plot_3D_density(np.angle(testProp[:, :, :]), resDecrease=[1, 1, 1])
+    fg.plot_2D(np.abs(fieldProp[:, :, stepNumber]))
+    fg.plot_2D(np.angle(fieldProp[:, :, stepNumber]), map='hsv')
+    fhl.plot_knot_dots(fieldProp)
+    plt.show()
+
+
 if __name__ == '__main__':
 
     A = fg.readingFile('Efield_0_0_SR_9.000000e-01.mat', printV=False )
@@ -15,7 +42,8 @@ if __name__ == '__main__':
     plt.show()
     propagation = 0
     if propagation:
-        fhl.resizing_knot_test()
+        # fhl.resizing_knot_test()
+        knot_1_plane_propagation()
 
     knot_from_math = 0
     if knot_from_math:
@@ -42,7 +70,7 @@ if __name__ == '__main__':
     studying_3D_OAM = 0
     if studying_3D_OAM:
         print(1 / 4 - 1 / 4 - 7 / 4 - 7 / 4 + 1 / 2 + 0 - 1 / 2 + 3 / 2 + 0 + 0 - 3 / 2 + 1 / 2 + (
-                    3 / 4 - 1 / 2) + 1 / 4 + 1 / 4 - 1 / 4)
+                3 / 4 - 1 / 2) + 1 / 4 + 1 / 4 - 1 / 4)
         xyzMesh = fg.create_mesh_XYZ(3, 3, 3, 251, 251, 251)
         fieldOAM = fOAM.LG_simple(xyzMesh[0], xyzMesh[1], xyzMesh[2],
                                   l=1, p=0, width=1, k0=1, x0=0, y0=0)

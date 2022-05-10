@@ -46,9 +46,11 @@ def plot_percentage_vs_w(ax=None):
     # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
     if ax is None:
         fig, ax = plt.subplots()  # figsize=(8, 6)
-    fg.plot_1D(xArray, yArray, color='r', marker='o', label='Trefoil',
-               xname='Strehl ratio', yname='Recovered knots %',
-               loc='upper left', ax=ax, title='SR=0.001 (v2)')
+    fg.plot_1D(
+        xArray, yArray, color='r', marker='o', label='Trefoil',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper left', ax=ax, title='SR=0.001 (v2)'
+    )
     # ax.invert_xaxis()
     plt.xlim(1, 1.5)
     plt.ylim(0, 100)
