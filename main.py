@@ -38,9 +38,21 @@ def knot_1_plane_propagation():
 
 
 if __name__ == '__main__':
-
-    A = fg.readingFile('Efield_0_0_SR_9.000000e-01.mat', printV=False )
-    fg.plot_2D(np.abs(A))
+    if 0:
+        def milnor_Pol(x, y, z, H=2):
+            R = fg.rho(x, y)
+            f = fg.phi(x, y)
+            return (1 - 2 * R**2 / H ** 2 - 4* R**2 * np.exp(2j*f) / H**2 + R**4 / H**4 - 4j * z / H + 4j * R**2 * z / H ** 3 -
+                    6*z**2 / H ** 2 + 2*R**2*z**2 / H ** 4+4j*z**3 / H ** 3+z**4 / H ** 4)
+        xyzMesh = fg.create_mesh_XYZ(8, 8, 4, 50, 50, 50)
+        field = milnor_Pol(xyzMesh[0], xyzMesh[1], xyzMesh[2])
+        fg.plot_2D(np.angle(field[:, :, np.shape(field)[2] // 2]))
+        fhl.plot_knot_dots(field)
+        plt.show()
+        # A = fg.readingFile('Efield_0_0_SR_9.000000e-01.mat',fieldToRead='Efield', printV=False )
+        # print(np.shape(A))
+        # fg.plot_2D(np.abs(A[:, :, np.shape(A)[2]//2 + 5]))
+    # fg.plot_3D_density(np.angle(A), resDecrease=[16, 16, 10])
     plt.show()
     propagation = 0
     if propagation:
@@ -49,10 +61,12 @@ if __name__ == '__main__':
 
     knot_from_math = 0
     if knot_from_math:
-        fOAM.knot_field_plot_save(xyMax=7, zMax=1.5, xyRes=133, zRes=51, w=0.5, width=2.5, k0=1,
+        fOAM.knot_field_plot_save(xyMax=7/16, zMax=1.5/256, xyRes=70, zRes=60, w=1.5, width=1.5/16, k0=1,
                                   knot='trefoil',
-                                  save=False, saveName='trefoil_math_01',
+                                  save=True, saveName='trefoil_math_01',
                                   plot=True, plotLayer=None)
+        field1 = np.load('trefoil_math_01.npy')
+        fhl.plot_knot_dots(field1)
         plt.show()
 
     creating_table_knots = 0  # making_table1

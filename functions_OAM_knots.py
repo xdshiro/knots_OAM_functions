@@ -37,12 +37,17 @@ def actual_link(x, y, z, w, width=1, k0=1, z0=0.):
 
 def actual_trefoil(x, y, z, w, width=1, k0=1, z0=0.):
     z = z - z0
-
-    a00 = 1 - w ** 2 - 2 * w ** 4 + 6 * w ** 6
-    a01 = w ** 2 * (1 + 4 * w ** 2 - 18 * w ** 4)
-    a02 = - 2 * w ** 4 * (1 - 9 * w ** 2)
-    a03 = -6 * w ** 6
-    a30 = -8 * np.sqrt(6) * w ** 3
+    H = 1.0
+    # a00 = 1 - w ** 2 - 2 * w ** 4 + 6 * w ** 6
+    # a01 = w ** 2 * (1 + 4 * w ** 2 - 18 * w ** 4)
+    # a02 = - 2 * w ** 4 * (1 - 9 * w ** 2)
+    # a03 = -6 * w ** 6
+    # a30 = -8 * np.sqrt(6) * w ** 3
+    a00 = (H**6 - H** 4 * w ** 2 - 2 * H ** 2 * w ** 4 + 6 * w ** 6) / H**6
+    a01 = (w ** 2 * (1 * H**4 + 4 * w ** 2 * H**2 - 18 * w ** 4)) / H**6
+    a02 = (- 2 * w ** 4 * (H**2 - 9 * w ** 2)) / H**6
+    a03 = (-6 * w ** 6) / H**6
+    a30 = (-8 * np.sqrt(6) * w ** 3) / H**3
 
     field = (a00 * LG_simple(x, y, z, l=0, p=0, width=width, k0=k0) +
              a01 * LG_simple(x, y, z, l=0, p=1, width=width, k0=k0) +
