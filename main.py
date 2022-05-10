@@ -12,27 +12,29 @@ import knot_class as kc
 def knot_1_plane_propagation():
     field1 = np.load('trefoil_math_01.npy')
     fieldTurb = fg.readingFile('Efield_100_500_SR_1.000000e-02.mat', fieldToRead='Efield')
-    fg.plot_3D_density(np.angle(fieldTurb), resDecrease=[16, 16, 10])
-    print(np.shape(fieldTurb))
-    exit()
-    # fg.plot_2D(np.abs(field1[:, :, np.shape(field1)[2] // 2 + 20]))
-    # fg.plot_2D(np.angle(field1[:, :, np.shape(field1)[2] // 2 + 20]), map='hsv')
-    # # fhl.plot_knot_dots(field1)
-    # plt.show()
-    # exit()
-    stepNumber = 36
+    fieldTurbProp = fg.crop_array_3D(fieldTurb, percentage=40, cropZ=80)
+    fieldTurb = fg.crop_array_3D(fieldTurb, percentage=15, cropZ=80)
+    # fg.plot_2D(np.angle(fieldTurb[:, :, -1]))
+    # fg.plot_2D(np.abs(fieldTurb[:, :, -1]))
+    stepNumber = 100
     fieldProp1 = fg.simple_propagator_3D(
-        field1[:, :, np.shape(field1)[2] // 2],
-        dz=-2, zSteps=stepNumber, n0=1, k0=1)
+        fieldTurbProp[:, :, np.shape(fieldTurbProp)[2] // 2],
+        dz=-1.5, zSteps=stepNumber, n0=1, k0=1)
     fieldProp2 = fg.simple_propagator_3D(
-        field1[:, :, np.shape(field1)[2] // 2],
-        dz=2, zSteps=stepNumber, n0=1, k0=1)
-    fieldProp = np.concatenate((np.flip(fieldProp1, axis=2), fieldProp2), axis=2)
-    # fg.plot_3D_density(np.angle(testProp[:, :, :]), resDecrease=[1, 1, 1])
-    fg.plot_2D(np.abs(fieldProp[:, :, stepNumber]))
-    fg.plot_2D(np.angle(fieldProp[:, :, stepNumber]), map='hsv')
-    fhl.plot_knot_dots(fieldProp)
+        fieldTurbProp[:, :, np.shape(fieldTurbProp)[2] // 2],
+        dz=1.5, zSteps=stepNumber, n0=1, k0=1)
+    fieldTurbProp = np.concatenate((np.flip(fieldProp1, axis=2), fieldProp2), axis=2)
+    fieldTurbProp = fg.crop_array_3D(fieldTurbProp, percentage=37.5)
+    # fg.plot_2D(np.angle(fieldProp[:, :, -1]))
+    # fg.plot_2D(np.abs(fieldProp[:, :, -1]))
+    fhl.plot_knot_dots(fieldTurb)
+    fhl.plot_knot_dots(fieldTurbProp)
     plt.show()
+    exit()
+    fieldTurb = fg.crop_array_3D(fieldTurb, percentage=15, cropZ=80)
+    fg.plot_3D_density(np.angle(fieldTurb), [1, 1, 1])
+    fhl.plot_knot_dots(fieldTurb)
+    exit()
 
 
 if __name__ == '__main__':

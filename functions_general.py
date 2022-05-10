@@ -151,10 +151,16 @@ def simple_propagator_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, k0=1
     intervalY = yArray[-1] - yArray[0]
 
     # xyMesh = np.array(np.meshgrid(xArray, yArray, indexing='ij'))
-    kxArray = np.linspace(-1. * np.pi * (xResolution - 2) / intervalX,
-                          1. * np.pi * (xResolution - 2) / intervalX, xResolution)
-    kyArray = np.linspace(-1. * np.pi * (yResolution - 2) / intervalY,
-                          1. * np.pi * (yResolution - 2) / intervalY, yResolution)
+    if xResolution // 2 == 1:
+        kxArray = np.linspace(-1. * np.pi * (xResolution - 2) / intervalX,
+                              1. * np.pi * (xResolution - 2) / intervalX, xResolution)
+        kyArray = np.linspace(-1. * np.pi * (yResolution - 2) / intervalY,
+                              1. * np.pi * (yResolution - 2) / intervalY, yResolution)
+    else:
+        kxArray = np.linspace(-1. * np.pi * (xResolution - 0) / intervalX,
+                              1. * np.pi * (xResolution - 2) / intervalX, xResolution)
+        kyArray = np.linspace(-1. * np.pi * (yResolution - 0) / intervalY,
+                              1. * np.pi * (yResolution - 2) / intervalY, yResolution)
 
     KxyMesh = np.array(np.meshgrid(kxArray, kyArray, indexing='ij'))
 
@@ -339,11 +345,51 @@ def phi(x, y):
     return np.angle(x + 1j * y)
 
 
-def crop_array_3D(field, cropX, cropY, cropZ, xPos=None, yPos=None, zPos=None):
-    shape = np.shape(field)
-    if xPos is None:
+"""
+function cropping from xPos to xPos + cropX
+by default it crops middle - cropX//2 to middle + cropX//2
+if percentage is not None -> cropping this percentage along Z ( cylindrical coordinates) 
+"""
 
-    y,x,c = img.shape
-    startx = x//2 - cropx//2
-    starty = y//2 - cropy//2
-    return img[starty:starty+cropy, startx:startx+cropx, :]
+
+def crop_array_3D(field, cropX=None, cropY=None, cropZ=None, percentage=None, xPos=None, yPos=None, zPos=None):
+    shape = np.shape(field)
+    if cropX is None:
+        cropX = shape[0]
+    if cropY is None:
+        cropY = shape[1]
+    if cropZ is None:
+        cropZ = shape[2]
+    if percentage is not None:
+        cropX = int(shape[0] / 100 * percentage)
+        cropY = int(shape[1] / 100 * percentage)
+    if xPos is None:
+        xPos = shape[0] // 2 - cropX // 2
+    if yPos is None:
+        yPos = shape[1] // 2 - cropY // 2
+    if zPos is None:
+        zPos = shape[2] // 2 - cropZ // 2
+
+    return field[xPos:xPos + cropX, yPos:yPos + cropY, zPos:zPos + cropZ]
+
+
+def crop_array_Values_3D(field, cropX=None, cropY=None, cropZ=None, percentage=None, xPos=None, yPos=None, zPos=None):
+    shape = np.shape(field)
+    if cropX is None:
+        cropX = shape[0]
+    if cropY is None:
+        cropY = shape[1]
+    if cropZ is None:
+        cropZ = shape[2]
+    if percentage is not None:
+        cropX = int(shape[0] / 100 * percentage)
+        cropY = int(shape[1] / 100 * percentage)
+    if xPos is None:
+        xPos = shape[0] // 2 - cropX // 2
+    if yPos is None:
+        yPos = shape[1] // 2 - cropY // 2
+    if zPos is None:
+        zPos = shape[2] // 2 - cropZ // 2
+    answer = np.zeros(shape, dtype=np.complex)
+    answer[xPos:xPos + cropX, yPos:yPos + cropY, zPos:zPos + cropZ] = field[xPos:xPos + cropX, yPos:yPos + cropY, zPos:zPos + cropZ]
+    return answer
