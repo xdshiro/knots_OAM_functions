@@ -198,18 +198,18 @@ def cut_fourier_filter(E, radiusPix=1):
     return ans
 
 
-# testing 3d filtering
-# def cut_fourier_filter_3D(E, radiusPix=1):
-#     ans = np.copy(E)
-#     ans = fftshift(fftn(ans))
-#     xCenter, yCenter, zCenter = np.shape(ans)[0] // 2, np.shape(ans)[1] // 2, np.shape(ans)[2] // 2
-#     for i in range(np.shape(ans)[0]):
-#         for j in range(np.shape(ans)[1]):
-#             for k in range(np.shape(ans)[2]):
-#                 if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2 + 3 * (zCenter - k) ** 2) > radiusPix:
-#                     ans[i, j, k] = 0
-#     ans = ifftn(ifftshift(ans))
-#     return ans
+# return the 3D array with the complex field
+def one_plane_propagator(fieldPlane, dz, stepsNumber, shapeWrong=False, n0=1, k0=1):
+    if shapeWrong:
+        if shapeWrong is True:
+            print(f'using the middle plane in one_plane_propagator (shapeWrong = True)')
+            fieldPlane = fieldPlane[:, :, np.shape(fieldPlane)[2] // 2]
+        else:
+            fieldPlane = fieldPlane[:, :, np.shape(fieldPlane)[2] // 2 + shapeWrong]
+    fieldPropMinus = simple_propagator_3D(fieldPlane, dz=-dz, zSteps=stepsNumber, n0=n0, k0=k0)
+    fieldPropPLus = simple_propagator_3D(fieldPlane, dz=dz, zSteps=stepsNumber, n0=n0, k0=k0)
+    fieldPropTotal = np.concatenate((np.flip(fieldPropMinus, axis=2), fieldPropPLus[:, :, 1:-1]), axis=2)
+    return fieldPropTotal
 
 
 def readingFile(fileName, fieldToRead="p_charges", printV=False):
@@ -326,11 +326,11 @@ def plot_2D(E, x=None, y=None, xname='', yname='', map='jet', vmin=None, vmax=No
     return ax
 
 
-def plot_scatter_3D(X, Y, Z, ax=None):
+def plot_scatter_3D(X, Y, Z, ax=None, size=None, color=None):
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(X, Y, Z)  # plot the point (2,3,4) on the figure
+    ax.scatter(X, Y, Z, size=size, color=color)  # plot the point (2,3,4) on the figure
     # ax.view_init(70, 0)
     # plt.show()
     # plt.close()

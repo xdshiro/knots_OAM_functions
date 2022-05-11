@@ -87,7 +87,7 @@ def makeDots(dotsArray, zArray):
 def deleteGarbageDots(dots, distanceNorm=1, mid=None, twoD=True):
     answer = dots
     if mid is None:
-        mid = [256, 256, 0]
+        mid = [0, 0, 0]
     delDist = maxDistance(dots, mid=mid, twoD=twoD) * distanceNorm
     removed = 0
     for i in range(len(dots)):
@@ -366,11 +366,12 @@ def creat_knot_table(directoryName, tableName, show=True, cut=1):
         elif show:
             list_of_file_names.append(f'{pathName}{fileName}')
             formula = input()
+
             list_of_alex.append(formula)
         else:
             list_of_file_names.append(f'{pathName}{fileName}')
             list_of_alex.append(str(ap))
-        plt.close()
+        plt.close('all')
 
     good = pd.DataFrame({'file': list_of_file_names,
                          'alex': list_of_alex})

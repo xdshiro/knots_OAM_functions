@@ -8,42 +8,9 @@ import functions_high_lvl as fhl
 import functions_OAM_knots as fOAM
 import knot_class as kc
 
-
-def knot_1_plane_propagation():
-    field1 = np.load('trefoil_math_01.npy')
-    fieldTurb = fg.readingFile('Efield_100_500_SR_1.000000e-02.mat', fieldToRead='Efield')
-    fieldTurbProp = fg.crop_array_3D(fieldTurb, percentage=40, cropZ=80)
-    fieldTurb = fg.crop_array_3D(fieldTurb, percentage=15, cropZ=80)
-    # fg.plot_2D(np.angle(fieldTurb[:, :, -1]))
-    # fg.plot_2D(np.abs(fieldTurb[:, :, -1]))
-    stepNumber = 100
-    fieldProp1 = fg.simple_propagator_3D(
-        fieldTurbProp[:, :, np.shape(fieldTurbProp)[2] // 2],
-        dz=-1.5, zSteps=stepNumber, n0=1, k0=1)
-    fieldProp2 = fg.simple_propagator_3D(
-        fieldTurbProp[:, :, np.shape(fieldTurbProp)[2] // 2],
-        dz=1.5, zSteps=stepNumber, n0=1, k0=1)
-    fieldTurbProp = np.concatenate((np.flip(fieldProp1, axis=2), fieldProp2), axis=2)
-    fieldTurbProp = fg.crop_array_3D(fieldTurbProp, percentage=37.5)
-    # fg.plot_2D(np.angle(fieldProp[:, :, -1]))
-    # fg.plot_2D(np.abs(fieldProp[:, :, -1]))
-    fhl.plot_knot_dots(fieldTurb)
-    fhl.plot_knot_dots(fieldTurbProp)
-    plt.show()
-    exit()
-    fieldTurb = fg.crop_array_3D(fieldTurb, percentage=15, cropZ=80)
-    fg.plot_3D_density(np.angle(fieldTurb), [1, 1, 1])
-    fhl.plot_knot_dots(fieldTurb)
-    exit()
-
-
 if __name__ == '__main__':
-    A = fg.readingFile('trefoil_300x300um.mat', fieldToRead='z', printV=False)
-    fg.plot_2D(A)
-    plt.show()
-    #
-
-    if 0:
+    milnor_research = False
+    if milnor_research:
         def milnor_Pol(x, y, z, H=1):
             R = fg.rho(x, y)
             f = fg.phi(x, y)
@@ -58,18 +25,24 @@ if __name__ == '__main__':
         fg.plot_2D(np.angle(field[:, :, np.shape(field)[2] // 2]))
         fhl.plot_knot_dots(field)
         plt.show()
-        # A = fg.readingFile('Efield_lowres_0_0_SR_9.000000e-01.mat',fieldToRead='Efield', printV=False )
-        # # print(np.shape(A))
-        # # np.save('A', A[:, :, np.shape(A)[2]//2])
-        # # exit()
-        # fg.plot_2D(np.abs(A[:, :, np.shape(A)[2]//2]))
-        # fhl.plot_knot_dots(A[:, :, np.shape(A)[2]//2 - 50:np.shape(A)[2]//2 + 50])
-        # fg.plot_3D_density(np.angle(A), resDecrease=[16, 16, 10])
+
         plt.show()
-    propagation = 0
+    propagation = 1
     if propagation:
-        # fhl.resizing_knot_test()
-        knot_1_plane_propagation()
+        # A = fg.readingFile('all_other_data/trefoil_exp_field.mat', fieldToRead='Uz', printV=False)
+        A = fg.readingFile('all_other_data/trefoil_exp_field.mat', fieldToRead='Uz', printV=False)
+        fhl.plot_knot_dots(A, bigSingularity=0, axesAll=0, cbrt=1)
+        plt.show()
+        exit()
+        fg.plot_2D(np.angle(A)[:, :, 8])
+        fg.plot_2D(np.abs(A)[:, :, 8])
+        # Aprop = fg.one_plane_propagator(A, dz=10, stepsNumber=10, shapeWrong=3)
+        Aprop = fg.one_plane_propagator(A, dz=10, stepsNumber=10, shapeWrong=3)
+        fhl.plot_knot_dots(Aprop, bigSingularity=0, axesAll=0, cbrt=1)
+
+        plt.show()
+        # knot_1_plane_propagation()
+        # #
 
     knot_from_math = 0
     if knot_from_math:
@@ -85,16 +58,16 @@ if __name__ == '__main__':
     creating_table_knots = 0  # making_table1
 
     if creating_table_knots:
-        SR = '0.9'
+        SR = '0.95'
         knot = 'Trefoil'
-        w = '1.4'  # Dima Cmex-
+        w = '1.2'  # Dima Cmex-
         # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
         #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
         directoryName = (
             f'C:\\WORK\\CODES\\knots_OAM_functions'
             f'\\temp_data\\SR = {SR}\\{knot}\\w = {w}\\')
         tableName = f'{knot}, SR={SR}, w={w}'
-        kc.creat_knot_table(directoryName, tableName, show=True, cut=0.35)
+        kc.creat_knot_table(directoryName, tableName, show=True, cut=0.5)
 
     studying_3D_OAM = 0
     if studying_3D_OAM:
