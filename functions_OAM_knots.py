@@ -22,7 +22,7 @@ def LG_simple(x, y, z, l=1, p=0, width=1, k0=1, x0=0, y0=0):
     return E
 
 
-def actual_link(x, y, z, w, width=1, k0=1, z0=0.):
+def link(x, y, z, w, width=1, k0=1, z0=0.):
     a00 = -1 + w ** 2
     a01 = -w ** 2
     a10 = -2 * w
@@ -35,19 +35,38 @@ def actual_link(x, y, z, w, width=1, k0=1, z0=0.):
     return field
 
 
-def actual_trefoil(x, y, z, w, width=1, k0=1, z0=0.):
+def trefoil(x, y, z, w, width=1, k0=1, z0=0.):
+    z = z - z0
+    a00 = 1 - w ** 2 - 2 * w ** 4 + 6 * w ** 6
+    a01 = w ** 2 * (1 + 4 * w ** 2 - 18 * w ** 4)
+    a02 = - 2 * w ** 4 * (1 - 9 * w ** 2)
+    a03 = -6 * w ** 6
+    a30 = -8 * np.sqrt(6) * w ** 3
+    field = (a00 * LG_simple(x, y, z, l=0, p=0, width=width, k0=k0) +
+             a01 * LG_simple(x, y, z, l=0, p=1, width=width, k0=k0) +
+             a02 * LG_simple(x, y, z, l=0, p=2, width=width, k0=k0) +
+             a03 * LG_simple(x, y, z, l=0, p=3, width=width, k0=k0) +
+             a30 * LG_simple(x, y, z, l=3, p=0, width=width, k0=k0)
+             )
+
+    return field
+
+
+def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0.):
     z = z - z0
     H = 1.0
-    # a00 = 1 - w ** 2 - 2 * w ** 4 + 6 * w ** 6
-    # a01 = w ** 2 * (1 + 4 * w ** 2 - 18 * w ** 4)
-    # a02 = - 2 * w ** 4 * (1 - 9 * w ** 2)
-    # a03 = -6 * w ** 6
-    # a30 = -8 * np.sqrt(6) * w ** 3
     a00 = (H**6 - H** 4 * w ** 2 - 2 * H ** 2 * w ** 4 + 6 * w ** 6) / H**6
     a01 = (w ** 2 * (1 * H**4 + 4 * w ** 2 * H**2 - 18 * w ** 4)) / H**6
     a02 = (- 2 * w ** 4 * (H**2 - 9 * w ** 2)) / H**6
     a03 = (-6 * w ** 6) / H**6
     a30 = (-8 * np.sqrt(6) * w ** 3) / H**3
+    modified = True
+    if modified:
+        a00 = 1.51
+        a01 = -5.06
+        a02 = 7.23
+        a03 = -2.03
+        a30 = -3.97
 
     field = (a00 * LG_simple(x, y, z, l=0, p=0, width=width, k0=k0) +
              a01 * LG_simple(x, y, z, l=0, p=1, width=width, k0=k0) +
@@ -59,15 +78,17 @@ def actual_trefoil(x, y, z, w, width=1, k0=1, z0=0.):
     return field
 
 
-def actual_knot(x, y, z, w, width=1, k0=1, z0=0., knot=None):
+def knot(x, y, z, w, width=1, k0=1, z0=0., knot=None):
     if knot is None:
         knot = 'trefoil'
     if knot == 'trefoil':
-        return actual_trefoil(x, y, z, w, width=width, k0=k0, z0=z0)
+        return trefoil(x, y, z, w, width=width, k0=k0, z0=z0)
     elif knot == 'hopf':
         print('add the HOPF!')
     elif knot == 'link':
-        return actual_link(x, y, z, w, width=width, k0=k0, z0=z0)
+        return link(x, y, z, w, width=width, k0=k0, z0=z0)
+    elif knot == 'trefoil_mod':
+        return trefoil_mod(x, y, z, w, width=width, k0=k0, z0=z0)
 
 
 # this one hasn't been checked yet
@@ -97,7 +118,7 @@ def knot_field_plot_save(xyMax=3, zMax=1, xyRes=50, zRes=50, w=1, width=1, k0=1,
     xyzMesh = fg.create_mesh_XYZ(xMin=-xyMax, xMax=xyMax,
                                  yMin=-xyMax, yMax=xyMax,
                                  zMin=-zMax, zMax=zMax, xRes=xyRes, yRes=xyRes, zRes=zRes)
-    field = actual_knot(xyzMesh[0], xyzMesh[1], z=xyzMesh[2], w=w, width=width, k0=k0, knot=knot)
+    field = knot(xyzMesh[0], xyzMesh[1], z=xyzMesh[2], w=w, width=width, k0=k0, knot=knot)
     if plot:
         if plotLayer is None:
             plotLayer = zRes // 2

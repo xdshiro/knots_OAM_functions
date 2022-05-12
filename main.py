@@ -62,10 +62,12 @@ if __name__ == '__main__':
 
     knot_from_math = 1
     if knot_from_math:
-        fOAM.knot_field_plot_save(xyMax=7 * 2, zMax=1.5 * 4, xyRes=70, zRes=60, w=1.3, width=1.5 * 2, k0=1,
+        fOAM.knot_field_plot_save(xyMax=6, zMax=1.5, xyRes=70, zRes=60, w=1.2, width=1.5, k0=1,
                                   knot='trefoil',
                                   save=True, saveName='trefoil_math_01',
                                   plot=True, plotLayer=None)
+        plt.show()
+        exit()
         field1 = np.load('trefoil_math_01.npy')
         for i in range(0, 1000, 2):
             print(i)
@@ -83,7 +85,7 @@ if __name__ == '__main__':
     if creating_table_knots:
         SR = '0.95'
         knot = 'Trefoil'
-        w = '1.2'  # Dima Cmex-
+        w = '1.2 mod'  # Dima Cmex-
         # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
         #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
         directoryName = (
