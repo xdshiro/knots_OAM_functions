@@ -27,30 +27,53 @@ if __name__ == '__main__':
         plt.show()
 
         plt.show()
-    propagation = 1
+    propagation = 0
     if propagation:
         # A = fg.readingFile('all_other_data/trefoil_exp_field.mat', fieldToRead='Uz', printV=False)
         A = fg.readingFile('all_other_data/trefoil_exp_field.mat', fieldToRead='Uz', printV=False)
-        fhl.plot_knot_dots(A, bigSingularity=0, axesAll=0, cbrt=1)
+        fhl.plot_knot_dots(A, bigSingularity=0, axesAll=0, cbrt=1, size=100, color='k')
         plt.show()
         exit()
-        fg.plot_2D(np.angle(A)[:, :, 8])
-        fg.plot_2D(np.abs(A)[:, :, 8])
+        # plt.show()
+        # exit()
+        # fg.plot_2D(np.angle(A)[:, :, 8])
+        # fg.plot_2D(np.abs(A)[:, :, 8])
+        for i in range(7, 30, 1):
+            print(i)
+            fg.plot_2D(np.angle(A[:, :, 0*np.shape(A)[2] // 2 + i]))
+            fg.plot_2D(np.abs(A[:, :, 0*np.shape(A)[2] // 2 + i]), map='gray')
+            plt.show()
+            input()
+
+
         # Aprop = fg.one_plane_propagator(A, dz=10, stepsNumber=10, shapeWrong=3)
-        Aprop = fg.one_plane_propagator(A, dz=10, stepsNumber=10, shapeWrong=3)
-        fhl.plot_knot_dots(Aprop, bigSingularity=0, axesAll=0, cbrt=1)
+        aProp = fg.one_plane_propagator(A, dz=10, stepsNumber=10, shapeWrong=0)
+        for i in range(0, 19, 19):
+            fg.plot_2D(np.angle(aProp[:, :, np.shape(aProp)[2] // 2 + 3]))
+            plt.show()
+        exit()
+        aProp = fg.size_array_increase_3D(aProp)
+
+        fhl.plot_knot_dots(aProp, bigSingularity=0, axesAll=0, cbrt=1, size=100, color='k')
 
         plt.show()
         # knot_1_plane_propagation()
         # #
 
-    knot_from_math = 0
+    knot_from_math = 1
     if knot_from_math:
-        fOAM.knot_field_plot_save(xyMax=7 * 2, zMax=1.5 * 4, xyRes=70, zRes=60, w=1.5, width=1.5 * 2, k0=1,
+        fOAM.knot_field_plot_save(xyMax=7 * 2, zMax=1.5 * 4, xyRes=70, zRes=60, w=1.3, width=1.5 * 2, k0=1,
                                   knot='trefoil',
                                   save=True, saveName='trefoil_math_01',
                                   plot=True, plotLayer=None)
         field1 = np.load('trefoil_math_01.npy')
+        for i in range(0, 1000, 2):
+            print(i)
+            fg.plot_2D(np.angle(field1[:, :, np.shape(field1)[2] // 2 + i]))
+            fg.plot_2D(np.abs(field1[:, :, np.shape(field1)[2] // 2 + i]), map='gray')
+            plt.show()
+            input()
+        exit()
         fg.plot_3D_density(np.angle(field1))
         # fhl.plot_knot_dots(field1)
         plt.show()

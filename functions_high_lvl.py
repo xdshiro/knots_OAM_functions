@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 
 
 # plotting dot's only from the Array of +-1
-def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=True, size=None, color=None):
+def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=True,
+                   size=plt.rcParams['lines.markersize'] ** 2, color=None):
     dotsFull, dotsOnly = fg.cut_non_oam(np.angle(field),
                                         bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
     dotsPlus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == 1])

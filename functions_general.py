@@ -200,7 +200,7 @@ def cut_fourier_filter(E, radiusPix=1):
 
 # return the 3D array with the complex field
 def one_plane_propagator(fieldPlane, dz, stepsNumber, shapeWrong=False, n0=1, k0=1):
-    if shapeWrong:
+    if shapeWrong is not False:
         if shapeWrong is True:
             print(f'using the middle plane in one_plane_propagator (shapeWrong = True)')
             fieldPlane = fieldPlane[:, :, np.shape(fieldPlane)[2] // 2]
@@ -326,11 +326,11 @@ def plot_2D(E, x=None, y=None, xname='', yname='', map='jet', vmin=None, vmax=No
     return ax
 
 
-def plot_scatter_3D(X, Y, Z, ax=None, size=None, color=None):
+def plot_scatter_3D(X, Y, Z, ax=None, size=plt.rcParams['lines.markersize'] ** 2, color=None):
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(X, Y, Z, size=size, color=color)  # plot the point (2,3,4) on the figure
+    ax.scatter(X, Y, Z, s=size, color=color)  # plot the point (2,3,4) on the figure
     # ax.view_init(70, 0)
     # plt.show()
     # plt.close()
@@ -391,5 +391,32 @@ def crop_array_Values_3D(field, cropX=None, cropY=None, cropZ=None, percentage=N
     if zPos is None:
         zPos = shape[2] // 2 - cropZ // 2
     answer = np.zeros(shape, dtype=np.complex)
-    answer[xPos:xPos + cropX, yPos:yPos + cropY, zPos:zPos + cropZ] = field[xPos:xPos + cropX, yPos:yPos + cropY, zPos:zPos + cropZ]
+    answer[xPos:xPos + cropX, yPos:yPos + cropY, zPos:zPos + cropZ] = field[xPos:xPos + cropX, yPos:yPos + cropY,
+                                                                      zPos:zPos + cropZ]
+    return answer
+
+
+def size_array_increase_3D(field, cropX=None, cropY=None, cropZ=None, percentage=None, xPos=None, yPos=None, zPos=None):
+    shape = np.shape(field)
+    # cropX is bigger than shape[0]
+    # position is in the cropX
+    if cropX is None:
+        cropX = shape[0] * 2
+    if cropY is None:
+        cropY = shape[1] * 2
+    if cropZ is None:
+        cropZ = shape[2]
+    if percentage is not None:
+        cropX = int(shape[0] / percentage * 100)
+        cropY = int(shape[1] / percentage * 100)
+    if xPos is None:
+        xPos = cropX // 2
+    if yPos is None:
+        yPos = cropY // 2
+    if zPos is None:
+        zPos = cropZ // 2
+    answer = np.zeros((cropX, cropY, cropZ), dtype=np.complex)
+    answer[xPos - shape[0] // 2:xPos + shape[0] // 2 + 1,
+    yPos - shape[1] // 2:yPos + shape[1] // 2 + 1,
+    zPos - shape[2] // 2:zPos + shape[2] // 2 + 1] = field
     return answer
