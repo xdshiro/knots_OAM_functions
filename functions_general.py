@@ -303,7 +303,10 @@ def plot_2D(E, x=None, y=None, xname='', yname='', map='jet', vmin=None, vmax=No
     if y is None:
         y = range(np.shape(E)[1])
     if ax is None:
-        fig, ax = plt.subplots()
+        if axis_equal:
+            fig, ax = plt.subplots(figsize=(6, 6))
+        else:
+            fig, ax = plt.subplots(figsize=(8, 6))
     image = plt.imshow(E,
                        interpolation='bilinear', cmap=map,
                        origin='lower', aspect='auto',  # aspect ration of the axes

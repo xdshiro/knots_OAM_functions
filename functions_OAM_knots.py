@@ -78,7 +78,7 @@ def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0.):
     return field
 
 
-def knot(x, y, z, w, width=1, k0=1, z0=0., knot=None):
+def knot_all(x, y, z, w, width=1, k0=1, z0=0., knot=None):
     if knot is None:
         knot = 'trefoil'
     if knot == 'trefoil':
@@ -112,18 +112,18 @@ def Jz_calc(EArray, xArray, yArray):
 
 # ploting and saving math trefoil
 def knot_field_plot_save(xyMax=3, zMax=1, xyRes=50, zRes=50, w=1, width=1, k0=1,
-                         knot=None,
+                         knot=None, axis_equal=True,
                          save=False, saveName='rename_me', plot=True, plotLayer=None):
     xyArray = np.linspace(-xyMax, xyMax, xyRes)
     xyzMesh = fg.create_mesh_XYZ(xMin=-xyMax, xMax=xyMax,
                                  yMin=-xyMax, yMax=xyMax,
                                  zMin=-zMax, zMax=zMax, xRes=xyRes, yRes=xyRes, zRes=zRes)
-    field = knot(xyzMesh[0], xyzMesh[1], z=xyzMesh[2], w=w, width=width, k0=k0, knot=knot)
+    field = knot_all(xyzMesh[0], xyzMesh[1], z=xyzMesh[2], w=w, width=width, k0=k0, knot=knot)
     if plot:
         if plotLayer is None:
             plotLayer = zRes // 2
-        fg.plot_2D(np.abs(field)[:, :, plotLayer], xyArray, xyArray)
-        fg.plot_2D(np.angle(field)[:, :, plotLayer], xyArray, xyArray, map='hsv')
+        fg.plot_2D(np.abs(field)[:, :, plotLayer], xyArray, xyArray, axis_equal=axis_equal)
+        fg.plot_2D(np.angle(field)[:, :, plotLayer], xyArray, xyArray, map='hsv', axis_equal=axis_equal)
     if save:
         np.save(saveName, field)
 

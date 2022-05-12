@@ -63,7 +63,7 @@ if __name__ == '__main__':
     knot_from_math = 1
     if knot_from_math:
         fOAM.knot_field_plot_save(xyMax=6, zMax=1.5, xyRes=70, zRes=60, w=1.2, width=1.5, k0=1,
-                                  knot='trefoil',
+                                  knot='trefoil', axis_equal=True,
                                   save=True, saveName='trefoil_math_01',
                                   plot=True, plotLayer=None)
         plt.show()
