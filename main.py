@@ -14,24 +14,36 @@ if __name__ == '__main__':
         def milnor_Pol(x, y, z, H=1):
             R = fg.rho(x, y)
             f = fg.phi(x, y)
+            # u^3 - v
+            return (-1 - 2 * np.exp(1j * f) * R + 3 * R ** 2 - 4 * np.exp(1j * f) * R ** 3 - 3 * R ** 4
+                    - 2 * np.exp(1j * f) * R ** 5 + R ** 6
+                    + (6 * 1j - 12 * 1j * R ** 2 + 6 * 1j * R ** 4) * z +
+                    -  (3 - 12 * 1j ** 2 - 4 * np.exp(1j * f) * R
+                        - 6 * R ** 2 + 12 * 1j ** 2 * R ** 2
+                        - 4 * np.exp(1j * f) * R ** 3 + 3 * R ** 4) * z ** 2 +
+                    -  (-12 * 1j + 8 * 1j ** 3 + 12 * 1j * R ** 2) * z ** 3
+                    + (-3 + 12 * 1j ** 2 - 2 * np.exp(1j * f) * R + 3 * R ** 2) * z ** 4
+                    + 6 * 1j * z ** 5 + z ** 6
+                    )
             # u^2 - v
-            return [1 - 2 * np.exp(1j * f) * R - 2 * R ** 2
-                    - 2 * np.exp(1j * f) * R ** 3 + R ** 4
-                    + (-4 * 1j + 4 * 1j * R ** 2) * z
-                    + (-2 + 4 * 1j ** 2 - 2 * np.exp(1j * f) * R + 2 * R ** 2) * z ** 2
-                    + 4 * 1j * z ** 3 + z * 4
-                    ]
+            # return (1 - 2 * np.exp(1j * f) * R - 2 * R ** 2
+            #         - 2 * np.exp(1j * f) * R ** 3 + R ** 4
+            #         + (-4 * 1j + 4 * 1j * R ** 2) * z
+            #         + (-2 + 4 * 1j ** 2 - 2 * np.exp(1j * f) * R + 2 * R ** 2) * z ** 2
+            #         + 4 * 1j * z ** 3 + z * 4
+            #         )
             # hopf
             # return (1 - 2 * R ** 2 / H ** 2 - 4 * R ** 2 * np.exp(
             #     2j * f) / H ** 2 + R ** 4 / H ** 4 - 4j * z / H + 4j * R ** 2 * z / H ** 3 -
             #         6 * z ** 2 / H ** 2 + 2 * R ** 2 * z ** 2 / H ** 4 + 4j * z ** 3 / H ** 3 + z ** 4 / H ** 4)
 
-        xyzMesh = fg.create_mesh_XYZ(4, 4, 1, 75, 75, 75)
+
+        xyzMesh = fg.create_mesh_XYZ(4, 4, 3, 75, 75, 75)
         field = milnor_Pol(xyzMesh[0], xyzMesh[1], xyzMesh[2])
         # field = fOAM.knot_all(xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, knot='trefoil_mod')
         # fg.plot_3D_density(np.angle(field))
         # fg.plot_2D(np.angle(field[:, :, np.shape(field)[2] // 2]))
-        fhl.plot_knot_dots(field, color='k', size=80, axesAll=False)
+        fhl.plot_knot_dots(field, color='k', size=80, axesAll=True)
         plt.show()
 
 plt.show()
