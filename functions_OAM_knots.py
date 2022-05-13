@@ -126,3 +126,37 @@ def knot_field_plot_save(xyMax=3, zMax=1, xyRes=50, zRes=50, w=1, width=1, k0=1,
         fg.plot_2D(np.angle(field)[:, :, plotLayer], xyArray, xyArray, map='hsv', axis_equal=axis_equal)
     if save:
         np.save(saveName, field)
+
+
+def milnor_Pol_testing(x, y, z, *args):
+    R = fg.rho(x, y)
+    f = fg.phi(x, y)
+    R = fg.rho(x, y)
+    f = fg.phi(x, y)
+    u = (-1 ** 2 + R ** 2 + 2j * z * 1 + z ** 2) / (1 ** 2 + R ** 2 + z ** 2)
+    v = (2 * R * 1 * np.exp(1j * f)) / (1 ** 2 + R ** 2 + z ** 2)
+    divider = (1 + R ** 2 + z ** 2)
+    return u ** 3 - v / 10 #/ divider ** 2
+    # return (
+    #         (-2 * np.exp(1j * f) * R * (1 + R ** 2 + z ** 2) ** 2
+    #          + (-1 + R ** 2 + 2 * 1j * z + z ** 2) ** 5)
+    #         / (1 + R ** 2 + z ** 2) ** 5
+    # )
+
+
+# def milnor_Pol_testing(x, y, z):
+#     R = fg.rho(x, y)
+#     f = fg.phi(x, y)
+#     return (
+#             (-2 * np.exp(1j * f) * R * (1 + R ** 2 + z ** 2) ** 2
+#              + (-1 + R ** 2 + 2 * 1j * z + z ** 2) ** 5)
+#             / (1 + R ** 2 + z ** 2) ** 3
+#     )
+
+
+def milnor_Pol_u_v_any(x, y, z, uOrder, vOrder, H=1):
+    R = fg.rho(x, y)
+    f = fg.phi(x, y)
+    u = (-H ** 2 + R ** 2 + 2j * z * H + z ** 2) / (H ** 2 + R ** 2 + z ** 2)
+    v = (2 * R * H * np.exp(1j * f)) / (H ** 2 + R ** 2 + z ** 2)
+    return u ** uOrder - v ** vOrder

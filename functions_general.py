@@ -3,6 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.fft import fftn, ifftn, fftshift, ifftshift
 import scipy.io as sio
+from scipy.interpolate import CloughTocher2DInterpolator
 
 # common parameters
 # global fig, ax
@@ -423,3 +424,27 @@ def size_array_increase_3D(field, cropX=None, cropY=None, cropZ=None, percentage
     yPos - shape[1] // 2:yPos + shape[1] // 2 + 1,
     zPos - shape[2] // 2:zPos + shape[2] // 2 + 1] = field
     return answer
+
+
+# function interpolate real 2D array of any data into the function(x, y)
+def interpolation_real(field, xArray=None, yArray=None):
+    xResolution, yResolution = np.shape(field)
+    if xArray is None:
+        xArray = np.linspace(0, xResolution - 1, xResolution)
+    if yArray is None:
+        yArray = np.linspace(0, yResolution - 1, yResolution)
+    xArrayFull = np.zeros(xResolution * yResolution)
+    yArrayFull = np.zeros(xResolution * yResolution)
+    fArray1D = np.zeros(xResolution * yResolution)
+    for i in range(xResolution * yResolution):
+        xArrayFull[i] = xArray[i // yResolution]
+        yArrayFull[i] = yArray[i % xResolution]
+        fArray1D[i] = field[i // yResolution, i % xResolution]
+    return CloughTocher2DInterpolator(list(zip(xArrayFull, yArrayFull)), fArray1D)
+
+
+# function interpolate complex 2D array of any data into the function(x, y)
+def interpolation_complex(field, xArray=None, yArray=None):
+    fieldReal = np.real(field)
+    fieldImag = np.imag(field)
+    return interpolation_real(fieldReal, xArray, yArray), interpolation_real(fieldImag, xArray, yArray)
