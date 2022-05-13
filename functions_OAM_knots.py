@@ -55,11 +55,11 @@ def trefoil(x, y, z, w, width=1, k0=1, z0=0.):
 def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0.):
     z = z - z0
     H = 1.0
-    a00 = (H**6 - H** 4 * w ** 2 - 2 * H ** 2 * w ** 4 + 6 * w ** 6) / H**6
-    a01 = (w ** 2 * (1 * H**4 + 4 * w ** 2 * H**2 - 18 * w ** 4)) / H**6
-    a02 = (- 2 * w ** 4 * (H**2 - 9 * w ** 2)) / H**6
-    a03 = (-6 * w ** 6) / H**6
-    a30 = (-8 * np.sqrt(6) * w ** 3) / H**3
+    a00 = 1 * (H ** 6 - H ** 4 * w ** 2 - 2 * H ** 2 * w ** 4 + 6 * w ** 6) / H ** 6
+    a01 = (w ** 2 * (1 * H ** 4 + 4 * w ** 2 * H ** 2 - 18 * w ** 4)) / H ** 6
+    a02 = (- 2 * w ** 4 * (H ** 2 - 9 * w ** 2)) / H ** 6
+    a03 = (-6 * w ** 6) / H ** 6
+    a30 = (-8 * np.sqrt(6) * w ** 3) / H ** 3
     modified = True
     if modified:
         a00 = 1.51
@@ -126,4 +126,3 @@ def knot_field_plot_save(xyMax=3, zMax=1, xyRes=50, zRes=50, w=1, width=1, k0=1,
         fg.plot_2D(np.angle(field)[:, :, plotLayer], xyArray, xyArray, map='hsv', axis_equal=axis_equal)
     if save:
         np.save(saveName, field)
-

@@ -312,7 +312,7 @@ def plot_2D(E, x=None, y=None, xname='', yname='', map='jet', vmin=None, vmax=No
                        origin='lower', aspect='auto',  # aspect ration of the axes
                        extent=[y[0], y[-1], x[0], x[-1]],
                        vmin=vmin, vmax=vmax, label='sdfsd')
-    cbr = plt.colorbar(image, shrink=1, pad=0.02, fraction=0.1)
+    cbr = plt.colorbar(image, shrink=0.8, pad=0.02, fraction=0.1)
     cbr.ax.tick_params(labelsize=ticksFontSize)
     plt.xticks(fontsize=ticksFontSize)
     plt.yticks(fontsize=ticksFontSize)
