@@ -431,9 +431,9 @@ def size_array_increase_3D(field, cropX=None, cropY=None, cropZ=None, percentage
     if zPos is None:
         zPos = cropZ // 2
     answer = np.zeros((cropX, cropY, cropZ), dtype=np.complex)
-    answer[xPos - shape[0] // 2:xPos + shape[0] // 2 + 1,
-    yPos - shape[1] // 2:yPos + shape[1] // 2 + 1,
-    zPos - shape[2] // 2:zPos + shape[2] // 2 + 1] = field
+    answer[xPos - shape[0] // 2:xPos + (shape[0] - 1) // 2 + 1,
+    yPos - shape[1] // 2:yPos + (shape[1] - 1) // 2 + 1,
+    zPos - shape[2] // 2:zPos + (shape[2] - 1) // 2 + 1] = field
     return answer
 
 

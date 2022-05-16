@@ -155,6 +155,7 @@ def milnor_Pol_testing(x, y, z, *args):
 
 
 def milnor_Pol_u_v_any(x, y, z, uOrder, vOrder, H=1):
+    """This function create u^a-v^b Milnor polynomial"""
     R = fg.rho(x, y)
     f = fg.phi(x, y)
     u = (-H ** 2 + R ** 2 + 2j * z * H + z ** 2) / (H ** 2 + R ** 2 + z ** 2)
