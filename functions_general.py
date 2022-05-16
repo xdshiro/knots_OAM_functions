@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objects as go
-from scipy.fft import fftn, ifftn, fftshift, ifftshift
 import scipy.io as sio
 from scipy.interpolate import CloughTocher2DInterpolator
 
@@ -103,9 +102,10 @@ def fill_dict_as_matrix_helper(E, dots=None, nonValue=0, check=False):
     return dots
 
 
-# this function finds singularities
-# returns [3D Array, dots only]
 def cut_non_oam(E, value=1, nonValue=0, bigSingularity=False, axesAll=False, cbrt=False):
+    """this function finds singularities
+    returns [3D Array, dots only]
+    """
     ans = np.copy(E)
     shape = np.shape(ans)
     dots = {}
@@ -152,7 +152,7 @@ def cut_non_oam(E, value=1, nonValue=0, bigSingularity=False, axesAll=False, cbr
     return [ans, dots]
 
 
-def simple_propagator_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, k0=1):
+def propagator_split_step_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, k0=1):
     if xArray is None:
         xArray = np.array(range(np.shape(E)[0]))
     if yArray is None:
@@ -199,13 +199,13 @@ def simple_propagator_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, k0=1
 # just a fourier filter in XZ cross-section
 def cut_fourier_filter(E, radiusPix=1):
     ans = np.copy(E)
-    ans = fftshift(fftn(ans))
+    ans = np.fft.fftshift(np.fft.fftn(ans))
     xCenter, yCenter = np.shape(ans)[0] // 2, np.shape(ans)[0] // 2
     for i in range(np.shape(ans)[0]):
         for j in range(np.shape(ans)[1]):
             if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2) > radiusPix:
                 ans[i, j] = 0
-    ans = ifftn(ifftshift(ans))
+    ans = np.fft.ifftn(np.fft.ifftshift(ans))
     print(np.shape(ans))
     return ans
 
@@ -218,8 +218,8 @@ def one_plane_propagator(fieldPlane, dz, stepsNumber, shapeWrong=False, n0=1, k0
             fieldPlane = fieldPlane[:, :, np.shape(fieldPlane)[2] // 2]
         else:
             fieldPlane = fieldPlane[:, :, np.shape(fieldPlane)[2] // 2 + shapeWrong]
-    fieldPropMinus = simple_propagator_3D(fieldPlane, dz=-dz, zSteps=stepsNumber, n0=n0, k0=k0)
-    fieldPropPLus = simple_propagator_3D(fieldPlane, dz=dz, zSteps=stepsNumber, n0=n0, k0=k0)
+    fieldPropMinus = propagator_split_step_3D(fieldPlane, dz=-dz, zSteps=stepsNumber, n0=n0, k0=k0)
+    fieldPropPLus = propagator_split_step_3D(fieldPlane, dz=dz, zSteps=stepsNumber, n0=n0, k0=k0)
     fieldPropTotal = np.concatenate((np.flip(fieldPropMinus, axis=2), fieldPropPLus[:, :, 1:-1]), axis=2)
     return fieldPropTotal
 
@@ -247,9 +247,11 @@ def plot_3D_density(E, resDecrease=None,
     shape = np.array(np.shape(E))
     if resDecrease is not None:
         shape = (shape // resDecrease)
-    X, Y, Z = np.mgrid[xMinMax[0]:xMinMax[1]:shape[0] * 1j,
+    X, Y, Z = np.mgrid[
+              xMinMax[0]:xMinMax[1]:shape[0] * 1j,
               yMinMax[0]:yMinMax[1]:shape[1] * 1j,
-              zMinMax[0]:zMinMax[1]:shape[2] * 1j]
+              zMinMax[0]:zMinMax[1]:shape[2] * 1j
+              ]
     fig = go.Figure(data=go.Volume(
         x=X.flatten(),  # collapsed into 1 dimension
         y=Y.flatten(),
@@ -406,7 +408,8 @@ def crop_array_Values_3D(field, cropX=None, cropY=None, cropZ=None, percentage=N
     if zPos is None:
         zPos = shape[2] // 2 - cropZ // 2
     answer = np.zeros(shape, dtype=np.complex)
-    answer[xPos:xPos + cropX, yPos:yPos + cropY, zPos:zPos + cropZ] = field[xPos:xPos + cropX, yPos:yPos + cropY,
+    answer[xPos:xPos + cropX, yPos:yPos + cropY, zPos:zPos + cropZ] = field[
+                                                                      xPos:xPos + cropX, yPos:yPos + cropY,
                                                                       zPos:zPos + cropZ]
     return answer
 
@@ -431,9 +434,11 @@ def size_array_increase_3D(field, cropX=None, cropY=None, cropZ=None, percentage
     if zPos is None:
         zPos = cropZ // 2
     answer = np.zeros((cropX, cropY, cropZ), dtype=np.complex)
-    answer[xPos - shape[0] // 2:xPos + (shape[0] - 1) // 2 + 1,
+    answer[
+    xPos - shape[0] // 2:xPos + (shape[0] - 1) // 2 + 1,
     yPos - shape[1] // 2:yPos + (shape[1] - 1) // 2 + 1,
-    zPos - shape[2] // 2:zPos + (shape[2] - 1) // 2 + 1] = field
+    zPos - shape[2] // 2:zPos + (shape[2] - 1) // 2 + 1
+    ] = field
     return answer
 
 
@@ -459,3 +464,25 @@ def interpolation_complex(field, xArray=None, yArray=None):
     fieldReal = np.real(field)
     fieldImag = np.imag(field)
     return interpolation_real(fieldReal, xArray, yArray), interpolation_real(fieldImag, xArray, yArray)
+
+
+def ft_2D(field, xArray, yArray, kxArray, kyArray):
+    """
+    The function processed ordinary 2D Fourier transformation (not FFT).
+    This can be helpful to get the required resolution in any window
+    :param field: 2D array of any complex field
+    :return: return 2D spectrum in kArray x yArray
+    """
+    def integrand_helper(kx, ky):
+        integrand = np.copy(field)
+        for i, x in enumerate(xArray):
+            for j, y in enumerate(yArray):
+                integrand[i, j] *= np.exp(-1j * x * kx) * np.exp(-1j * y * ky)
+        return integrand
+
+    spectrum = np.zeros((len(kxArray), len(kyArray)), dtype=complex)
+    for i, kx in enumerate(kxArray):
+        for j, ky in enumerate(kyArray):
+            spectrum[i, j] = np.sum(integrand_helper(kx, ky))
+
+    return spectrum * (xArray[1] - xArray[0]) * (yArray[1] - yArray[0]) / 2 / np.pi

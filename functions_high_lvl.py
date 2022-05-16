@@ -24,8 +24,8 @@ def resizing_knot_test():
     # plt.show()
     # exit()
     stepNumber = 36
-    fieldProp = fg.simple_propagator_3D(field1[:, :, np.shape(field1)[2] // 2],
-                                        dz=2/4, zSteps=stepNumber, n0=1, k0=1)
+    fieldProp = fg.propagator_split_step_3D(field1[:, :, np.shape(field1)[2] // 2],
+                                            dz=2/4, zSteps=stepNumber, n0=1, k0=1)
     # fg.plot_3D_density(np.angle(testProp[:, :, :]), resDecrease=[1, 1, 1])
     fg.plot_2D(np.abs(fieldProp[:, :, stepNumber]))
     fg.plot_2D(np.angle(fieldProp[:, :, stepNumber]), map='hsv')

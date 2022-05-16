@@ -8,22 +8,32 @@ import functions_high_lvl as fhl
 import functions_OAM_knots as fOAM
 import knot_class as kc
 
-from scipy.fft import fftn, ifftn, fftshift, ifftshift
 
 if __name__ == '__main__':
     propagation_modification = True
     if propagation_modification:
         xyMinMax = 5
-        xRes = yRes = 150
-        xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, 0.5, xRes, yRes, 40)
+        xRes = yRes = 50
+        xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
+        yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
+        xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, 0.5, xRes, yRes, 7)
         field = fOAM.knot_all(xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0., knot=None)
-        fg.plot_2D(np.abs(ifftshift(fftn(field[:, :, np.shape(field)[2]//2]))))
+        # fg.plot_2D(np.abs(ifftshift(fftn(field[:, :, np.shape(field)[2] // 2]))),
+        #           xlim=[20, 30], ylim=[20, 30])
+        kxArray = np.linspace(-4 * 2 * np.pi / xyMinMax, 4 * 2 * np.pi / xyMinMax, xRes)
+        kyArray = np.linspace(-4 * 2 * np.pi / xyMinMax, 4 * 2 * np.pi / xyMinMax, yRes)
+        fieldSpec = fg.ft_2D(field, xArray, yArray, kxArray, kyArray)
+        # fg.plot_2D(np.abs(np.fft.fftn(np.fft.fftn(field[:, :, np.shape(field)[2] // 2]))))
+        xArrayNew = np.linspace(-xyMinMax * 2, xyMinMax * 2, xRes * 2)
+        yArrayNew = np.linspace(-xyMinMax * 2, xyMinMax * 2, yRes * 2)
+        field = fg.ft_2D(fieldSpec, kxArray, kyArray, xArrayNew, yArrayNew)
+        fg.plot_2D(np.abs(field))
+        # fg.plot_2D(np.abs(np.fft.ifftshift(np.fft.ifftn(fieldSpec))))
         plt.show()
         exit()
-        fieldProp = fg.simple_propagator_3D(field[:, :, np.shape(field)[2] // 2],
-                                            xArray=np.linspace(-xyMinMax, xyMinMax, xRes),
-                                            yArray=np.linspace(-xyMinMax, xyMinMax, yRes),
-                                            dz=0.01, zSteps=100)
+        fieldProp = fg.propagator_split_step_3D(field[:, :, np.shape(field)[2] // 2],
+                                                xArray=xArray, yArray=yArray,
+                                                dz=0.01, zSteps=100)
         fg.plot_2D(np.abs(fieldProp[:, :, -1]))
         fg.plot_2D(np.angle(fieldProp[:, :, -1]))
         plt.show()
@@ -44,7 +54,7 @@ if __name__ == '__main__':
         # fg.plot_2D(np.abs(ifftshift(fftn(field_inter))))
         plt.show()
         exit()
-        field_inter_prop = fg.simple_propagator_3D(field_inter, dz=0.2, zSteps=30)
+        field_inter_prop = fg.propagator_split_step_3D(field_inter, dz=0.2, zSteps=30)
         fg.plot_2D(np.abs(field_inter_prop[:, :, -1]))
         fg.plot_2D(np.angle(field_inter_prop[:, :, -1]))
         plt.show()
