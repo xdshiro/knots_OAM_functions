@@ -26,6 +26,17 @@ def create_mesh_XYZ(xMax, yMax, zMax, xRes, yRes, zRes,
     return np.array(np.meshgrid(xArray, yArray, zArray, indexing=indexing))
 
 
+def create_mesh_XY(xMax, yMax, xRes, yRes,
+                   xMin=None, yMin=None, indexing='ij'):
+    if xMin is None:
+        xMin = -xMax
+    if yMin is None:
+        yMin = -yMax
+    xArray = np.linspace(xMin, xMax, xRes)
+    yArray = np.linspace(yMin, yMax, yRes)
+    return np.array(np.meshgrid(xArray, yArray, indexing=indexing))
+
+
 def resolution_decrease(E, resDecrease=None):
     if resDecrease is None:
         resDecrease = [1, 1, 1]

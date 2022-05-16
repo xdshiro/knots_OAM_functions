@@ -11,8 +11,18 @@ import knot_class as kc
 if __name__ == '__main__':
     milnor_research = True
     if milnor_research:
-        xyzMesh = fg.create_mesh_XYZ(2, 2, 0.5, 140, 140, 140)
+        xyzMesh = fg.create_mesh_XYZ(2, 2, 0.5, 40, 40, 7)
         field = fOAM.milnor_Pol_testing(xyzMesh[0], xyzMesh[1], xyzMesh[2], 2, 3)
+        f = fg.interpolation_complex(field[:, :, np.shape(field)[2] // 2],
+                                     np.linspace(-2, 2, 40), np.linspace(-2, 2, 40))
+        print(fOAM.milnor_Pol_testing(1, 2, 0, 2, 3))
+        print(f[0](1, 2) + 1j * f[1](1, 2))
+        x, y = fg.create_mesh_XY(2, 2, 160, 160)
+        field_inter = f[0](x, y) + 1j * f[1](x, y)
+        fg.plot_2D(np.abs(field_inter))
+        fg.plot_2D(np.angle(field_inter))
+        # fg.plot_2D(np.abs(field[:, :, np.shape(field)[2] // 2]))
+        # fg.plot_2D(np.angle(field[:, :, np.shape(field)[2] // 2]))
 
         # field = fOAM.knot_all(xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, knot='trefoil_mod')
         # fg.plot_3D_density(np.angle(field))
