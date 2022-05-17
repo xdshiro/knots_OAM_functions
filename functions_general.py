@@ -473,6 +473,7 @@ def ft_2D(field, xArray, yArray, kxArray, kyArray):
     :param field: 2D array of any complex field
     :return: return 2D spectrum in kArray x yArray
     """
+
     def integrand_helper(kx, ky):
         integrand = np.copy(field)
         for i, x in enumerate(xArray):
@@ -486,3 +487,16 @@ def ft_2D(field, xArray, yArray, kxArray, kyArray):
             spectrum[i, j] = np.sum(integrand_helper(kx, ky))
 
     return spectrum * (xArray[1] - xArray[0]) * (yArray[1] - yArray[0]) / 2 / np.pi
+
+
+def permutations_all(*arrays):
+    """
+    This function gets arrays and return the 1D array with all possible permutations
+    :param arrays: any combinations of arrays, for example: [1][2,7,13][2,3]
+    :return: [[1,2,2],[1,2,3],[1,7,2]...,[1,13,3]]
+    """
+    N = len(arrays)
+    grid = np.meshgrid(*arrays, indexing='ij')
+    transposing = np.roll(np.arange(N + 1), -1)  # [1, 2, 3,... N, 0]
+    permutations = np.transpose(grid, transposing)
+    return permutations.reshape(-1, N)  # -1 means unspecified value (как получится)

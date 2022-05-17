@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import assoc_laguerre
 import functions_general as fg
-
+import matplotlib.pyplot as plt
 
 def laguerre_polynomial(x, l, p):
     return assoc_laguerre(x, p, l)
@@ -52,29 +52,33 @@ def trefoil(x, y, z, w, width=1, k0=1, z0=0.):
     return field
 
 
-def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0.):
+def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
     z = z - z0
     H = 1.0
-    a00 = 1 * (H ** 6 - H ** 4 * w ** 2 - 2 * H ** 2 * w ** 4 + 6 * w ** 6) / H ** 6
-    a01 = (w ** 2 * (1 * H ** 4 + 4 * w ** 2 * H ** 2 - 18 * w ** 4)) / H ** 6
-    a02 = (- 2 * w ** 4 * (H ** 2 - 9 * w ** 2)) / H ** 6
-    a03 = (-6 * w ** 6) / H ** 6
-    a30 = (-8 * np.sqrt(6) * w ** 3) / H ** 3
-    modified = True
-    if modified:
-        a00 = 1.51
-        a01 = -5.06
-        a02 = 7.23
-        a03 = -2.03
-        a30 = -3.97
-
-    field = (a00 * LG_simple(x, y, z, l=0, p=0, width=width, k0=k0) +
-             a01 * LG_simple(x, y, z, l=0, p=1, width=width, k0=k0) +
-             a02 * LG_simple(x, y, z, l=0, p=2, width=width, k0=k0) +
-             a03 * LG_simple(x, y, z, l=0, p=3, width=width, k0=k0) +
-             a30 * LG_simple(x, y, z, l=3, p=0, width=width, k0=k0)
+    if coeff is not None or coeff is False:
+        paper = [1.51, -5.06, 7.23, -2.03, -3.97]
+        aCoeff = coeff
+    else:
+        a00 = 1 * (H ** 6 - H ** 4 * w ** 2 - 2 * H ** 2 * w ** 4 + 6 * w ** 6) / H ** 6
+        a01 = (w ** 2 * (1 * H ** 4 + 4 * w ** 2 * H ** 2 - 18 * w ** 4)) / H ** 6
+        a02 = (- 2 * w ** 4 * (H ** 2 - 9 * w ** 2)) / H ** 6
+        a03 = (-6 * w ** 6) / H ** 6
+        a30 = (-8 * np.sqrt(6) * w ** 3) / H ** 3
+        aCoeff = [a00, a01, a02, a03, a30]
+        aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
+        aCoeff /= aSumSqr
+    if coeffPrint:
+        print(aCoeff)
+        print(f'a00 -> a01 -> a02 ->... -> a0n -> an0:')
+        for i, a in enumerate(aCoeff):
+            print(f'a{i}: {a:.3f}', end=',\t')
+        print()
+    field = (aCoeff[0] * LG_simple(x, y, z, l=0, p=0, width=width, k0=k0) +
+             aCoeff[1] * LG_simple(x, y, z, l=0, p=1, width=width, k0=k0) +
+             aCoeff[2] * LG_simple(x, y, z, l=0, p=2, width=width, k0=k0) +
+             aCoeff[3] * LG_simple(x, y, z, l=0, p=3, width=width, k0=k0) +
+             aCoeff[4] * LG_simple(x, y, z, l=3, p=0, width=width, k0=k0)
              )
-
     return field
 
 
@@ -161,3 +165,15 @@ def milnor_Pol_u_v_any(x, y, z, uOrder, vOrder, H=1):
     u = (-H ** 2 + R ** 2 + 2j * z * H + z ** 2) / (H ** 2 + R ** 2 + z ** 2)
     v = (2 * R * H * np.exp(1j * f)) / (H ** 2 + R ** 2 + z ** 2)
     return u ** uOrder - v ** vOrder
+
+
+# plotting dot's only from the Array of +-1
+def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=True,
+                   size=plt.rcParams['lines.markersize'] ** 2, color=None):
+    dotsFull, dotsOnly = fg.cut_non_oam(np.angle(field),
+                                        bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
+    dotsPlus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == 1])
+    dotsMinus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == -1])
+    ax = fg.plot_scatter_3D(dotsPlus[:, 0], dotsPlus[:, 1], dotsPlus[:, 2], size=size, color=color)
+    fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
+    plt.show()

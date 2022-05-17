@@ -8,76 +8,67 @@ import functions_high_lvl as fhl
 import functions_OAM_knots as fOAM
 import knot_class as kc
 
-
 if __name__ == '__main__':
-    propagation_modification = True
+    knot_optimization = True
+    if knot_optimization:
+        def knot_optimization():
+            def cost_function_paper(field, i0=0.01):
+                I0 = np.max(np.abs(field) ** 2) * i0
+                fieldFlat = np.ndarray.flatten(field)
+                IMin = [1 / min(np.abs(x) ** 2, I0) for x in fieldFlat]
+                return np.sum(IMin)
+
+            xyMinMax = 2.5
+            zMinMax = 0.7
+            zRes = 50
+            xRes = yRes = 50
+            xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes)
+            field = fOAM.trefoil_mod(
+                xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0.,
+                coeff=None, coeffPrint=True,
+            )
+            # a0: 1.715, a1: -5.662, a2: 6.381, a3: -2.305, a4: -4.356,
+            deltaCoeff = 0.2
+            dotsNumber = 5
+            aBest = [1.715, -5.662, 6.381, -2.305, -4.356]
+            aValues = []
+            for a in aBest:
+                aArray = np.linspace(a - deltaCoeff, a + deltaCoeff, dotsNumber)
+                aValues.append(aArray)
+
+            print(np.size(fg.permutations_all(*aValues)))
+
+            print(*aValues)
+            exit()
+            print(aValues)
+            aCombinations = np.meshgrid(aValues[0], aValues[1])
+            print(aCombinations)
+            print(cost_function_paper(field, i0=0.05))
+            # 6443266.7791220145
+            # fg.plot_3D_density(np.abs(field))
+            # exit()
+            # fOAM.plot_knot_dots(field)
+            # plt.show()
+
+
+        knot_optimization()
+
+    # not finished
+    propagation_modification = False
     if propagation_modification:
-        xyMinMax = 5
-        xRes = yRes = 50
-        xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
-        yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
-        xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, 0.5, xRes, yRes, 7)
-        field = fOAM.knot_all(xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0., knot=None)
-        # fg.plot_2D(np.abs(ifftshift(fftn(field[:, :, np.shape(field)[2] // 2]))),
-        #           xlim=[20, 30], ylim=[20, 30])
-        kxArray = np.linspace(-4 * 2 * np.pi / xyMinMax, 4 * 2 * np.pi / xyMinMax, xRes)
-        kyArray = np.linspace(-4 * 2 * np.pi / xyMinMax, 4 * 2 * np.pi / xyMinMax, yRes)
-        fieldSpec = fg.ft_2D(field, xArray, yArray, kxArray, kyArray)
-        # fg.plot_2D(np.abs(np.fft.fftn(np.fft.fftn(field[:, :, np.shape(field)[2] // 2]))))
-        xArrayNew = np.linspace(-xyMinMax * 2, xyMinMax * 2, xRes * 2)
-        yArrayNew = np.linspace(-xyMinMax * 2, xyMinMax * 2, yRes * 2)
-        field = fg.ft_2D(fieldSpec, kxArray, kyArray, xArrayNew, yArrayNew)
-        fg.plot_2D(np.abs(field))
-        # fg.plot_2D(np.abs(np.fft.ifftshift(np.fft.ifftn(fieldSpec))))
-        plt.show()
-        exit()
-        fieldProp = fg.propagator_split_step_3D(field[:, :, np.shape(field)[2] // 2],
-                                                xArray=xArray, yArray=yArray,
-                                                dz=0.01, zSteps=100)
-        fg.plot_2D(np.abs(fieldProp[:, :, -1]))
-        fg.plot_2D(np.angle(fieldProp[:, :, -1]))
-        plt.show()
-        exit()
-        # field = fg.size_array_increase_3D(field)
-        f = fg.interpolation_complex(field[:, :, np.shape(field)[2] // 2],
-                                     np.linspace(-3, 3, 80), np.linspace(-3, 3, 80))
-        x, y = fg.create_mesh_XY(3, 3, 120, 120)
-        field_inter = f[0](x, y) + 1j * f[1](x, y)
-        # f_spec = fg.interpolation_complex(ifftshift(fftn(field_inter)),
-        #                                   np.linspace(-2, 2, 50), np.linspace(-2, 2, 50))
-        # x, y = fg.create_mesh_XY(2, 2, 150, 150)
-        # f_spec_inter = f_spec[0](x, y) + 1j * f_spec[1](x, y)
-        #
-        # fg.plot_2D(np.abs(f_spec_inter))
-        fg.plot_2D(np.abs(field_inter))
-        fg.plot_2D(np.abs(field[:, :, np.shape(field)[2] // 2]))
-        # fg.plot_2D(np.abs(ifftshift(fftn(field_inter))))
-        plt.show()
-        exit()
-        field_inter_prop = fg.propagator_split_step_3D(field_inter, dz=0.2, zSteps=30)
-        fg.plot_2D(np.abs(field_inter_prop[:, :, -1]))
-        fg.plot_2D(np.angle(field_inter_prop[:, :, -1]))
-        plt.show()
+        fhl.propagation_modification()
 
     milnor_research = False
     if milnor_research:
-        xyzMesh = fg.create_mesh_XYZ(2, 2, 0.5, 40, 40, 40)
-        field = fOAM.milnor_Pol_testing(xyzMesh[0], xyzMesh[1], xyzMesh[2], 2, 3)
-        fg.plot_2D(np.abs(field[:, :, np.shape(field)[2] // 2]))
-        fg.plot_2D(np.angle(field[:, :, np.shape(field)[2] // 2]))
-        fhl.plot_knot_dots(field, color='k', size=80, axesAll=True)
-        # field = fOAM.knot_all(xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, knot='trefoil_mod')
-        # fg.plot_3D_density(np.angle(field))
-        # fg.plot_2D(np.angle(field[:, :, np.shape(field)[2] // 2]))
-        plt.show()
+        fhl.milnor_research()
 
-    propagation = 0
+    propagation = False
     if propagation:
         # A = fg.readingFile('all_other_data/trefoil_exp_field.mat', fieldToRead='Uz', printV=False)
         A = fg.readingFile('all_other_data/trefoil_exp_field.mat', fieldToRead='Uz', printV=False)
         fg.plot_2D(np.angle(A[:, :, np.shape(A)[2] // 2]))
         fg.plot_2D(np.angle(A[:, :, np.shape(A)[2] // 2 + 3]))
-        # fhl.plot_knot_dots(A, bigSingularity=0, axesAll=0, cbrt=1, size=100, color='k')
+        # fOAM.plot_knot_dots(A, bigSingularity=0, axesAll=0, cbrt=1, size=100, color='k')
         plt.show()
         exit()
         # plt.show()
@@ -99,7 +90,7 @@ if __name__ == '__main__':
         exit()
         aProp = fg.size_array_increase_3D(aProp)
 
-        fhl.plot_knot_dots(aProp, bigSingularity=0, axesAll=0, cbrt=1, size=100, color='k')
+        fOAM.plot_knot_dots(aProp, bigSingularity=0, axesAll=0, cbrt=1, size=100, color='k')
 
         plt.show()
         # knot_1_plane_propagation()
@@ -107,23 +98,7 @@ if __name__ == '__main__':
 
     knot_from_math = False
     if knot_from_math:
-        fOAM.knot_field_plot_save(xyMax=6, zMax=1.5, xyRes=300, zRes=11, w=1.2, width=1.5, k0=1,
-                                  knot='trefoil_mod', axis_equal=True,
-                                  save=True, saveName='trefoil_math_01',
-                                  plot=True, plotLayer=None)
-        plt.show()
-        exit()
-        field1 = np.load('trefoil_math_01.npy')
-        for i in range(0, 1000, 2):
-            print(i)
-            fg.plot_2D(np.angle(field1[:, :, np.shape(field1)[2] // 2 + i]))
-            fg.plot_2D(np.abs(field1[:, :, np.shape(field1)[2] // 2 + i]), map='gray')
-            plt.show()
-            input()
-        exit()
-        fg.plot_3D_density(np.angle(field1))
-        # fhl.plot_knot_dots(field1)
-        plt.show()
+        fhl.knot_from_math_f()
 
     creating_table_knots = 0  # making_table1
 
@@ -197,7 +172,7 @@ if __name__ == '__main__':
         values = (field[:, :, :])
 
         if 1:
-            fhl.plot_knot_dots(field[185:327, 185:327, :])
+            fOAM.plot_knot_dots(field[185:327, 185:327, :])
             plt.show()
             exit()
 
