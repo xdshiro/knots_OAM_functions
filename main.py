@@ -20,30 +20,47 @@ if __name__ == '__main__':
 
             xyMinMax = 2.5
             zMinMax = 0.7
-            zRes = 50
-            xRes = yRes = 50
+            zRes = 30
+            xRes = yRes = 30
             xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes)
-            field = fOAM.trefoil_mod(
-                xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0.,
-                coeff=None, coeffPrint=True,
-            )
+
             # a0: 1.715, a1: -5.662, a2: 6.381, a3: -2.305, a4: -4.356,
-            deltaCoeff = 0.2
-            dotsNumber = 5
-            aBest = [1.715, -5.662, 6.381, -2.305, -4.356]
-            aValues = []
-            for a in aBest:
-                aArray = np.linspace(a - deltaCoeff, a + deltaCoeff, dotsNumber)
-                aValues.append(aArray)
+            def knot_permutations_all(aInitial, deltaCoeff, dotsNumber):
+                aValues = []
+                for i, a in enumerate(aInitial):
+                    aArray = np.linspace(a - deltaCoeff[i], a + deltaCoeff[i], dotsNumber[i])
+                    aValues.append(aArray)
+                return fg.permutations_all(*aValues)
 
-            print(np.size(fg.permutations_all(*aValues)))
-
-            print(*aValues)
+            deltaCoeff = [0.4, 0, 0, 0, 0]
+            dotsNumber = [4, 1, 1, 1, 1]
+            aInitial = [1.715, -5.662, 6.381, -2.305, -4.356]
+            aAll = knot_permutations_all(aInitial, deltaCoeff, dotsNumber)
+            print(aAll)
             exit()
-            print(aValues)
-            aCombinations = np.meshgrid(aValues[0], aValues[1])
-            print(aCombinations)
-            print(cost_function_paper(field, i0=0.05))
+            print(np.size(aAll))
+            sumArray = []
+            for a in aAll:
+                field = fOAM.trefoil_mod(
+                    xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0.,
+                    coeff=a, coeffPrint=False,
+                )
+                sumArray.append(cost_function_paper(field, i0=0.03))
+            aBestIndex = sumArray.index(min(sumArray))
+            aBest = aAll[aBestIndex]
+            print(aBest)
+            if 0:
+                coeff = []
+                fg.plot_2D(np.angle(fOAM.trefoil_mod(
+                    xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0.,
+                    coeff=[1.715, -5.662, 6.381, -2.305, -4.356], coeffPrint=False,
+                )[:, :, 15]))
+                fg.plot_2D(np.angle(fOAM.trefoil_mod(
+                    xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0.,
+                    coeff=coeff, coeffPrint=False,
+                )[:, :, 15]))
+                plt.show()
+            exit()
             # 6443266.7791220145
             # fg.plot_3D_density(np.abs(field))
             # exit()
