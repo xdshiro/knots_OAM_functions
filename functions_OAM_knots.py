@@ -58,6 +58,8 @@ def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
     if coeff is not None or coeff is False:
         paper = [1.51, -5.06, 7.23, -2.03, -3.97]
         aCoeff = coeff
+        aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
+        aCoeff /= aSumSqr
     else:
         a00 = 1 * (H ** 6 - H ** 4 * w ** 2 - 2 * H ** 2 * w ** 4 + 6 * w ** 6) / H ** 6
         a01 = (w ** 2 * (1 * H ** 4 + 4 * w ** 2 * H ** 2 - 18 * w ** 4)) / H ** 6
@@ -168,7 +170,7 @@ def milnor_Pol_u_v_any(x, y, z, uOrder, vOrder, H=1):
 
 
 # plotting dot's only from the Array of +-1
-def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=True,
+def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
                    size=plt.rcParams['lines.markersize'] ** 2, color=None):
     dotsFull, dotsOnly = fg.cut_non_oam(np.angle(field),
                                         bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)

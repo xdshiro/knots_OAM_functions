@@ -12,12 +12,14 @@ if __name__ == '__main__':
     knot_optimization = True
     if knot_optimization:
         def knot_optimization():
-            def cost_function_paper(field, i0=0.01, norm=1e6):
+            def cost_function_paper(field, iMin=0.01, i0=0.01, norm=1e6):
                 I0 = np.max(np.abs(field)) ** 2
                 I0 *= i0
                 IFlat = np.ndarray.flatten(np.abs(field) ** 2)
-                IMin = [1 / min(x, I0) for x in IFlat]
-                # IMax = [1/min(x, I0) for x in IFlat]
+                # cutParam = I0 / i0 * iMin
+                # IFlat[IFlat < cutParam] = cutParam
+                # IMin = [1 / min(x, I0) for x in IFlat]
+                IMin = [1 / max(x, I0) for x in IFlat]
                 return np.sum(IMin) / norm
 
             def knot_permutations_all(aInitial, deltaCoeff, dotsNumber):
@@ -28,32 +30,106 @@ if __name__ == '__main__':
                 return fg.permutations_all(*aValues)
 
             coeffMod = [1.51, -5.06, 7.23, -2.03, -3.97]
-            # coeffStand = [ 1.6125 ,-5.662 ,  7.23 ,  -2.03 ,  -4.356 ]
+            # ['1.53', '-5.04', '7.19', '-1.97', '-3.99']
             coeffStand = [1.715, -5.662, 6.381, -2.305, -4.356]
-            xyMinMax = 3.75
+            coeffTest = [4.23, -4.78, 8.72, -2.83, -2.93]
+            # coeffTest = [1.715, -5.662,  7.23,  -2.03,  -4.356]
+            # coeffTest /= np.sqrt(sum([a ** 2 for a in coeffTest])) * 0.1
+            # coeffTest = np.array(coeffTest) * 1.51 / 1.5308532
+            i0 = 0.01
+            iMin = i0 / 10
+            extraField = 0
+            xyMinMax = 4  ##########################
             zMinMax = 1
-            zRes = 71
-            xRes = yRes = 111
+            zRes = 91
+            xRes = yRes = 91
             xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes)
             # perfect from the paper
             fieldMod = fOAM.trefoil_mod(
-                xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0.,
+                *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
                 coeff=coeffMod
                 , coeffPrint=False,
-            )
+            ) + extraField
+            if 0:
+                dotsFull, dotsOnly = fg.cut_non_oam(np.angle(fieldMod),
+                                                    bigSingularity=False, axesAll=False, cbrt=False)
+                dotsOnly = [[*key] for key in dotsOnly]
+
+                def key_func(element):
+                    return element[2]
+
+                dotsOnly.sort(key=key_func)
+                print(dotsOnly)
+                # fOAM.plot_knot_dots(fieldMod)
+                # plt.show()
+                exit()
             fieldStand = fOAM.trefoil_mod(
-                xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0.,
+                *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
                 coeff=coeffStand
                 , coeffPrint=False,
-            )
-            fieldMod = fieldMod / np.abs(fieldMod).max()
-            fieldStand = fieldStand / np.abs(fieldStand).max()
-            i0 = 0.01
-            costMod = cost_function_paper(fieldMod[:, :, np.shape(fieldStand)[2] // 2], i0=i0, norm=1e6)
-            costStand = cost_function_paper(fieldStand[:, :, np.shape(fieldStand)[2] // 2], i0=i0)
-            print(f"Mod: {costMod:.3f}, Stand:{costStand:.3f}, Mod/Stand={costMod / costStand:.3f} (i0={i0})")
+            ) + extraField
+            fieldTest = fOAM.trefoil_mod(
+                *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
+                coeff=coeffTest, coeffPrint=False
+            ) + extraField
+            if 1:
+                fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2)
+                fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2])
+                fOAM.plot_knot_dots(fieldTest)
+                plt.show()
+                exit()
             # exit()
+            # fieldMod = fieldMod / np.abs(fieldMod).max()
+            # fieldStand = fieldStand / np.abs(fieldStand).max()
+            # fieldTest = fieldTest / np.abs(fieldTest).max()
+
+            costMod = cost_function_paper(fieldMod[:, :, :], iMin=iMin, i0=i0)
+            costStand = cost_function_paper(fieldStand[:, :, :], iMin=iMin, i0=i0)
+            costTest = cost_function_paper(fieldTest[:, :, :], iMin=iMin, i0=i0)
+            print(f"Mod: {costMod:.5f}, Stand:{costStand:.5f}, Test: {costTest:.5f}\n"
+                  f"Mod/Stand={costMod / costStand:.5f}, Mod/Test={costMod / costTest:.5f}"
+                  f" (i0={i0})")
+            exit()
+            initialCoeff = coeffStand
+            field = fieldStand
+            initialSum = cost_function_paper(field, iMin=iMin, i0=i0)
+            deltaCoeff = [0.3] * 5
+            def circle_test(field, radius, testValue=1):
+                shape = np.shape(field)
+                radius *= np.sqrt((shape[0]//2 + shape[1]//2) ** 2)
+                for x in range(shape[0]):
+                    for y in range(shape[1]):
+                        if np.sqrt((x - shape[0]//2) ** 2 + (y - shape[1]//2) ** 2) <= radius :
+                            if np.abs(field[x, y]) > testValue:
+                                return False
+                return True
+            for i in range(500):
+                print(i)
+                newCoeff = fg.random_list(initialCoeff, deltaCoeff)
+                newField = fOAM.trefoil_mod(
+                    *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
+                    coeff=newCoeff, coeffPrint=False)
+                newSum = cost_function_paper(newField, iMin=iMin, i0=i0)
+                if newSum < initialSum:
+                    if circle_test(np.angle(newField)[:, :, np.shape(newField)[2] // 2],
+                                             radius=0.04, testValue=2.5):
+                        print(initialSum, newSum, [float(f'{a:.2f}') for a in newCoeff])
+                        initialSum = newSum
+                        initialCoeff = newCoeff
+                        fg.plot_2D(np.abs(newField)[:, :, np.shape(newField)[2] // 2] ** 2)
+                        fg.plot_2D(np.angle(newField)[:, :, np.shape(newField)[2] // 2])
+                        # singularities = (fg.cut_non_oam(newField[:, :, np.shape(newField)[2] // 2],
+                        #                                 bigSingularity=False, circle=1)[0])
+                        # fg.plot_2D(singularities)
+                        plt.show()
+                        # input()
+                    else:
+                        print(f'It is not a knot anymore!')
+            print(initialCoeff)
+            exit()
+
             # exit()
+
             # fg.plot_3D_density(np.angle(fieldTest))
             # fOAM.plot_knot_dots(fieldTest)
             # plt.show()
@@ -61,14 +137,15 @@ if __name__ == '__main__':
             #
             # print((np.abs(fieldMod[:, :, np.shape(fieldStand)[2]//2])).min(),
             #       (np.abs(fieldStand[:, :, np.shape(fieldStand)[2]//2])).min())
-            # fg.plot_2D(np.abs(fieldStand)[:, :, np.shape(fieldStand)[2]//2] ** 2)
-            # fg.plot_2D(np.abs(fieldMod)[:, :, np.shape(fieldMod)[2]//2] ** 2)
-            # fg.plot_2D(np.angle(fieldStand)[:, :, np.shape(fieldStand)[2] // 2])
-            # fg.plot_2D(np.angle(fieldMod)[:, :, np.shape(fieldMod)[2] // 2])
+            # fg.plot_2D(np.abs(fieldMod)[:, :, np.shape(fieldMod)[2]//2 + 10] ** 2)
+            # fg.plot_2D(np.angle(fieldMod)[:, :, np.shape(fieldMod)[2] // 2 + 10])
+            # fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2]//2] ** 2)
+            # fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2])
+            # plt.show()
+
             # fOAM.plot_knot_dots(fieldStand)
             # fOAM.plot_knot_dots(fieldMod)
-            # plt.show()
-            exit()
+            # exit()
             # fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 4 * 3])
             # fg.plot_2D(np.abs(fieldTest)[:, :, -1])
             # fg.plot_2D(np.abs(fieldTest)[:, :, 0])
@@ -83,20 +160,21 @@ if __name__ == '__main__':
             # [ 1.56 -5.11  7.28 -1.98 -4.02] 3.75 0.00001
             deltaCoeff = [0.1025, 0.301, 0.4245, 0.1375, 0.193]
             dotsNumber = [3, 3, 3, 3, 3]
+            i0 = 0.01
             # aInitial = [(a + b) / 2 for a, b in zip(coeffStand, coeffMod)]
             aInitial = [(a + b) / 2 for a, b in zip(coeffStand, coeffMod)]
             aAll = knot_permutations_all(aInitial, deltaCoeff, dotsNumber)
             sumArray = []
             for i, a in enumerate(aAll):
                 print(i, len(aAll))
-                sumArray.append(cost_function_paper(
-                    fOAM.trefoil_mod(
-                        *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-                        coeff=a, coeffPrint=False, )
-                    , i0=0.01))
+                field = fOAM.trefoil_mod(
+                    *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
+                    coeff=a, coeffPrint=False)
+                # field = field / np.abs(field).max()
+                sumArray.append(cost_function_paper(field, iMin=iMin, i0=i0))
             aBestIndex = sumArray.index(min(sumArray))
             aBest = aAll[aBestIndex]
-            print(aBest)
+            print(aBest, )
             if 0:
                 coeff = []
                 fg.plot_2D(np.angle(fOAM.trefoil_mod(

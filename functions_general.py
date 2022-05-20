@@ -67,7 +67,7 @@ def cut_middle_values(E, min, max, midValue=0, minValue=None, maxValue=None):
     return ans
 
 
-def check_dot_oam_helper(E):
+def check_dot_oam_9dots_helper(E):
     flagPlus, flagMinus = True, True
     minIndex = np.argmin(E)
     for i in range(minIndex - len(E), minIndex - 1, 1):
@@ -80,6 +80,27 @@ def check_dot_oam_helper(E):
             flagPlus = False
             break
     if flagPlus:
+        # print(np.arg() + np.arg() - np.arg() - np.arg())
+        return True, +1
+    elif flagMinus:
+        return True, -1
+    return False, 0
+
+
+def check_dot_oam_4dots(E):
+    flagPlus, flagMinus = True, True
+    minIndex = np.argmin(E)
+    for i in range(minIndex - len(E), minIndex - 1, 1):
+        if E[i] >= E[i + 1]:
+            flagMinus = False
+            break
+    maxIndex = np.argmax(E)
+    for i in range(maxIndex - len(E), maxIndex - 1, 1):
+        if E[i] <= E[i + 1]:
+            flagPlus = False
+            break
+    if flagPlus:
+        # print(np.arg() + np.arg() - np.arg() - np.arg())
         return True, +1
     elif flagMinus:
         return True, -1
@@ -102,35 +123,42 @@ def fill_dict_as_matrix_helper(E, dots=None, nonValue=0, check=False):
     return dots
 
 
-def cut_non_oam(E, value=1, nonValue=0, bigSingularity=False, axesAll=False, cbrt=False):
+def plane_singularities_finder_9dots(E, circle, value, nonValue, bigSingularity):
+    shape = np.shape(E)
+    ans = np.zeros(shape)
+    for i in range(1, shape[0] - 1, 1):
+        for j in range(1, shape[1] - 1, 1):
+            Echeck = np.array([E[i - 1, j - 1], E[i - 1, j], E[i - 1, j + 1],
+                               E[i, j + 1], E[i + 1, j + 1], E[i + 1, j],
+                               E[i + 1, j - 1], E[i, j - 1]])
+            oamFlag, oamValue = check_dot_oam_9dots_helper(Echeck)
+            if oamFlag:
+                ######
+                ans[i - circle:i + 1 + circle, j - circle:j + 1 + circle] = nonValue
+                #####
+                ans[i, j] = oamValue * value
+                if bigSingularity:
+                    ans[i - 1:i + 2, j - 1:j + 2] = oamValue * value
+            else:
+                ans[i, j] = nonValue
+    return ans
+
+
+def cut_non_oam(E, value=1, nonValue=0, bigSingularity=False, axesAll=False, cbrt=False, circle=1):
+    # E = np.angle(E)
     """this function finds singularities
     returns [3D Array, dots only]
     """
-    ans = np.copy(E)
-    shape = np.shape(ans)
+    shape = np.shape(E)
     dots = {}
     if len(shape) == 2:
-        for i in range(1, shape[0] - 1, 1):
-            for j in range(1, shape[1] - 1, 1):
-                Echeck = np.array([E[i - 1, j - 1], E[i - 1, j], E[i - 1, j + 1],
-                                   E[i, j + 1], E[i + 1, j + 1], E[i + 1, j],
-                                   E[i + 1, j - 1], E[i, j - 1]])
-                # if len(Echeck[Echeck>2.0]) != 0 and len(Echeck[Echeck<-2.0]) != 0:
-                #    print(Echeck)
-                oamFlag, oamValue = check_dot_oam_helper(Echeck)
-                # print(oamFlag, oamValue)
-                if oamFlag:
-                    ans[i, j] = oamValue * value
-                    if bigSingularity:
-                        ans[i - 1:i + 2, j - 1:j + 2] = oamValue * value
-                else:
-                    ans[i, j] = nonValue
-
+        ans = plane_singularities_finder_9dots(E, circle, value, nonValue, bigSingularity)
         ans[:1, :] = nonValue
         ans[-1:, :] = nonValue
         ans[:, :1] = nonValue
         ans[:, -1:] = nonValue
     else:
+        ans = np.copy(E)
         for i in range(shape[2]):
             ans[:, :, i] = cut_non_oam(ans[:, :, i], value=value, nonValue=nonValue,
                                        bigSingularity=bigSingularity)[0]
@@ -500,3 +528,15 @@ def permutations_all(*arrays):
     transposing = np.roll(np.arange(N + 1), -1)  # [1, 2, 3,... N, 0]
     permutations = np.transpose(grid, transposing)
     return permutations.reshape(-1, N)  # -1 means unspecified value (как получится)
+
+
+def random_list(values, diapason):
+    import random
+    """
+    Function returns values + random * diapason
+    :param values: we are changing this values
+    :param diapason: to a random value from [value - diap, value + diap]
+    :return: new modified values
+    """
+    answer = [x + random.uniform(-d, +d) for x, d in zip(values, diapason)]
+    return answer
