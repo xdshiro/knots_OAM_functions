@@ -67,63 +67,53 @@ def cut_middle_values(E, min, max, midValue=0, minValue=None, maxValue=None):
     return ans
 
 
-def check_dot_oam_9dots_helper(E):
-    flagPlus, flagMinus = True, True
-    minIndex = np.argmin(E)
-    for i in range(minIndex - len(E), minIndex - 1, 1):
-        if E[i] >= E[i + 1]:
-            flagMinus = False
-            break
-    maxIndex = np.argmax(E)
-    for i in range(maxIndex - len(E), maxIndex - 1, 1):
-        if E[i] <= E[i + 1]:
-            flagPlus = False
-            break
-    if flagPlus:
-        # print(np.arg() + np.arg() - np.arg() - np.arg())
-        return True, +1
-    elif flagMinus:
-        return True, -1
-    return False, 0
-
-
-def check_dot_oam_4dots(E):
-    flagPlus, flagMinus = True, True
-    minIndex = np.argmin(E)
-    for i in range(minIndex - len(E), minIndex - 1, 1):
-        if E[i] >= E[i + 1]:
-            flagMinus = False
-            break
-    maxIndex = np.argmax(E)
-    for i in range(maxIndex - len(E), maxIndex - 1, 1):
-        if E[i] <= E[i + 1]:
-            flagPlus = False
-            break
-    if flagPlus:
-        # print(np.arg() + np.arg() - np.arg() - np.arg())
-        return True, +1
-    elif flagMinus:
-        return True, -1
-    return False, 0
-
-
 def fill_dict_as_matrix_helper(E, dots=None, nonValue=0, check=False):
     if dots is None:
         dots = {}
     shape = np.shape(E)
-    for i in range(shape[0]):
-        for j in range(shape[1]):
-            for k in range(shape[2]):
-                if E[i, j, k] != nonValue:
-                    if check:
-                        if dots.get((i, j, k)) is None:
+    if len(shape) == 3:
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                for k in range(shape[2]):
+                    if E[i, j, k] != nonValue:
+                        if check:
+                            if dots.get((i, j, k)) is None:
+                                dots[(i, j, k)] = E[i, j, k]
+                        else:
                             dots[(i, j, k)] = E[i, j, k]
-                    else:
-                        dots[(i, j, k)] = E[i, j, k]
+    else:
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                    if E[i, j] != nonValue:
+                        if check:
+                            if dots.get((i, j, 0)) is None:
+                                dots[(i, j, 0)] = E[i, j]
+                        else:
+                            dots[(i, j, 0)] = E[i, j]
     return dots
 
 
+
 def plane_singularities_finder_9dots(E, circle, value, nonValue, bigSingularity):
+    def check_dot_oam_9dots_helper(E):
+        flagPlus, flagMinus = True, True
+        minIndex = np.argmin(E)
+        for i in range(minIndex - len(E), minIndex - 1, 1):
+            if E[i] >= E[i + 1]:
+                flagMinus = False
+                break
+        maxIndex = np.argmax(E)
+        for i in range(maxIndex - len(E), maxIndex - 1, 1):
+            if E[i] <= E[i + 1]:
+                flagPlus = False
+                break
+        if flagPlus:
+            # print(np.arg() + np.arg() - np.arg() - np.arg())
+            return True, +1
+        elif flagMinus:
+            return True, -1
+        return False, 0
+
     shape = np.shape(E)
     ans = np.zeros(shape)
     for i in range(1, shape[0] - 1, 1):
@@ -132,6 +122,35 @@ def plane_singularities_finder_9dots(E, circle, value, nonValue, bigSingularity)
                                E[i, j + 1], E[i + 1, j + 1], E[i + 1, j],
                                E[i + 1, j - 1], E[i, j - 1]])
             oamFlag, oamValue = check_dot_oam_9dots_helper(Echeck)
+            if oamFlag:
+                ######
+                ans[i - circle:i + 1 + circle, j - circle:j + 1 + circle] = nonValue
+                #####
+                ans[i, j] = oamValue * value
+                if bigSingularity:
+                    ans[i - 1:i + 2, j - 1:j + 2] = oamValue * value
+            else:
+                ans[i, j] = nonValue
+    return ans
+
+
+def plane_singularities_finder_4dots(E, circle, value, nonValue, bigSingularity):
+    def check_dot_oam_4dots_helper(E):
+        def arg(x):
+            return np.angle(np.exp(1j * x))
+        sum = arg(E[1] - E[0]) + arg(E[2] - E[3]) - arg(E[2] - E[1]) - arg(E[1] - E[0])
+        if sum > 3:
+            return True, +1
+        if sum < -3:
+            return True, -1
+        return False, 0
+
+    shape = np.shape(E)
+    ans = np.zeros(shape)
+    for i in range(1, shape[0] - 1, 1):
+        for j in range(1, shape[1] - 1, 1):
+            Echeck = np.array([E[i, j], E[i, j + 1], E[i + 1, j + 1], E[i + 1, j]])
+            oamFlag, oamValue = check_dot_oam_4dots_helper(Echeck)
             if oamFlag:
                 ######
                 ans[i - circle:i + 1 + circle, j - circle:j + 1 + circle] = nonValue
@@ -157,6 +176,7 @@ def cut_non_oam(E, value=1, nonValue=0, bigSingularity=False, axesAll=False, cbr
         ans[-1:, :] = nonValue
         ans[:, :1] = nonValue
         ans[:, -1:] = nonValue
+        dots = fill_dict_as_matrix_helper(ans)
     else:
         ans = np.copy(E)
         for i in range(shape[2]):
@@ -540,3 +560,17 @@ def random_list(values, diapason):
     """
     answer = [x + random.uniform(-d, +d) for x, d in zip(values, diapason)]
     return answer
+
+
+def distance_between_points(point1, point2):
+    """
+    distance between 2 points in any dimensions
+    :param point1: [x1, ...]
+    :param point2: [x2, ...]
+    :return: geometrical distance
+    """
+    deltas = np.array(point1) - np.array(point2)
+    ans = 0
+    for delta in deltas:
+        ans += delta ** 2
+    return np.sqrt(ans)
