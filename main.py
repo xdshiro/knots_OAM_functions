@@ -7,178 +7,22 @@ import functions_general as fg
 import functions_high_lvl as fhl
 import functions_OAM_knots as fOAM
 import knot_class as kc
+from knots_optimization import *
 
 if __name__ == '__main__':
     knot_optimization = 1
     if knot_optimization:
         def knot_optimization():
-            def cost_function_paper(field, iMin=0.01, i0=0.01, norm=1e6):
-                I0 = np.max(np.abs(field)) ** 2
-                I0 *= i0
-                IFlat = np.ndarray.flatten(np.abs(field) ** 2)
-                cutParam = I0 / i0 * iMin
-                IFlat[IFlat < cutParam] = cutParam
-                IMin = [1 / min(x, I0) for x in IFlat]
-                # IMin = [1 / max(x, I0) for x in IFlat]
-                return np.sum(IMin) / norm
-
-            def knot_permutations_all(aInitial, deltaCoeff, dotsNumber):
-                aValues = []
-                for i, a in enumerate(aInitial):
-                    aArray = np.linspace(a - deltaCoeff[i], a + deltaCoeff[i], dotsNumber[i])
-                    aValues.append(aArray)
-                return fg.permutations_all(*aValues)
-
-            def circle_test(field, radius, testValue=1.):
-                shape = np.shape(field)
-                radius *= np.sqrt((shape[0] // 2 + shape[1] // 2) ** 2)
-                for x in range(shape[0]):
-                    for y in range(shape[1]):
-                        if np.sqrt((x - shape[0] // 2) ** 2 + (y - shape[1] // 2) ** 2) <= radius:
-                            if np.abs(field[x, y]) > testValue:
-                                return False
-                return True
-
-            def check_knot_paper(xyzMesh, coeff, deltaCoeff, iMin, i0, radiustest=0.05, steps=1000, ):
-                field = fOAM.trefoil_mod(
-                    *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-                    coeff=coeff
-                    , coeffPrint=False,
-                )
-                sum = cost_function_paper(field, iMin=iMin, i0=i0)
-                for i in range(steps):
-                    print(i)
-                    newCoeff = fg.random_list(coeff, deltaCoeff)
-                    newField = fOAM.trefoil_mod(
-                        *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-                        coeff=newCoeff, coeffPrint=False)
-                    newSum = cost_function_paper(newField, iMin=iMin, i0=i0)
-                    if newSum < sum:
-                        if circle_test(np.angle(newField)[:, :, np.shape(newField)[2] // 2],
-                                       radius=radiustest, testValue=2.5):
-                            print(f'{sum / newSum: .3f}', [float(f'{a:.2f}') for a in newCoeff])
-                            fOAM.plot_knot_dots(newField, axesAll=False)
-                            plt.show()
-                            while True:
-                                x = int(input())
-                                if x == 9 or x == 1:
-                                    sum = newSum
-                                    coeff = newCoeff
-                                    break
-                                if x == 0:
-                                    break
-                        else:
-                            print(f'It is not a knot anymore!')
-                print(coeff)
-                return coeff
-
-                # check_knot_paper()
-                # newCoeff = fg.random_list(initialCoeff, deltaCoeff)
-                # newField = fOAM.trefoil_mod(
-                #     *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-                #     coeff=newCoeff, coeffPrint=False)
-                # newSum = cost_function_paper(newField, iMin=iMin, i0=i0)
-                # if newSum < initialSum:
-                #     if circle_test(np.angle(newField)[:, :, np.shape(newField)[2] // 2],
-                #                    radius=0.04, testValue=2.5):
-                #         print(f'{costMod / newSum: .3f}', [float(f'{a:.2f}') for a in newCoeff])
-                #         fOAM.plot_knot_dots(newField, axesAll=False)
-                #         plt.show()
-                #         while True:
-                #             x = int(input())
-                #             if x == 9 or x == 1:
-                #                 initialSum = newSum
-                #                 initialCoeff = newCoeff
-                #                 break
-                #             if x == 0:
-                #                 break
-                #
-                #     else:
-                #         print(f'It is not a knot anymore!')
-
-            def check_knot_mine(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True):
-                field = fOAM.trefoil_mod(
-                    *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-                    coeff=coeff
-                    , coeffPrint=False,
-                )
-
-                def return_min_helper(dots, minDistance):
-
-                    for i in range(len(dots) - 1):
-                        for j in range(i + 1, len(dots)):
-                            currentDistance = fg.distance_between_points(dots[i], dots[j])
-                            # print(currentDistance)
-                            if currentDistance < minDistance:
-                                minDistance = currentDistance
-                    return minDistance
-
-                def dots12_check(dotsWithOAM, minDistance):
-                    dotsPlus = [dot for dot, OAM in dotsWithOAM if OAM > 0]
-                    dotsMinus = [dot for dot, OAM in dotsWithOAM if OAM < 0]
-                    minDistancePlus = return_min_helper(dotsPlus, minDistance)
-                    minDistanceMinus = return_min_helper(dotsMinus, minDistance)
-                    if minDistanceMinus < minDistancePlus:
-                        return minDistanceMinus
-                    else:
-                        return minDistancePlus
-
-                def min_distance(field, six_dots=True):
-                    fieldFull, dotsOnly = fg.cut_non_oam(np.angle(field[:, :, :]),
-                                                         axesAll=False)
-                    minDistance = float('inf')
-                    have_seen_12_dots = False
-                    for z in range(zRes):
-
-                        dotsInZwithOam = [(list(dots[:2]), OAM) for (dots, OAM) in dotsOnly.items()
-                                          if dots[2] == z]
-                        dotsInZ = [dot for dot, OAM in dotsInZwithOam]
-                        if (six_dots and len(dotsInZ) != 6) or (have_seen_12_dots and len(dotsInZ) != 12):
-                            break
-                        elif len(dotsInZ) == 12:  # 12 dots
-                            have_seen_12_dots = True
-                            minDistance = dots12_check(dotsInZwithOam, minDistance)
-
-                        else:  # just 6 dots
-                            minDistance = return_min_helper(dotsInZ, minDistance)
-                        # fg.plot_2D(fieldFull[:, :, z])
-                        # plt.show()
-                    return minDistance
-                    # print(fg.distance_between_points(dot, dotsInZ[0][:2]))
-
-                minDistance = min_distance(field, six_dots=six_dots)
-                for i in range(steps):
-                    print(i)
-                    newCoeff = fg.random_list(coeff, deltaCoeff)
-                    newField = fOAM.trefoil_mod(
-                        *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-                        coeff=newCoeff
-                        , coeffPrint=False,
-                    )
-                    minDistanceNew = min_distance(newField, six_dots=six_dots)
-                    if minDistanceNew > minDistance:
-                        print(f'{minDistance / minDistanceNew: .3f}', [float(f'{a:.2f}') for a in newCoeff])
-                        minDistance = minDistanceNew
-                        coeff = newCoeff
-                        # fOAM.plot_knot_dots(newField, axesAll=False)
-                        # plt.show()
-                        # while True:
-                        #     x = int(input())
-                        #     if x == 9 or x == 1:
-                        #         minDistance = minDistanceNew
-                        #         coeff = newCoeff
-                        #         break
-                        #     if x == 0:
-                        #         break
-                return coeff
+            # def test_visual():
 
             coeffMod = [1.51, -5.06, 7.23, -2.03, -3.97]
             # ['1.53', '-5.04', '7.19', '-1.97', '-3.99']
             coeffStand = [1.715, -5.662, 6.381, -2.305, -4.356]
-            coeffTest = [1.56, -5.11, 8.29, -2.37, -5.36]  # [2.27, -6.0, 6.84, -0.84, -4.81] paper
-            coeffTest = [1.41, -3.71, 7.44, -2.09, -4.26]  # dima 6 dots [1.69, -4.15, 7.64, -1.94, -4.93]
-            coeffTest = [1.75, -3.65, 7.22, -1.77, -4.84]  # dima 12 dots
-            coeffTest = [1.75, -4.65, 7.22, -1.77, -4.84]  # dima 12 dots w=1.3
+            coeffTest = [1.56, -5.11, 8.29, -2.37, -5.36]  # this is the best, I think [2.27, -6.0, 6.84, -0.84, -4.81] paper
+            coeffTest = [1.36, -4.41, 7.24, -2.58, -3.66]
+            # coeffTest = [1.41, -3.71, 7.44, -2.09, -4.26]  # dima 6 dots [1.69, -4.15, 7.64, -1.94, -4.93]
+            # coeffTest = [1.26, -3.74, 7.71, -2.07, -4.25]
+            # coeffTest = [1.75, -3.65, 7.22, -1.77, -4.84]  # dima 12 dots
             # посмотреть новые для 6 теста [1.41, -3.85, 7.28, -1.95, -4.25]
             # coeffTest /= np.sqrt(sum([a ** 2 for a in coeffTest])) * 0.1
             # coeffTest = np.array(coeffTest) * 1.51 / 1.5308532
@@ -186,30 +30,34 @@ if __name__ == '__main__':
             i0 = 0.01
             iMin = i0 / 100
             xyMinMax = 4
-            zMinMax = 1
+            zMinMax = 1.1  # 2.6
             zRes = 71
             xRes = yRes = 101
             xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
 
             # perfect from the paper
             # check_knot_paper(xyzMesh, coeffMod, deltaCoeff=[0.3] * 5, iMin=iMin, i0=i0, radiustest=0.05, steps=1000)
-            plot_test = True
+            plot_test = False
             if plot_test:
                 xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
                 fieldTest = fOAM.trefoil_mod(
                     *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
                     coeff=coeffTest, coeffPrint=False
                 )
-                fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2)
-                fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2])
-                fOAM.plot_knot_dots(fieldTest, axesAll=True)
+                fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2, axis_equal=True)
+                fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
+                fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
                 if 0:
                     for i in range(zRes):
                         fOAM.plot_knot_dots(fieldTest[:, :, i], axesAll=False)
                 plt.show()
                 exit()
-
-            check_knot_mine(xyzMesh, coeffTest, deltaCoeff=[0.3] * 5, steps=1000, six_dots=True)
+            check_knot_mine(xyzMesh, coeffTest, deltaCoeff=[0.3] * 5, steps=5000,
+                            six_dots=False, testvisual=True,
+                            circletest=True, radiustest=0.02, # # # # # # # # # ## #
+                            checkboundaries=True, boundaryValue=0.1,
+                            xyzMeshPlot=fg.create_mesh_XYZ(xyMinMax * 1.3, xyMinMax * 1.3, zMinMax * 2.5,
+                                                           xRes, yRes, zRes, zMin=None))
             exit()
 
             fieldMod = fOAM.trefoil_mod(
@@ -369,7 +217,7 @@ if __name__ == '__main__':
     if creating_table_knots:
         SR = '0.95'
         knot = 'Trefoil'
-        w = '1.2 6dots'  # Dima Cmex-
+        w = '1.2 6dots best'  # Dima Cmex-
         # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
         #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
         # directoryName = (
@@ -379,7 +227,7 @@ if __name__ == '__main__':
             f'C:\\SCIENCE\\programming\\Python\\gitHub\\knots_OAM_functions'
             f'\\temp_data\\SR = {SR}\\{knot}\\w = {w}\\')
         tableName = f'{knot}, SR={SR}, w={w}'
-        kc.creat_knot_table(directoryName, tableName, show=True, cut=0.4)
+        kc.creat_knot_table(directoryName, tableName, show=True, cut=0.35)
 
     studying_3D_OAM = 0
     if studying_3D_OAM:
