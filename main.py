@@ -18,11 +18,11 @@ if __name__ == '__main__':
             coeffMod = [1.51, -5.06, 7.23, -2.03, -3.97]
             # ['1.53', '-5.04', '7.19', '-1.97', '-3.99']
             coeffStand = [1.715, -5.662, 6.381, -2.305, -4.356]
-            coeffTest = [1.56, -5.11, 8.29, -2.37, -5.36]  # this is the best, I think [2.27, -6.0, 6.84, -0.84, -4.81] paper
-            coeffTest = [1.36, -4.41, 7.24, -2.58, -3.66]
-            # coeffTest = [1.41, -3.71, 7.44, -2.09, -4.26]  # dima 6 dots [1.69, -4.15, 7.64, -1.94, -4.93]
-            # coeffTest = [1.26, -3.74, 7.71, -2.07, -4.25]
-            # coeffTest = [1.75, -3.65, 7.22, -1.77, -4.84]  # dima 12 dots
+            coeffTest = [1.56, -5.11, 8.29, -2.37, -5.36]  # this is the best, I think MINE PAPER
+            coeffTest = [1.39, -4.42, 7.74, -3.06, -4.08] # dima 12 dots
+            coeffTest = [1.432243610393109, -4.413788596450563, 7.912670563333508, -3.1446575323615487, -4.132814760960295]
+            # coeffTest = [1.41, -3.71, 7.44, -2.09, -4.26]  # dima 6 LAST
+            # coeffTest = [1.26, -3.74, 7.71, -2.07, -4.25] # dima 5 dots BEST
             # посмотреть новые для 6 теста [1.41, -3.85, 7.28, -1.95, -4.25]
             # coeffTest /= np.sqrt(sum([a ** 2 for a in coeffTest])) * 0.1
             # coeffTest = np.array(coeffTest) * 1.51 / 1.5308532
@@ -31,8 +31,8 @@ if __name__ == '__main__':
             iMin = i0 / 100
             xyMinMax = 4
             zMinMax = 1.1  # 2.6
-            zRes = 71
-            xRes = yRes = 101
+            zRes = 141
+            xRes = yRes = 181
             xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
 
             # perfect from the paper
@@ -47,17 +47,17 @@ if __name__ == '__main__':
                 fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2, axis_equal=True)
                 fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
                 fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
-                if 0:
+                if 1:
                     for i in range(zRes):
                         fOAM.plot_knot_dots(fieldTest[:, :, i], axesAll=False)
                 plt.show()
                 exit()
-            check_knot_mine(xyzMesh, coeffTest, deltaCoeff=[0.3] * 5, steps=5000,
-                            six_dots=False, testvisual=True,
+            check_knot_mine(xyzMesh, coeffTest, deltaCoeff=[0.1] * 5, steps=5000,
+                            six_dots=False, testvisual=False,
                             circletest=True, radiustest=0.02, # # # # # # # # # ## #
                             checkboundaries=True, boundaryValue=0.1,
                             xyzMeshPlot=fg.create_mesh_XYZ(xyMinMax * 1.3, xyMinMax * 1.3, zMinMax * 2.5,
-                                                           xRes, yRes, zRes, zMin=None))
+                                                           71, 71, 81, zMin=None))
             exit()
 
             fieldMod = fOAM.trefoil_mod(

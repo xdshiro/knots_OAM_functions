@@ -151,6 +151,8 @@ def min_distance(dotsOnly, zRes, six_dots=True):
         dotsInZ = [dot for dot, OAM in dotsInZwithOam]
         if (six_dots and len(dotsInZ) != 6) or (have_seen_12_dots and len(dotsInZ) != 12):
             break
+        elif  6 < len(dotsInZ) < 12:
+            continue
         elif len(dotsInZ) == 12:  # 12 dots
             have_seen_12_dots = True
             minDistance = dots12_check(dotsInZwithOam, minDistance)
