@@ -19,9 +19,10 @@ if __name__ == '__main__':
             # ['1.53', '-5.04', '7.19', '-1.97', '-3.99']
             coeffStand = [1.715, -5.662, 6.381, -2.305, -4.356]
             coeffTest = [1.56, -5.11, 8.29, -2.37, -5.36]  # this is the best, I think MINE PAPER
-            coeffTest = [1.39, -4.42, 7.74, -3.06, -4.08] # dima 12 dots
-            coeffTest = [1.4066928535675236, -4.429233587858617, 7.933437494079064, -3.140315328450963, -4.183760377782745]
-            [1.3951616520496517, -4.385130273800939, 7.97239291700559, -3.120629578458835, -4.2155693495439746]
+            coeffTest = [1.39, -4.42, 7.74, -3.06, -4.08]  # dima 12 dots
+            coeffTest = [1.371, -4.1911, 7.9556, -3.4812, -4.2231]  # 12 dots best [1.48, -4.78, 7.15, -2.25, -3.22]
+            coeffTest = [1.828, -5.977, 6.577, -2.347, -3.488]  # w=1.3
+            # coeffTest = [1.35, -4.9, 7.43, -2.49, -3.1]
             # coeffTest = [1.41, -3.71, 7.44, -2.09, -4.26]  # dima 6 LAST
             # coeffTest = [1.26, -3.74, 7.71, -2.07, -4.25] # dima 5 dots BEST
             # посмотреть новые для 6 теста [1.41, -3.85, 7.28, -1.95, -4.25]
@@ -32,19 +33,20 @@ if __name__ == '__main__':
             iMin = i0 / 100
             xyMinMax = 4
             zMinMax = 1.1  # 2.6
-            zRes = 141
-            xRes = yRes = 181
+            zRes = 61
+            xRes = yRes = 81
             xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
 
             # perfect from the paper
             # check_knot_paper(xyzMesh, coeffMod, deltaCoeff=[0.3] * 5, iMin=iMin, i0=i0, radiustest=0.05, steps=1000)
-            plot_test = False
+            plot_test = True
             if plot_test:
                 xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
                 fieldTest = fOAM.trefoil_mod(
-                    *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
+                    *xyzMesh, w=1.3, width=1.2, k0=1, z0=0.,
                     coeff=coeffTest, coeffPrint=False
                 )
+
                 fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2, axis_equal=True)
                 fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
                 fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
@@ -53,9 +55,9 @@ if __name__ == '__main__':
                         fOAM.plot_knot_dots(fieldTest[:, :, i], axesAll=False)
                 plt.show()
                 exit()
-            check_knot_mine(xyzMesh, coeffTest, deltaCoeff=[0.1] * 5, steps=5000,
-                            six_dots=False, testvisual=False,
-                            circletest=True, radiustest=0.02, # # # # # # # # # ## #
+            check_knot_mine(xyzMesh, coeffTest, deltaCoeff=[0.3] * 5, steps=5000,
+                            six_dots=False, testvisual=True,
+                            circletest=True, radiustest=0.02,  # # # # # # # # # ## #
                             checkboundaries=True, boundaryValue=0.1,
                             xyzMeshPlot=fg.create_mesh_XYZ(xyMinMax * 1.3, xyMinMax * 1.3, zMinMax * 2.5,
                                                            71, 71, 81, zMin=None))
@@ -221,14 +223,41 @@ if __name__ == '__main__':
         w = '1.2 12dots'  # Dima Cmex-
         # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
         #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
-        # directoryName = (
-        #     f'C:\\WORK\\CODES\\knots_OAM_functions'
-        #     f'\\temp_data\\SR = {SR}\\{knot}\\w = {w}\\')
         directoryName = (
-            f'C:\\SCIENCE\\programming\\Python\\gitHub\\knots_OAM_functions'
+            f'C:\\WORK\\CODES\\knots_OAM_functions'
             f'\\temp_data\\SR = {SR}\\{knot}\\w = {w}\\')
+        # directoryName = (
+        #     f'C:\\SCIENCE\\programming\\Python\\gitHub\\knots_OAM_functions'
+        #     f'\\temp_data\\SR = {SR}\\{knot}\\w = {w}\\')
         tableName = f'{knot}, SR={SR}, w={w}'
         kc.creat_knot_table(directoryName, tableName, show=True, cut=0.35)
+
+    # metasurface for Jiannan
+    metasurface_Jiannan = False
+    if metasurface_Jiannan:
+        def discretization_helper(x, steps, min, max):
+            steps += 1  # 8 [0, 1, 2, 3, 4, 5, 6, 7, 8] where 0 and 8 are the same numbers
+            discrArray = np.linspace(min, max, steps)
+            return np.arange(steps)[np.abs(discrArray - x).argmin()]
+
+
+        def discretization_phase(field, steps, min, max) -> type(np.array(())):
+            answer = np.copy(field)
+            for i, x in enumerate(field):
+                if not len(np.shape(x)):
+                    answer[i] = discretization_helper(x, steps, min, max)
+                else:
+                    answer[i] = discretization_phase(x, steps, min, max)
+            answer[answer == steps] = 0
+            return answer
+
+
+        A = fg.readingFile('trefoil_300x300um.mat', fieldToRead='z', printV=False)
+        A2 = (discretization_phase(A, 8, min=A.min(), max=A.max()))
+        fg.plot_2D(A)
+        fg.plot_2D(A2)
+        plt.show()
+        exit()
 
     studying_3D_OAM = 0
     if studying_3D_OAM:
