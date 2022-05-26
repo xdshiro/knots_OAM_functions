@@ -7,6 +7,8 @@ import functions_general as fg
 import functions_OAM_knots as fOAM
 
 import winsound
+
+
 def cost_function_paper(field, iMin=0.01, i0=0.01, norm=1e6):
     I0 = np.max(np.abs(field)) ** 2
     I0 *= i0
@@ -96,10 +98,7 @@ def check_knot_paper(xyzMesh, coeff, deltaCoeff, iMin, i0, radiustest=0.05, step
 
 
 def test_visual(dotsOnly, coeff=None, xyzMeshVisual=None, sound=True):
-    if sound:
-        duration = 300  # milliseconds
-        freq = 440  # Hz
-        winsound.Beep(freq, duration)
+
     if coeff is None:
         dots = np.array([list(dots) for (dots, OAM) in dotsOnly.items()])
         fg.plot_scatter_3D(dots[:, 0], dots[:, 1], dots[:, 2])
@@ -109,6 +108,10 @@ def test_visual(dotsOnly, coeff=None, xyzMeshVisual=None, sound=True):
             *xyzMeshVisual, w=1.2, width=1.2, k0=1, z0=0.,
             coeff=coeff, coeffPrint=False
         )
+        if sound:
+            duration = 300  # milliseconds
+            freq = 440  # Hz
+            winsound.Beep(freq, duration)
         fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
         plt.show()
 
@@ -121,7 +124,6 @@ def test_visual(dotsOnly, coeff=None, xyzMeshVisual=None, sound=True):
 
 
 def return_min_helper(dots, minDistance):
-
     for i in range(len(dots) - 1):
         for j in range(i + 1, len(dots)):
             currentDistance = fg.distance_between_points(dots[i], dots[j])
@@ -129,6 +131,7 @@ def return_min_helper(dots, minDistance):
             if currentDistance < minDistance:
                 minDistance = currentDistance
     return minDistance
+
 
 def dots12_check(dotsWithOAM, minDistance):
     dotsPlus = [dot for dot, OAM in dotsWithOAM if OAM > 0]
@@ -140,8 +143,8 @@ def dots12_check(dotsWithOAM, minDistance):
     else:
         return minDistancePlus
 
-def min_distance(dotsOnly, zRes, six_dots=True):
 
+def min_distance(dotsOnly, zRes, six_dots=True):
     minDistance = float('inf')
     have_seen_12_dots = False
     for z in range(zRes):
@@ -151,23 +154,30 @@ def min_distance(dotsOnly, zRes, six_dots=True):
         dotsInZ = [dot for dot, OAM in dotsInZwithOam]
         if (six_dots and len(dotsInZ) != 6) or (have_seen_12_dots and len(dotsInZ) != 12):
             break
-        elif  6 < len(dotsInZ) < 12:
+        elif 6 < len(dotsInZ) < 12:
             continue
         elif len(dotsInZ) == 12:  # 12 dots
+            if six_dots:
+                return 0
             have_seen_12_dots = True
             minDistance = dots12_check(dotsInZwithOam, minDistance)
 
         else:  # just 6 dots
-            minDistance = return_min_helper(dotsInZ, minDistance)
+            potMinDistance = return_min_helper(dotsInZ, minDistance)
+            if (not (potMinDistance < minDistance * 0.9)) or z == 0:  #######################
+                minDistance = potMinDistance
+            else:
+                break
         # fg.plot_2D(fieldFull[:, :, z])
         # plt.show()
     return minDistance
     # print(fg.distance_between_points(dot, dotsInZ[0][:2]))
 
+
 def empty_space_check(dotsOnly, zRes, valueTest):
     zArray = [dot[2] for dot in dotsOnly]
     zArray.sort()
-    if max(zArray) < zRes * (1-valueTest):
+    if max(zArray) < zRes * (1 - valueTest):
         return True
     else:
         return False
@@ -175,7 +185,7 @@ def empty_space_check(dotsOnly, zRes, valueTest):
 
 
 def check_knot_mine(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True, checkboundaries=False, boundaryValue=0.2,
-                            circletest=True, radiustest=0.05, testvisual=False, xyzMeshPlot=None):
+                    circletest=True, radiustest=0.05, testvisual=False, xyzMeshPlot=None):
     field = fOAM.trefoil_mod(
         *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
         coeff=coeff

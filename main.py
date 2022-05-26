@@ -22,6 +22,7 @@ if __name__ == '__main__':
             coeffTest = [1.39, -4.42, 7.74, -3.06, -4.08]  # dima 12 dots
             coeffTest = [1.371, -4.1911, 7.9556, -3.4812, -4.2231]  # 12 dots best [1.48, -4.78, 7.15, -2.25, -3.22]
             coeffTest = [1.828, -5.977, 6.577, -2.347, -3.488]  # w=1.3
+            coeffTest = [1.7138467013697232, -5.304459582637312, 6.659112412081649, -2.5074137370635765, -4.407259374450308]
             # coeffTest = [1.35, -4.9, 7.43, -2.49, -3.1]
             # coeffTest = [1.41, -3.71, 7.44, -2.09, -4.26]  # dima 6 LAST
             # coeffTest = [1.26, -3.74, 7.71, -2.07, -4.25] # dima 5 dots BEST
@@ -33,30 +34,30 @@ if __name__ == '__main__':
             iMin = i0 / 100
             xyMinMax = 4
             zMinMax = 1.1  # 2.6
-            zRes = 61
-            xRes = yRes = 81
+            zRes = 121
+            xRes = yRes = 101
             xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
 
             # perfect from the paper
             # check_knot_paper(xyzMesh, coeffMod, deltaCoeff=[0.3] * 5, iMin=iMin, i0=i0, radiustest=0.05, steps=1000)
-            plot_test = True
+            plot_test = False
             if plot_test:
                 xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
                 fieldTest = fOAM.trefoil_mod(
                     *xyzMesh, w=1.3, width=1.2, k0=1, z0=0.,
                     coeff=coeffTest, coeffPrint=False
                 )
-
+                # fg.plot_3D_density(np.angle(fieldTest))
                 fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2, axis_equal=True)
                 fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
                 fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
                 if 1:
-                    for i in range(zRes):
+                    for i in range(zRes//2, zRes):
                         fOAM.plot_knot_dots(fieldTest[:, :, i], axesAll=False)
                 plt.show()
                 exit()
             check_knot_mine(xyzMesh, coeffTest, deltaCoeff=[0.3] * 5, steps=5000,
-                            six_dots=False, testvisual=True,
+                            six_dots=True, testvisual=True,
                             circletest=True, radiustest=0.02,  # # # # # # # # # ## #
                             checkboundaries=True, boundaryValue=0.1,
                             xyzMeshPlot=fg.create_mesh_XYZ(xyMinMax * 1.3, xyMinMax * 1.3, zMinMax * 2.5,
