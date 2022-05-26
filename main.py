@@ -15,9 +15,56 @@ if __name__ == '__main__':
         fhl.knot_optimization()
 
     # not finished
-    propagation_modification = False
+    propagation_modification = True
     if propagation_modification:
-        fhl.propagation_modification()
+        def propagation_modification():
+            xyMinMax = 5
+            xRes = yRes = 50
+            xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
+            yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
+            xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, 0.5, xRes, yRes, 7)
+            field = fOAM.knot_all(xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0., knot=None)
+            # fg.plot_2D(np.abs(ifftshift(fftn(field[:, :, np.shape(field)[2] // 2]))),
+            #           xlim=[20, 30], ylim=[20, 30])
+            kxArray = np.linspace(-4 * 2 * np.pi / xyMinMax, 4 * 2 * np.pi / xyMinMax, xRes)
+            kyArray = np.linspace(-4 * 2 * np.pi / xyMinMax, 4 * 2 * np.pi / xyMinMax, yRes)
+            fieldSpec = fg.ft_2D(field, xArray, yArray, kxArray, kyArray)
+            # fg.plot_2D(np.abs(np.fft.fftn(np.fft.fftn(field[:, :, np.shape(field)[2] // 2]))))
+            xArrayNew = np.linspace(-xyMinMax * 2, xyMinMax * 2, xRes * 2)
+            yArrayNew = np.linspace(-xyMinMax * 2, xyMinMax * 2, yRes * 2)
+            field = fg.ft_2D(fieldSpec, kxArray, kyArray, xArrayNew, yArrayNew)
+            fg.plot_2D(np.abs(field))
+            # fg.plot_2D(np.abs(np.fft.ifftshift(np.fft.ifftn(fieldSpec))))
+            plt.show()
+            exit()
+            fieldProp = fg.propagator_split_step_3D(field[:, :, np.shape(field)[2] // 2],
+                                                    xArray=xArray, yArray=yArray,
+                                                    dz=0.01, zSteps=100)
+            fg.plot_2D(np.abs(fieldProp[:, :, -1]))
+            fg.plot_2D(np.angle(fieldProp[:, :, -1]))
+            plt.show()
+            exit()
+            # field = fg.size_array_increase_3D(field)
+            f = fg.interpolation_complex(field[:, :, np.shape(field)[2] // 2],
+                                         np.linspace(-3, 3, 80), np.linspace(-3, 3, 80))
+            x, y = fg.create_mesh_XY(3, 3, 120, 120)
+            field_inter = f[0](x, y) + 1j * f[1](x, y)
+            # f_spec = fg.interpolation_complex(ifftshift(fftn(field_inter)),
+            #                                   np.linspace(-2, 2, 50), np.linspace(-2, 2, 50))
+            # x, y = fg.create_mesh_XY(2, 2, 150, 150)
+            # f_spec_inter = f_spec[0](x, y) + 1j * f_spec[1](x, y)
+            #
+            # fg.plot_2D(np.abs(f_spec_inter))
+            fg.plot_2D(np.abs(field_inter))
+            fg.plot_2D(np.abs(field[:, :, np.shape(field)[2] // 2]))
+            # fg.plot_2D(np.abs(ifftshift(fftn(field_inter))))
+            plt.show()
+            exit()
+            field_inter_prop = fg.propagator_split_step_3D(field_inter, dz=0.2, zSteps=30)
+            fg.plot_2D(np.abs(field_inter_prop[:, :, -1]))
+            fg.plot_2D(np.angle(field_inter_prop[:, :, -1]))
+            plt.show()
+        propagation_modification()
 
     milnor_research = False
     if milnor_research:
@@ -61,12 +108,12 @@ if __name__ == '__main__':
     if knot_from_math:
         fhl.knot_from_math_f()
 
-    creating_table_knots = 0  # making_table1
+    creating_table_knots = 1  # making_table1
 
     if creating_table_knots:
         SR = '0.95'
         knot = 'Trefoil'
-        w = '1.2 12dots best'  # Dima Cmex-
+        w = '1.2 6dots no 12'  # Dima Cmex-
         # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
         #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
         directoryName = (
