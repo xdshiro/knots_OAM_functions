@@ -164,7 +164,7 @@ def min_distance(dotsOnly, zRes, six_dots=True):
 
         else:  # just 6 dots
             potMinDistance = return_min_helper(dotsInZ, minDistance)
-            if (not (potMinDistance < minDistance * 0.9)) or z == 0:  #######################
+            if (not (potMinDistance < minDistance * 0.94)) or z == 0:  #######################
                 minDistance = potMinDistance
             else:
                 break
