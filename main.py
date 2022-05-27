@@ -17,38 +17,37 @@ if __name__ == '__main__':
     propagation_modification = True
     if propagation_modification:
         def propagation_modification():
+            def region_increase(field, xyMinMax, xy_increase, xy_res_increase, k_increase, plot_origian=True):
+                if plot_origian:
+                    fg.plot_2D(np.abs(field))
+                    fg.plot_2D(np.angle(field))
+                xRes, yRes = np.shape(field)
+                xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
+                yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
+                kRes = int(xRes * 2)
+                kxArray = np.linspace(-k_increase * np.pi / xyMinMax, k_increase * np.pi / xyMinMax, kRes)
+                kyArray = np.linspace(-k_increase * np.pi / xyMinMax, k_increase * np.pi / xyMinMax, kRes)
+                fieldSpec = fg.ft_forward_2D(field, xArray, yArray, kxArray, kyArray)
+                fg.plot_2D(np.abs(fieldSpec), title='Spec')
+                xyResNew = int(xRes * xy_res_increase)
+                radiusCut = xyResNew // xy_increase // 2
+                xArrayNew = np.linspace(-xyMinMax * xy_increase, xyMinMax * xy_increase, xyResNew)
+                yArrayNew = np.linspace(-xyMinMax * xy_increase, xyMinMax * xy_increase, xyResNew)
+                fieldHiger = fg.ft_reverse_2D(fieldSpec, xArrayNew, yArrayNew, kxArray, kyArray)
+                fg.plot_2D(np.abs(fieldHiger), title='abs')
+                fg.plot_2D(np.angle(fieldHiger), title='spec')
+                fg.plot_2D(np.angle(fg.cut_filter(fieldHiger, radiusCut, circle=False)), title='spec circled')
+                plt.show()
+                return fieldHiger
+
             xyMinMax = 5
-            xRes = yRes = 30
+            xRes, yRes = 30, 30
             xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
             yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
-            # xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, 0.5, xRes, yRes, 7)
             xyMesh = np.meshgrid(xArray, yArray)
             field = fOAM.knot_all(*xyMesh, 0, w=1.2, width=1.2, k0=1, z0=0., knot=None)
-            # fg.plot_2D(np.abs(ifftshift(fftn(field[:, :, np.shape(field)[2] // 2]))),
-            #           xlim=[20, 30], ylim=[20, 30])
-            # fg.plot_2D(np.abs(field))
-            # fg.plot_2D(np.angle(field))
-            # fg.plot_2D(np.real(field))
-            # fg.plot_2D(np.imag(field))
-            multK = 3.5
-            kxArray = np.linspace(-2 * multK * np.pi / xyMinMax, 2 * multK * np.pi / xyMinMax, xRes)
-            kyArray = np.linspace(-2 * multK * np.pi / xyMinMax, 2 * multK * np.pi / xyMinMax, yRes)
-            fieldSpec = fg.ft_forward_2D(field, xArray, yArray, kxArray, kyArray)
-            # fg.plot_2D(np.abs(fieldSpec))
-            # fg.plot_2D(np.abs(np.fft.fftn(np.fft.fftn(field[:, :, np.shape(field)[2] // 2]))))
-            multXY = 2
-            xArrayNew = np.linspace(-xyMinMax * multXY, xyMinMax * multXY, xRes * 1)
-            yArrayNew = np.linspace(-xyMinMax * multXY, xyMinMax * multXY, yRes * 1)
-            fieldHiger = fg.ft_reverse_2D(fieldSpec, xArrayNew, yArrayNew, kxArray, kyArray)
-            fg.plot_2D(np.abs(fieldHiger))
-            fg.plot_2D(np.angle(fieldHiger))
-            fg.plot_2D(np.angle(fg.cut_fourier_filter(fieldHiger, 20)))
-            # fg.plot_2D(np.angle(np.fft.fftn(fieldSpec)))
+            newField = region_increase(field, xyMinMax, xy_increase=2, xy_res_increase=2, k_increase=6)
 
-            # fg.plot_2D(np.abs(np.fft.fftshift(np.fft.fftn(field))))
-            # fg.plot_2D(np.abs(np.fft.ifftn(fieldSpec)))
-            # fg.plot_2D(np.abs(np.fft.ifftshift(np.fft.ifftn(fieldSpec))))
-            plt.show()
             exit()
             fieldProp = fg.propagator_split_step_3D(field[:, :, np.shape(field)[2] // 2],
                                                     xArray=xArray, yArray=yArray,

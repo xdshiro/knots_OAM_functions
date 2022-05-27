@@ -244,14 +244,21 @@ def propagator_split_step_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, 
     return fieldReturn
 
 
-def cut_filter(E, radiusPix=1):
+def cut_filter(E, radiusPix=1, circle=True):
     ans = np.copy(E)
     xCenter, yCenter = np.shape(ans)[0] // 2, np.shape(ans)[0] // 2
-    for i in range(np.shape(ans)[0]):
-        for j in range(np.shape(ans)[1]):
-            if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2) > radiusPix:
-                ans[i, j] = 0
+    if circle:
+        for i in range(np.shape(ans)[0]):
+            for j in range(np.shape(ans)[1]):
+                if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2) > radiusPix:
+                    ans[i, j] = 0
+    else:
+        zeros = np.zeros(np.shape(ans), dtype=complex)
+        zeros[xCenter - radiusPix:xCenter + radiusPix + 1, yCenter - radiusPix:yCenter + radiusPix + 1] \
+            = ans[xCenter - radiusPix:xCenter + radiusPix + 1, yCenter - radiusPix:yCenter + radiusPix + 1]
+        ans = zeros
     return ans
+
 
 # just a fourier filter in XZ cross-section
 def cut_fourier_filter(E, radiusPix=1):
@@ -533,6 +540,7 @@ def ft_2D_helper(field, xArray, yArray, kxArray, kyArray, sign):
             for j, y in enumerate(yArray):
                 integrand[i, j] *= np.exp(sign * 1j * x * kx) * np.exp(sign * 1j * y * ky)
         return integrand
+
     spectrum = np.zeros((len(kxArray), len(kyArray)), dtype=complex)
     for i, kx in enumerate(kxArray):
         for j, ky in enumerate(kyArray):
