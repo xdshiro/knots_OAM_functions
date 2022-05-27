@@ -8,7 +8,6 @@ import functions_high_lvl as fhl
 import functions_OAM_knots as fOAM
 import knot_class as kc
 
-
 if __name__ == '__main__':
     knot_optimization = 0
     if knot_optimization:
@@ -19,21 +18,35 @@ if __name__ == '__main__':
     if propagation_modification:
         def propagation_modification():
             xyMinMax = 5
-            xRes = yRes = 50
+            xRes = yRes = 30
             xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
             yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
-            xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, 0.5, xRes, yRes, 7)
-            field = fOAM.knot_all(xyzMesh[0], xyzMesh[1], xyzMesh[2], w=1.2, width=1.2, k0=1, z0=0., knot=None)
+            # xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, 0.5, xRes, yRes, 7)
+            xyMesh = np.meshgrid(xArray, yArray)
+            field = fOAM.knot_all(*xyMesh, 0, w=1.2, width=1.2, k0=1, z0=0., knot=None)
             # fg.plot_2D(np.abs(ifftshift(fftn(field[:, :, np.shape(field)[2] // 2]))),
             #           xlim=[20, 30], ylim=[20, 30])
-            kxArray = np.linspace(-4 * 2 * np.pi / xyMinMax, 4 * 2 * np.pi / xyMinMax, xRes)
-            kyArray = np.linspace(-4 * 2 * np.pi / xyMinMax, 4 * 2 * np.pi / xyMinMax, yRes)
-            fieldSpec = fg.ft_2D(field, xArray, yArray, kxArray, kyArray)
+            # fg.plot_2D(np.abs(field))
+            # fg.plot_2D(np.angle(field))
+            # fg.plot_2D(np.real(field))
+            # fg.plot_2D(np.imag(field))
+            multK = 3.5
+            kxArray = np.linspace(-2 * multK * np.pi / xyMinMax, 2 * multK * np.pi / xyMinMax, xRes)
+            kyArray = np.linspace(-2 * multK * np.pi / xyMinMax, 2 * multK * np.pi / xyMinMax, yRes)
+            fieldSpec = fg.ft_forward_2D(field, xArray, yArray, kxArray, kyArray)
+            # fg.plot_2D(np.abs(fieldSpec))
             # fg.plot_2D(np.abs(np.fft.fftn(np.fft.fftn(field[:, :, np.shape(field)[2] // 2]))))
-            xArrayNew = np.linspace(-xyMinMax * 2, xyMinMax * 2, xRes * 2)
-            yArrayNew = np.linspace(-xyMinMax * 2, xyMinMax * 2, yRes * 2)
-            field = fg.ft_2D(fieldSpec, kxArray, kyArray, xArrayNew, yArrayNew)
-            fg.plot_2D(np.abs(field))
+            multXY = 2
+            xArrayNew = np.linspace(-xyMinMax * multXY, xyMinMax * multXY, xRes * 1)
+            yArrayNew = np.linspace(-xyMinMax * multXY, xyMinMax * multXY, yRes * 1)
+            fieldHiger = fg.ft_reverse_2D(fieldSpec, xArrayNew, yArrayNew, kxArray, kyArray)
+            fg.plot_2D(np.abs(fieldHiger))
+            fg.plot_2D(np.angle(fieldHiger))
+            fg.plot_2D(np.angle(fg.cut_fourier_filter(fieldHiger, 20)))
+            # fg.plot_2D(np.angle(np.fft.fftn(fieldSpec)))
+
+            # fg.plot_2D(np.abs(np.fft.fftshift(np.fft.fftn(field))))
+            # fg.plot_2D(np.abs(np.fft.ifftn(fieldSpec)))
             # fg.plot_2D(np.abs(np.fft.ifftshift(np.fft.ifftn(fieldSpec))))
             plt.show()
             exit()
@@ -64,6 +77,8 @@ if __name__ == '__main__':
             fg.plot_2D(np.abs(field_inter_prop[:, :, -1]))
             fg.plot_2D(np.angle(field_inter_prop[:, :, -1]))
             plt.show()
+
+
         propagation_modification()
 
     milnor_research = False

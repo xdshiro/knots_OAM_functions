@@ -84,14 +84,13 @@ def fill_dict_as_matrix_helper(E, dots=None, nonValue=0, check=False):
     else:
         for i in range(shape[0]):
             for j in range(shape[1]):
-                    if E[i, j] != nonValue:
-                        if check:
-                            if dots.get((i, j, 0)) is None:
-                                dots[(i, j, 0)] = E[i, j]
-                        else:
+                if E[i, j] != nonValue:
+                    if check:
+                        if dots.get((i, j, 0)) is None:
                             dots[(i, j, 0)] = E[i, j]
+                    else:
+                        dots[(i, j, 0)] = E[i, j]
     return dots
-
 
 
 def plane_singularities_finder_9dots(E, circle, value, nonValue, bigSingularity):
@@ -138,6 +137,7 @@ def plane_singularities_finder_4dots(E, circle, value, nonValue, bigSingularity)
     def check_dot_oam_4dots_helper(E):
         def arg(x):
             return np.angle(np.exp(1j * x))
+
         sum = arg(E[1] - E[0]) + arg(E[2] - E[3]) - arg(E[2] - E[1]) - arg(E[1] - E[0])
         if sum > 3:
             return True, +1
@@ -244,15 +244,20 @@ def propagator_split_step_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, 
     return fieldReturn
 
 
-# just a fourier filter in XZ cross-section
-def cut_fourier_filter(E, radiusPix=1):
+def cut_filter(E, radiusPix=1):
     ans = np.copy(E)
-    ans = np.fft.fftshift(np.fft.fftn(ans))
     xCenter, yCenter = np.shape(ans)[0] // 2, np.shape(ans)[0] // 2
     for i in range(np.shape(ans)[0]):
         for j in range(np.shape(ans)[1]):
             if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2) > radiusPix:
                 ans[i, j] = 0
+    return ans
+
+# just a fourier filter in XZ cross-section
+def cut_fourier_filter(E, radiusPix=1):
+    ans = np.copy(E)
+    ans = np.fft.fftshift(np.fft.fftn(ans))
+    ans = cut_filter(ans, radiusPix=radiusPix)
     ans = np.fft.ifftn(np.fft.ifftshift(ans))
     print(np.shape(ans))
     return ans
@@ -514,7 +519,7 @@ def interpolation_complex(field, xArray=None, yArray=None):
     return interpolation_real(fieldReal, xArray, yArray), interpolation_real(fieldImag, xArray, yArray)
 
 
-def ft_2D(field, xArray, yArray, kxArray, kyArray):
+def ft_2D_helper(field, xArray, yArray, kxArray, kyArray, sign):
     """
     The function processed ordinary 2D Fourier transformation (not FFT).
     This can be helpful to get the required resolution in any window
@@ -522,19 +527,27 @@ def ft_2D(field, xArray, yArray, kxArray, kyArray):
     :return: return 2D spectrum in kArray x yArray
     """
 
-    def integrand_helper(kx, ky):
+    def integrand_helper(kx, ky, sign):
         integrand = np.copy(field)
         for i, x in enumerate(xArray):
             for j, y in enumerate(yArray):
-                integrand[i, j] *= np.exp(-1j * x * kx) * np.exp(-1j * y * ky)
+                integrand[i, j] *= np.exp(sign * 1j * x * kx) * np.exp(sign * 1j * y * ky)
         return integrand
-
     spectrum = np.zeros((len(kxArray), len(kyArray)), dtype=complex)
     for i, kx in enumerate(kxArray):
         for j, ky in enumerate(kyArray):
-            spectrum[i, j] = np.sum(integrand_helper(kx, ky))
+            spectrum[i, j] = np.sum(integrand_helper(kx, ky, sign))
 
     return spectrum * (xArray[1] - xArray[0]) * (yArray[1] - yArray[0]) / 2 / np.pi
+
+
+def ft_forward_2D(field, xArray, yArray, kxArray, kyArray):
+    return ft_2D_helper(field, xArray, yArray, kxArray, kyArray, -1)
+
+
+def ft_reverse_2D(field, xArray, yArray, kxArray, kyArray):
+    xArray, yArray, kxArray, kyArray = kxArray, kyArray, xArray, yArray
+    return ft_2D_helper(field, xArray, yArray, kxArray, kyArray, +1)
 
 
 def permutations_all(*arrays):
