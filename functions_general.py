@@ -253,7 +253,8 @@ def cut_filter(E, radiusPix=1, circle=True):
                 if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2) > radiusPix:
                     ans[i, j] = 0
     else:
-        zeros = np.zeros(np.shape(ans), dtype=complex)
+        # zeros = np.zeros(np.shape(ans), dtype=complex)
+        zeros = np.abs(np.copy(ans))
         zeros[xCenter - radiusPix:xCenter + radiusPix + 1, yCenter - radiusPix:yCenter + radiusPix + 1] \
             = ans[xCenter - radiusPix:xCenter + radiusPix + 1, yCenter - radiusPix:yCenter + radiusPix + 1]
         ans = zeros
@@ -271,14 +272,15 @@ def cut_fourier_filter(E, radiusPix=1):
 
 
 # return the 3D array with the complex field
-def one_plane_propagator(fieldPlane, dz, stepsNumber, shapeWrong=False, n0=1, k0=1):
-    if shapeWrong is not False:
-        if shapeWrong is True:
-            print(f'using the middle plane in one_plane_propagator (shapeWrong = True)')
-            fieldPlane = fieldPlane[:, :, np.shape(fieldPlane)[2] // 2]
-        else:
-            fieldPlane = fieldPlane[:, :, np.shape(fieldPlane)[2] // 2 + shapeWrong]
+def one_plane_propagator(fieldPlane, dz, stepsNumber, n0=1, k0=1):  #, shapeWrong=False
+    # if shapeWrong is not False:
+    #     if shapeWrong is True:
+    #         print(f'using the middle plane in one_plane_propagator (shapeWrong = True)')
+    #         fieldPlane = fieldPlane[:, :, np.shape(fieldPlane)[2] // 2]
+    #     else:
+    #         fieldPlane = fieldPlane[:, :, np.shape(fieldPlane)[2] // 2 + shapeWrong]
     fieldPropMinus = propagator_split_step_3D(fieldPlane, dz=-dz, zSteps=stepsNumber, n0=n0, k0=k0)
+
     fieldPropPLus = propagator_split_step_3D(fieldPlane, dz=dz, zSteps=stepsNumber, n0=n0, k0=k0)
     fieldPropTotal = np.concatenate((np.flip(fieldPropMinus, axis=2), fieldPropPLus[:, :, 1:-1]), axis=2)
     return fieldPropTotal

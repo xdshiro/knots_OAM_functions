@@ -8,6 +8,16 @@ import functions_high_lvl as fhl
 import functions_OAM_knots as fOAM
 import knot_class as kc
 
+# aCoeff = [1.371, -4.1911, 7.9556, -3.4812, -4.2231]
+# aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
+# aCoeff /= aSumSqr
+# print(aCoeff)
+# print(sum([a ** 2 for a in aCoeff]))
+# aCoeff = [1.51, -5.06, 7.23, -2.03, -3.97]
+# aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
+# aCoeff /= aSumSqr
+# print(aCoeff)
+# exit()
 if __name__ == '__main__':
     knot_optimization = 0
     if knot_optimization:
@@ -37,17 +47,26 @@ if __name__ == '__main__':
                 fg.plot_2D(np.abs(fieldHiger), title='abs')
                 fg.plot_2D(np.angle(fieldHiger), title='spec')
                 fg.plot_2D(np.angle(fg.cut_filter(fieldHiger, radiusCut, circle=False)), title='spec circled')
+                fieldHiger = fg.cut_filter(fieldHiger, radiusCut, circle=False) # нужно не все отрезать, а сделать там модуль. Тогда будет хорошо
                 plt.show()
                 return fieldHiger
 
             xyMinMax = 5
-            xRes, yRes = 30, 30
+            xRes, yRes = 40, 40
             xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
             yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
             xyMesh = np.meshgrid(xArray, yArray)
             field = fOAM.knot_all(*xyMesh, 0, w=1.2, width=1.2, k0=1, z0=0., knot=None)
             newField = region_increase(field, xyMinMax, xy_increase=2, xy_res_increase=2, k_increase=6)
-
+            fieldAfterProp = fg.one_plane_propagator(field, dz=1, stepsNumber=20, n0=1, k0=1)
+            newFieldAfterProp = fg.one_plane_propagator(newField, dz=1, stepsNumber=20, n0=1, k0=1)
+            fg.plot_2D(np.abs(fieldAfterProp[:, :, -1]))
+            fg.plot_2D(np.angle(fieldAfterProp[:, :, -1]))
+            fg.plot_2D(np.abs(newFieldAfterProp[:, :, -1]))
+            fg.plot_2D(np.angle(newFieldAfterProp[:, :, -1]))
+            plt.show()
+            exit()
+            fOAM.plot_knot_dots(newFieldAfterProp)
             exit()
             fieldProp = fg.propagator_split_step_3D(field[:, :, np.shape(field)[2] // 2],
                                                     xArray=xArray, yArray=yArray,
