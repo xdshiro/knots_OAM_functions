@@ -7,6 +7,8 @@ import functions_general as fg
 import functions_high_lvl as fhl
 import functions_OAM_knots as fOAM
 import knot_class as kc
+from knots_optimization import *
+
 
 # aCoeff = [1.371, -4.1911, 7.9556, -3.4812, -4.2231]
 # aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
@@ -21,43 +23,78 @@ import knot_class as kc
 if __name__ == '__main__':
     knot_optimization = 0
     if knot_optimization:
-        fhl.knot_optimization()
+        fhl.hopf_optimization()
+        # fhl.knot_optimization()
 
     # not finished
-    propagation_modification = True
+    propagation_modification = False
     if propagation_modification:
         def propagation_modification():
-            def region_increase(field, xyMinMax, xy_increase, xy_res_increase, k_increase, plot_origian=True):
+            def region_increase(field, xyMinMax, xy_increase, xy_res_increase, k_increase, k_res_increase=2,
+                                plot_origian=True, plot_new=True):
                 if plot_origian:
-                    fg.plot_2D(np.abs(field))
-                    fg.plot_2D(np.angle(field))
+                    fg.plot_2D(np.abs(field), title='original spec')
+                    fg.plot_2D(np.angle(field), title='original abs')
+                    plt.show()
                 xRes, yRes = np.shape(field)
                 xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
                 yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
-                kRes = int(xRes * 2)
+                kRes = int(xRes * k_res_increase)
                 kxArray = np.linspace(-k_increase * np.pi / xyMinMax, k_increase * np.pi / xyMinMax, kRes)
                 kyArray = np.linspace(-k_increase * np.pi / xyMinMax, k_increase * np.pi / xyMinMax, kRes)
                 fieldSpec = fg.ft_forward_2D(field, xArray, yArray, kxArray, kyArray)
-                fg.plot_2D(np.abs(fieldSpec), title='Spec')
                 xyResNew = int(xRes * xy_res_increase)
-                radiusCut = xyResNew // xy_increase // 2
+                radiusCut = int(xyResNew / xy_increase / k_res_increase)
                 xArrayNew = np.linspace(-xyMinMax * xy_increase, xyMinMax * xy_increase, xyResNew)
                 yArrayNew = np.linspace(-xyMinMax * xy_increase, xyMinMax * xy_increase, xyResNew)
                 fieldHiger = fg.ft_reverse_2D(fieldSpec, xArrayNew, yArrayNew, kxArray, kyArray)
-                fg.plot_2D(np.abs(fieldHiger), title='abs')
-                fg.plot_2D(np.angle(fieldHiger), title='spec')
-                fg.plot_2D(np.angle(fg.cut_filter(fieldHiger, radiusCut, circle=False)), title='spec circled')
-                fieldHiger = fg.cut_filter(fieldHiger, radiusCut, circle=False) # нужно не все отрезать, а сделать там модуль. Тогда будет хорошо
-                plt.show()
+                if plot_new:
+                    fg.plot_2D(np.abs(fieldSpec), title='spec')
+                    fg.plot_2D(np.abs(fieldHiger), title='abs')
+                    fg.plot_2D(np.angle(fieldHiger), title='spec')
+                    plt.show()
+                fieldHiger = fg.cut_filter(fieldHiger, radiusCut, circle=False,
+                                           phaseOnly=True)  # нужно не все отрезать, а сделать там модуль. Тогда будет хорошо
+                fg.plot_2D(np.angle(fieldHiger), title='spec circled')
                 return fieldHiger
 
+            save_file = False
+            resDec = 8
+            npFileName = f'exp_{resDec}_{2}_{2}_res_{resDec}.npy'
+            if save_file:
+                field_experiment = fg.readingFile('all_other_data/experiment/3foil_singleshot.mat',fieldToRead='Uz',
+                                                  printV=False)
+                field_experiment = field_experiment[::resDec, ::resDec]
+                # fg.plot_2D(np.abs(field_experiment[::resDec, ::resDec]))
+                # fg.plot_2D(np.angle(field_experiment[::resDec, ::resDec]))
+                # plt.show()
+                # exit()
+                # fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=15, stepsNumber=40, n0=1, k0=1)
+                newField = region_increase(field_experiment, 5, xy_increase=2, xy_res_increase=2, k_increase=6,
+                                           plot_origian=False, k_res_increase=2)
+                fg.plot_2D(np.abs(newField[:, :]))
+                fg.plot_2D(np.angle(newField[:, :]))
+                plt.show()
+                np.save(npFileName, newField)
+                exit()
+            newField = np.load(npFileName)
+            fieldAfterProp = fg.one_plane_propagator(newField, dz=1, stepsNumber=60, n0=1, k0=1)
+            fg.plot_2D(np.abs(fieldAfterProp[:, :, -1]))
+            fg.plot_2D(np.angle(fieldAfterProp[:, :, -1]))
+            fieldAfterProp = fg.cut_filter(fieldAfterProp, radiusPix=np.shape(fieldAfterProp)[0] // 4.5, circle=True)
+            fg.plot_2D(np.abs(fieldAfterProp[:, :, -1]))
+            fg.plot_2D(np.angle(fieldAfterProp[:, :, -1]))
+            fOAM.plot_knot_dots(fieldAfterProp, axesAll=True, color='b')
+            plt.show()
+            exit()
             xyMinMax = 5
             xRes, yRes = 40, 40
             xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
             yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
             xyMesh = np.meshgrid(xArray, yArray)
             field = fOAM.knot_all(*xyMesh, 0, w=1.2, width=1.2, k0=1, z0=0., knot=None)
-            newField = region_increase(field, xyMinMax, xy_increase=2, xy_res_increase=2, k_increase=6)
+            newField = region_increase(field, xyMinMax, xy_increase=2, xy_res_increase=2, k_increase=6,
+                                       plot_origian=False)
             fieldAfterProp = fg.one_plane_propagator(field, dz=1, stepsNumber=20, n0=1, k0=1)
             newFieldAfterProp = fg.one_plane_propagator(newField, dz=1, stepsNumber=20, n0=1, k0=1)
             fg.plot_2D(np.abs(fieldAfterProp[:, :, -1]))
@@ -66,8 +103,9 @@ if __name__ == '__main__':
             fg.plot_2D(np.angle(newFieldAfterProp[:, :, -1]))
             plt.show()
             exit()
+            newFieldAfterProp = fg.one_plane_propagator(newField, dz=1, stepsNumber=20, n0=1, k0=1)
             fOAM.plot_knot_dots(newFieldAfterProp)
-            exit()
+
             fieldProp = fg.propagator_split_step_3D(field[:, :, np.shape(field)[2] // 2],
                                                     xArray=xArray, yArray=yArray,
                                                     dz=0.01, zSteps=100)
@@ -145,8 +183,8 @@ if __name__ == '__main__':
 
     if creating_table_knots:
         SR = '0.95'
-        knot = 'Trefoil'
-        w = '1.2 6dots no 12'  # Dima Cmex-
+        knot = 'Hopf'
+        w = '1.4 st'  # Dima Cmex-
         # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
         #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
         directoryName = (

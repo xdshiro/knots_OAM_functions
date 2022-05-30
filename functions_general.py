@@ -244,7 +244,7 @@ def propagator_split_step_3D(E, dz=1, xArray=None, yArray=None, zSteps=1, n0=1, 
     return fieldReturn
 
 
-def cut_filter(E, radiusPix=1, circle=True):
+def cut_filter(E, radiusPix=1, circle=True, phaseOnly=False):
     ans = np.copy(E)
     xCenter, yCenter = np.shape(ans)[0] // 2, np.shape(ans)[0] // 2
     if circle:
@@ -253,8 +253,11 @@ def cut_filter(E, radiusPix=1, circle=True):
                 if np.sqrt((xCenter - i) ** 2 + (yCenter - j) ** 2) > radiusPix:
                     ans[i, j] = 0
     else:
-        # zeros = np.zeros(np.shape(ans), dtype=complex)
-        zeros = np.abs(np.copy(ans))
+        if phaseOnly:
+            zeros = np.abs(np.copy(ans))
+            zeros = zeros.astype(complex, copy=False)
+        else:
+            zeros = np.zeros(np.shape(ans), dtype=complex)
         zeros[xCenter - radiusPix:xCenter + radiusPix + 1, yCenter - radiusPix:yCenter + radiusPix + 1] \
             = ans[xCenter - radiusPix:xCenter + radiusPix + 1, yCenter - radiusPix:yCenter + radiusPix + 1]
         ans = zeros
@@ -545,6 +548,7 @@ def ft_2D_helper(field, xArray, yArray, kxArray, kyArray, sign):
 
     spectrum = np.zeros((len(kxArray), len(kyArray)), dtype=complex)
     for i, kx in enumerate(kxArray):
+        print(f'row #{i} out of {len(kxArray)}, ft={sign}')
         for j, ky in enumerate(kyArray):
             spectrum[i, j] = np.sum(integrand_helper(kx, ky, sign))
 

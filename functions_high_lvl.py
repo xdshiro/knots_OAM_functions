@@ -140,3 +140,45 @@ def knot_optimization():
                     checkboundaries=True, boundaryValue=0.1,
                     xyzMeshPlot=fg.create_mesh_XYZ(xyMinMax * 1.3, xyMinMax * 1.3, zMinMax * 2.5,
                                                    71, 71, 81, zMin=None))
+
+
+def hopf_optimization():
+    # def test_visual():
+    coeffPaper = [2.63, -6.32, 4.21, -5.95]
+    coeff15 = [2.81, -6.68, 4.29, 5.36]
+    coeffTest = [3.1183383245351384, -6.487464929941611, 4.539015096229947, 5.339462907691034]  # w=1.2
+    coeffTest = [3.205855865528611, -6.434314589371021, 4.627563891019791, 5.325638957032132]  # w=1.3
+    coeff = coeffTest
+    # [3.1183383245351384, -6.487464929941611, 4.539015096229947, 5.339462907691034]
+    # [3.212293593009031, -6.392995869495429, 4.629882224195264, 5.242451210074536]
+    xyMinMax = 4
+    zMinMax = 1.1  # 2.6
+    zRes = 81
+    xRes = yRes = 151
+    plot_test = True
+    if plot_test:
+        xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
+        fieldTest = fOAM.hopf_mod(
+            *xyzMesh, w=1.5, width=1.3, k0=1, z0=0.,
+            coeff=coeff, coeffPrint=True
+        )
+        # fg.plot_3D_density(np.angle(fieldTest))
+        fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2, axis_equal=True)
+        fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
+        fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
+        plt.show()
+        if 1:
+            field, dotsOnly = fg.cut_non_oam(np.angle(fieldTest),
+                                             bigSingularity=False, axesAll=False, cbrt=False)
+            for i in range(zRes // 2, zRes):
+                fg.plot_2D(field[:, :, i])
+                plt.show()
+
+        exit()
+    xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
+    check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff=[0.05] * 4, steps=5000,
+                         six_dots=False, testvisual=False,
+                         circletest=False, radiustest=0.02,  # # # # # # # # # ## #
+                         checkboundaries=True, boundaryValue=0.1,
+                         xyzMeshPlot=fg.create_mesh_XYZ(xyMinMax * 1.3, xyMinMax * 1.3, zMinMax * 2.5,
+                                                        71, 71, 81, zMin=None))

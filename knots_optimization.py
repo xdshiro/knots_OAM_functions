@@ -97,17 +97,22 @@ def check_knot_paper(xyzMesh, coeff, deltaCoeff, iMin, i0, radiustest=0.05, step
     #         print(f'It is not a knot anymore!')
 
 
-def test_visual(dotsOnly, coeff=None, xyzMeshVisual=None, sound=True):
-
+def test_visual(dotsOnly, coeff=None, xyzMeshVisual=None, sound=True, knot='trefoil'):
     if coeff is None:
         dots = np.array([list(dots) for (dots, OAM) in dotsOnly.items()])
         fg.plot_scatter_3D(dots[:, 0], dots[:, 1], dots[:, 2])
         plt.show()
     else:
-        fieldTest = fOAM.trefoil_mod(
-            *xyzMeshVisual, w=1.2, width=1.2, k0=1, z0=0.,
-            coeff=coeff, coeffPrint=False
-        )
+        if knot == 'trefoil':
+            fieldTest = fOAM.trefoil_mod(
+                *xyzMeshVisual, w=1.2, width=1.2, k0=1, z0=0.,
+                coeff=coeff, coeffPrint=False
+            )
+        else:
+            fieldTest = fOAM.hopf_mod(
+                *xyzMeshVisual, w=1.2, width=1.2, k0=1, z0=0.,
+                coeff=coeff, coeffPrint=False
+            )
         if sound:
             duration = 300  # milliseconds
             freq = 440  # Hz
@@ -174,6 +179,33 @@ def min_distance(dotsOnly, zRes, six_dots=True):
     # print(fg.distance_between_points(dot, dotsInZ[0][:2]))
 
 
+def min_distance_hopf(dotsOnly, zRes, six_dots=False):
+    minDistance = float('inf')
+    have_seen_8_dots = False
+    for z in range(zRes):
+
+        dotsInZwithOam = [(list(dots[:2]), OAM) for (dots, OAM) in dotsOnly.items()
+                          if dots[2] == z]
+        dotsInZ = [dot for dot, OAM in dotsInZwithOam if OAM > 0]
+        if (six_dots and len(dotsInZ) != 4) or (have_seen_8_dots and len(dotsInZ) != 8):
+            break
+        elif 4 < len(dotsInZ) < 8:
+            continue
+        elif len(dotsInZ) == 8:  # 12 dots
+            if six_dots:
+                return 0
+            have_seen_8_dots = True
+            minDistance = dots12_check(dotsInZwithOam, minDistance)
+
+        else:  # just 6 dots
+            potMinDistance = return_min_helper(dotsInZ, minDistance)
+            minDistance = potMinDistance
+        # fg.plot_2D(fieldFull[:, :, z])
+        # plt.show()
+    return minDistance
+    # print(fg.distance_between_points(dot, dotsInZ[0][:2]))
+
+
 def empty_space_check(dotsOnly, zRes, valueTest):
     zArray = [dot[2] for dot in dotsOnly]
     zArray.sort()
@@ -222,6 +254,67 @@ def check_knot_mine(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True, check
                     print(f'{minDistance / minDistanceNew: .3f}', [float(f'{a:.2f}') for a in newCoeff])
                     minDistance = minDistanceNew
                     coeff = newCoeff
+            else:
+                print(f'{minDistance / minDistanceNew: .3f}', [float(f'{a:.2f}') for a in newCoeff])
+                minDistance = minDistanceNew
+                coeff = newCoeff
+
+    return coeff
+
+
+def check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True, checkboundaries=False,
+                         boundaryValue=0.2,
+                         circletest=True, radiustest=0.05, testvisual=False, xyzMeshPlot=None):
+    field = fOAM.hopf_mod(
+        *xyzMesh, w=1.4, width=1.2, k0=1, z0=0.,
+        coeff=coeff
+        , coeffPrint=False,
+    )
+    xRes, yRes, zRes = np.shape(xyzMesh)[1:]
+    dotsOnly = fg.cut_non_oam(np.angle(field[:, :, :]),
+                              axesAll=False)[1]
+    minDistance = min_distance(dotsOnly, zRes, six_dots=six_dots)
+    for i in range(steps):
+        newCoeff = fg.random_list(coeff, deltaCoeff)
+        newField = fOAM.hopf_mod(
+            *xyzMesh, w=1.4, width=1.2, k0=1, z0=0.,
+            coeff=newCoeff
+            , coeffPrint=False,
+        )
+        dotsOnly = fg.cut_non_oam(np.angle(newField[:, :, :]),
+                                  axesAll=False)[1]
+        if circletest:
+            if not circle_test(np.angle(newField)[:, :, np.shape(newField)[2] // 2],
+                               radius=radiustest, testValue=2.5):
+                print('circle')
+                continue
+        # if checkboundaries:
+        #     if not empty_space_check(dotsOnly, zRes, boundaryValue):
+        #         print('boundaries')
+        #         continue
+        minDistanceNew = min_distance_hopf(dotsOnly, zRes, six_dots=six_dots)
+        print(i, f'{minDistance: .2f}', f'{minDistanceNew:.2f}', newCoeff)
+        if minDistanceNew > minDistance:
+            if testvisual:
+                print('test visual')
+                if test_visual(dotsOnly, coeff, xyzMeshPlot, knot='hopf'):
+                    print(f'{minDistance / minDistanceNew: .3f}', [float(f'{a:.2f}') for a in newCoeff])
+                    minDistance = minDistanceNew
+                    coeff = newCoeff
+            elif checkboundaries:
+                fieldBound = fOAM.hopf_mod(
+                    *xyzMeshPlot, w=1.2, width=1.3, k0=1, z0=0.,
+                    coeff=coeff, coeffPrint=False
+                )
+                dotsOnlyBound = fg.cut_non_oam(np.angle(fieldBound[:, :, :]),
+                                               axesAll=False)[1]
+                xResB, yResB, zResB = np.shape(xyzMeshPlot)[1:]
+                if empty_space_check(dotsOnlyBound, zResB, boundaryValue):
+                    print(f'Boundary is good')
+                    minDistance = minDistanceNew
+                    coeff = newCoeff
+                else:
+                    print(f'Boundary is bad')
             else:
                 print(f'{minDistance / minDistanceNew: .3f}', [float(f'{a:.2f}') for a in newCoeff])
                 minDistance = minDistanceNew

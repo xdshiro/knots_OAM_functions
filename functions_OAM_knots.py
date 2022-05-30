@@ -83,6 +83,35 @@ def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
              )
     return field
 
+def hopf_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
+    z = z - z0
+    H = 1.0
+    if coeff is not None or coeff is False:
+        paper = [2.63, -6.32, 4.21, -5.95]
+        aCoeff = coeff
+        aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
+        aCoeff /= aSumSqr
+    else:
+        a00 = 1 - 2 * w ** 2 + 2 * w ** 4
+        a01 = 2 * w ** 2 - 4 * w ** 4
+        a02 = 2 * w ** 4
+        a20 = 4 * np.sqrt(2) * w ** 2
+        aCoeff = [a00, a01, a02, a20]
+        aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
+        aCoeff /= aSumSqr
+    if coeffPrint:
+        print(aCoeff)
+        print(f'a00 -> a01 -> a02 ->... -> a0n -> an0:')
+        for i, a in enumerate(aCoeff):
+            print(f'a{i}: {a:.3f}', end=',\t')
+        print()
+    field = (aCoeff[0] * LG_simple(x, y, z, l=0, p=0, width=width, k0=k0) +
+             aCoeff[1] * LG_simple(x, y, z, l=0, p=1, width=width, k0=k0) +
+             aCoeff[2] * LG_simple(x, y, z, l=0, p=2, width=width, k0=k0) +
+             aCoeff[3] * LG_simple(x, y, z, l=2, p=0, width=width, k0=k0)
+             )
+    return field
+
 
 def knot_all(x, y, z, w, width=1, k0=1, z0=0., knot=None):
     if knot is None:
