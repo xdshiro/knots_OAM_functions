@@ -71,5 +71,43 @@ def plot_percentage_vs_w(ax=None):
     return ax
 
 
-plot_percentage_vs_w()
+def plot_SR_percentage(ax=None):
+    xArray = [0.95, 0.9, 0.8, 0.7, 0.6, 0.5]
+    yArray = [84, 57, 8, 0, 1, 1]
+    # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
+    # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
+    if ax is None:
+        fig, ax = plt.subplots()  # figsize=(8, 6)
+    fg.plot_1D(
+        xArray, yArray, color='r', marker='o', label='Optimized',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax, title=None
+    )
+    fg.plot_1D(
+        [0.9], [5], color='b', marker='o', label='Paper',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax, title='Trefoil'
+    )
+    # plt.scatter([0.9], [5], c='r', marker='o', size=)
+    # ax.invert_xaxis()
+    plt.xlim(1, 0.45)
+    plt.ylim(-3, 100)
+    # ax.text('SR=0.001')
+    # ax.set_xscale('log')
+    # ax.fill_between([0.0018, 0.0175], [0, 0], [102.5, 102.5],
+    #                 facecolor='g',
+    #                 alpha=0.3,
+    #                 color='green',
+    #                 edgecolor='black',
+    #                 linewidth=1,
+    #                 linestyle='--')
+    # plt.xticks([0.02, 0.01, 0.001])
+    # fig.set_figwidth(12)
+    # fig.set_figheight(6)
+    # fig.set_facecolor('floralwhite')
+    # ax.set_facecolor('seashell')
+    return ax
+
+
+plot_SR_percentage()
 plt.show()

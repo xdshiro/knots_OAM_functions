@@ -310,7 +310,7 @@ class Knots(object):
             self.knots.append(knot.knot)
 
 
-def making_knot(name, show=True, cut=1):
+def making_knot(name, show=True, cut=1, showAll=False):
     knot = Knot3(dotsFileName=name, dz=4, clean=cut, angleCheck=180, distCheck=5, layersStep=1)
     knot.plotDots(initial=0)
     try:
@@ -332,6 +332,8 @@ def making_knot(name, show=True, cut=1):
             if show:
                 plt.show()
         else:
+            if showAll:
+                plt.show()
             plt.close()
         return ap
     except Exception:
@@ -342,15 +344,19 @@ def making_knot(name, show=True, cut=1):
         return 0
 
 
-def creat_knot_table(directoryName, tableName, show=True, cut=1):
-    listOfFiles = [f for f in os.listdir(directoryName) if f.endswith(".mat")]
+def creat_knot_table(directoryName, tableName, show=True, cut=1, single=None):
+    if single is not None:
+        end = single
+    else:
+        end = ".mat"
+    listOfFiles = [f for f in os.listdir(directoryName) if f.endswith(end)]
     list_of_file_names = []
     list_of_file_names_bad = []
     list_of_alex = []
     for fileName in listOfFiles[::]:
         print(fileName[:-4])
         pathName = directoryName[-20:-0]
-        ap = making_knot(directoryName + fileName, show=show, cut=cut)
+        ap = making_knot(directoryName + fileName, show=show, cut=cut, showAll=single)
 
         t = sympy.symbols("t")
         if ap == t ** 6 - t ** 5 + t ** 4 - t ** 3 + t ** 2 - t + 1:

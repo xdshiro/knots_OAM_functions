@@ -75,8 +75,9 @@ def propagation_modification():
 
 
 def milnor_research():
-    xyzMesh = fg.create_mesh_XYZ(2, 2, 0.5, 40, 40, 40)
-    field = fOAM.milnor_Pol_testing(xyzMesh[0], xyzMesh[1], xyzMesh[2], 2, 3)
+    xyzMesh = fg.create_mesh_XYZ(2.5, 2.5, 0.5, 80, 80, 80)
+    # field = fOAM.milnor_Pol_testing(xyzMesh[0], xyzMesh[1], xyzMesh[2], 2, 3)
+    field = fOAM.trefoil_test(xyzMesh[0], xyzMesh[1], xyzMesh[2])
     fg.plot_2D(np.abs(field[:, :, np.shape(field)[2] // 2]))
     fg.plot_2D(np.angle(field[:, :, np.shape(field)[2] // 2]))
     fOAM.plot_knot_dots(field, color='k', size=80, axesAll=True)
@@ -104,12 +105,13 @@ def knot_optimization():
     # coeffTest /= np.sqrt(sum([a ** 2 for a in coeffTest])) * 0.1
     # coeffTest = np.array(coeffTest) * 1.51 / 1.5308532
     # Mod/Stand=0.95284, Mod/Test=1.03021 (i0=0.05)[1.41, -3.71, 7.44, -2.09, -4.26]
+    coeffTest = coeffMod
     i0 = 0.01
     iMin = i0 / 100
     xyMinMax = 4
     zMinMax = 1.1  # 2.6
     zRes = 121
-    xRes = yRes = 101
+    xRes = yRes = 191
     xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
 
     # perfect from the paper
@@ -122,11 +124,11 @@ def knot_optimization():
             coeff=coeffTest, coeffPrint=False
         )
         # fg.plot_3D_density(np.angle(fieldTest))
-        fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2, axis_equal=True)
+        fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
         fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
-        fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
+        # fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
         plt.show()
-        if 1:
+        if 0:
             field, dotsOnly = fg.cut_non_oam(np.angle(fieldTest),
                                              bigSingularity=False, axesAll=False, cbrt=False)
             for i in range(zRes // 2, zRes):
@@ -144,22 +146,32 @@ def knot_optimization():
 
 def hopf_optimization():
     # def test_visual():
-    coeffPaper = [2.63, -6.32, 4.21, -5.95]
-    coeff15 = [2.81, -6.68, 4.29, 5.36]
-    coeffTest = [3.1183383245351384, -6.487464929941611, 4.539015096229947, 5.339462907691034]  # w=1.2
-    coeffTest = [3.205855865528611, -6.434314589371021, 4.627563891019791, 5.325638957032132]  # w=1.3
-    coeff = coeffTest
+    coeffPaper = [2.63, -6.32, 4.21, 5.95]  # у них 5.95
+    coeff15 = [2.81, -6.68, 4.29, 5.36]  # w = 1.5 ?
+    # coeffTest12 = [3.1183383245351384, -6.487464929941611, 4.539015096229947, 5.339462907691034]  # w=1.2
+    # coeffTest13 = [3.205855865528611, -6.434314589371021, 4.627563891019791, 5.325638957032132]  # w=1.3
+    # coeffTest14 = [2.995001378425516, -6.519053147580572, 4.462673212141267, 5.378283099690847]  # w=1.4
+    coeffTest12 = [2.69, -6.41, 4.48, 5.38]  # w=1.2
+    coeffTest125 = [2.73, -6.32, 4.58, 5.34]
+    coeffTest13 = [3.09, -6.14, 4.88, 5.54]  # w=1.3
+    coeffTest14 = [3.59, -6.31, 5.47, 5.0]  # w=1.4
+    # coeffTest14_2 = [ 3.20102509, -6.09079389,  4.98992959,  5.26842205]
+    coeff = list(map(lambda x, y: (x+y) / 2, coeffTest13, coeffTest14))
+    print(coeff)
+    coeff = coeffTest12
+
+    width = 1.4
     # [3.1183383245351384, -6.487464929941611, 4.539015096229947, 5.339462907691034]
     # [3.212293593009031, -6.392995869495429, 4.629882224195264, 5.242451210074536]
-    xyMinMax = 4
-    zMinMax = 1.1  # 2.6
-    zRes = 81
-    xRes = yRes = 151
+    xyMinMax = 4  * 2
+    zMinMax = 1.1  * 4
+    zRes = 61
+    xRes = yRes = 71
     plot_test = True
     if plot_test:
         xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
         fieldTest = fOAM.hopf_mod(
-            *xyzMesh, w=1.5, width=1.3, k0=1, z0=0.,
+            *xyzMesh, w=1.5, width=width, k0=1, z0=0.,
             coeff=coeff, coeffPrint=True
         )
         # fg.plot_3D_density(np.angle(fieldTest))
@@ -167,7 +179,7 @@ def hopf_optimization():
         fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
         fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
         plt.show()
-        if 1:
+        if 0:
             field, dotsOnly = fg.cut_non_oam(np.angle(fieldTest),
                                              bigSingularity=False, axesAll=False, cbrt=False)
             for i in range(zRes // 2, zRes):
@@ -176,9 +188,9 @@ def hopf_optimization():
 
         exit()
     xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
-    check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff=[0.05] * 4, steps=5000,
-                         six_dots=False, testvisual=False,
+    check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff=[0.1] * 4, steps=1000,
+                         six_dots=False, testvisual=False, width=width,
                          circletest=False, radiustest=0.02,  # # # # # # # # # ## #
                          checkboundaries=True, boundaryValue=0.1,
                          xyzMeshPlot=fg.create_mesh_XYZ(xyMinMax * 1.3, xyMinMax * 1.3, zMinMax * 2.5,
-                                                        71, 71, 81, zMin=None))
+                                                        51, 51, 141, zMin=None))

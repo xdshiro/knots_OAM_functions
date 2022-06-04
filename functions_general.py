@@ -275,7 +275,7 @@ def cut_fourier_filter(E, radiusPix=1):
 
 
 # return the 3D array with the complex field
-def one_plane_propagator(fieldPlane, dz, stepsNumber, n0=1, k0=1):  #, shapeWrong=False
+def one_plane_propagator(fieldPlane, dz, stepsNumber, n0=1, k0=1):  # , shapeWrong=False
     # if shapeWrong is not False:
     #     if shapeWrong is True:
     #         print(f'using the middle plane in one_plane_propagator (shapeWrong = True)')
@@ -601,3 +601,62 @@ def distance_between_points(point1, point2):
     for delta in deltas:
         ans += delta ** 2
     return np.sqrt(ans)
+
+
+def field_new_resolution(field, xResNew, yResNew):
+    """
+    This function approximate 2D complex field and return the numpy array with a new shape
+    :param field: 2D array, dtype = complex, any resolution
+    :param xResNew: new resolution along x
+    :param yResNew: new resolution along y, can be different from x
+    :return: the same field but with a new resolution
+    """
+    xRes, yRes = np.shape(field)
+    f = interpolation_complex(field,
+                              np.linspace(-1, 1, xRes), np.linspace(-1, 1, yRes))
+    x, y = create_mesh_XY(1, 1, xResNew, yResNew)
+    field_inter = f[0](x, y) + 1j * f[1](x, y)
+    return field_inter
+
+
+def region_increase(field, xyMinMax=5, xy_increase=2, xy_res_increase=2, k_increase=6, k_res_increase=2,
+                    plot_origian=True, plot_new=True, cut=True):
+    """
+    increase the size of the window of the field by using the discrete fourier transformation
+    :param field: any 2D field
+    :param xyMinMax: boundaries of the new field. doesn't affect anything. affect kArray, but I don't think it's matter
+    :param xy_increase: how many times larger/smaller (0.5) should be the new screen size
+    :param xy_res_increase: new xy resolution
+    :param k_increase: this parameter should be played with, higher if the field is more complicated
+    :param k_res_increase: I think it is =xy_res_increase or =xy_increase (not sure, need more studying)
+    :param plot_origian: ploting the field
+    :param plot_new: ploting the new field with the increased region
+    :param cut: it cuts the square of the size of the initial field. I don't think this is useful
+    :return: return the new field with a new window size and resolution
+    """
+    if plot_origian:
+        plot_2D(np.abs(field), title='original spec')
+        plot_2D(np.angle(field), title='original abs')
+        plt.show()
+    xRes, yRes = np.shape(field)
+    xArray = np.linspace(-xyMinMax, xyMinMax, xRes)
+    yArray = np.linspace(-xyMinMax, xyMinMax, yRes)
+    kRes = int(xRes * k_res_increase)
+    kxArray = np.linspace(-k_increase * np.pi / xyMinMax, k_increase * np.pi / xyMinMax, kRes)
+    kyArray = np.linspace(-k_increase * np.pi / xyMinMax, k_increase * np.pi / xyMinMax, kRes)
+    fieldSpec = ft_forward_2D(field, xArray, yArray, kxArray, kyArray)
+    xyResNew = int(xRes * xy_res_increase)
+    radiusCut = int(xyResNew / xy_increase / k_res_increase)  # / xy_res_increase
+    xArrayNew = np.linspace(-xyMinMax * xy_increase, xyMinMax * xy_increase, xyResNew)
+    yArrayNew = np.linspace(-xyMinMax * xy_increase, xyMinMax * xy_increase, xyResNew)
+    fieldHiger = ft_reverse_2D(fieldSpec, xArrayNew, yArrayNew, kxArray, kyArray)
+    if plot_new:
+        plot_2D(np.abs(fieldSpec), title='spec')
+        plot_2D(np.abs(fieldHiger), title='abs')
+        plot_2D(np.angle(fieldHiger), title='spec')
+        plt.show()
+    if cut:
+        fieldHiger = cut_filter(fieldHiger, radiusCut, circle=False,
+                                phaseOnly=True)  # нужно не все отрезать, а сделать там модуль. Тогда будет хорошо
+        plot_2D(np.angle(fieldHiger), title='spec circled')
+    return fieldHiger

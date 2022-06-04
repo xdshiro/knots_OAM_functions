@@ -162,6 +162,25 @@ def knot_field_plot_save(xyMax=3, zMax=1, xyRes=50, zRes=50, w=1, width=1, k0=1,
     if save:
         np.save(saveName, field)
 
+def trefoil_test(x, y, z, *args):
+
+    a00 = 0.61
+    a01 = -2.56
+    a02 = 6.15
+    a03 = -6.35
+    a04 = 2.92
+    a05 = -0.61
+    a30 = -2.45
+    field = (a00 * LG_simple(x, y, z, l=0, p=0, width=1, k0=1) +
+             a01 * LG_simple(x, y, z, l=0, p=1, width=1, k0=1) +
+             a02 * LG_simple(x, y, z, l=0, p=2, width=1, k0=1) +
+             a03 * LG_simple(x, y, z, l=0, p=3, width=1, k0=1) +
+             a04 * LG_simple(x, y, z, l=0, p=4, width=1, k0=1) +
+             a05 * LG_simple(x, y, z, l=0, p=5, width=1, k0=1) +
+             a30 * LG_simple(x, y, z, l=3, p=0, width=1, k0=1)
+             )
+
+    return field
 
 def milnor_Pol_testing(x, y, z, *args):
     R = fg.rho(x, y)
@@ -207,5 +226,4 @@ def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
     dotsMinus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == -1])
     ax = fg.plot_scatter_3D(dotsPlus[:, 0], dotsPlus[:, 1], dotsPlus[:, 2], size=size, color=color)
     fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
-
     plt.show()

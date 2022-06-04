@@ -263,21 +263,21 @@ def check_knot_mine(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True, check
 
 
 def check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True, checkboundaries=False,
-                         boundaryValue=0.2,
+                         boundaryValue=0.2, width=1.4,
                          circletest=True, radiustest=0.05, testvisual=False, xyzMeshPlot=None):
     field = fOAM.hopf_mod(
-        *xyzMesh, w=1.4, width=1.2, k0=1, z0=0.,
+        *xyzMesh, w=1.4, width=width, k0=1, z0=0.,
         coeff=coeff
         , coeffPrint=False,
     )
     xRes, yRes, zRes = np.shape(xyzMesh)[1:]
     dotsOnly = fg.cut_non_oam(np.angle(field[:, :, :]),
                               axesAll=False)[1]
-    minDistance = min_distance(dotsOnly, zRes, six_dots=six_dots)
+    minDistance = min_distance_hopf(dotsOnly, zRes, six_dots=six_dots)
     for i in range(steps):
         newCoeff = fg.random_list(coeff, deltaCoeff)
         newField = fOAM.hopf_mod(
-            *xyzMesh, w=1.4, width=1.2, k0=1, z0=0.,
+            *xyzMesh, w=1.4, width=width, k0=1, z0=0.,
             coeff=newCoeff
             , coeffPrint=False,
         )
@@ -288,36 +288,29 @@ def check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True, 
                                radius=radiustest, testValue=2.5):
                 print('circle')
                 continue
-        # if checkboundaries:
-        #     if not empty_space_check(dotsOnly, zRes, boundaryValue):
-        #         print('boundaries')
-        #         continue
         minDistanceNew = min_distance_hopf(dotsOnly, zRes, six_dots=six_dots)
         print(i, f'{minDistance: .2f}', f'{minDistanceNew:.2f}', newCoeff)
         if minDistanceNew > minDistance:
-            if testvisual:
-                print('test visual')
-                if test_visual(dotsOnly, coeff, xyzMeshPlot, knot='hopf'):
-                    print(f'{minDistance / minDistanceNew: .3f}', [float(f'{a:.2f}') for a in newCoeff])
-                    minDistance = minDistanceNew
-                    coeff = newCoeff
-            elif checkboundaries:
+            if checkboundaries:
                 fieldBound = fOAM.hopf_mod(
-                    *xyzMeshPlot, w=1.2, width=1.3, k0=1, z0=0.,
+                    *xyzMeshPlot, w=1.4, width=width, k0=1, z0=0.,
                     coeff=coeff, coeffPrint=False
                 )
                 dotsOnlyBound = fg.cut_non_oam(np.angle(fieldBound[:, :, :]),
                                                axesAll=False)[1]
                 xResB, yResB, zResB = np.shape(xyzMeshPlot)[1:]
-                if empty_space_check(dotsOnlyBound, zResB, boundaryValue):
-                    print(f'Boundary is good')
-                    minDistance = minDistanceNew
-                    coeff = newCoeff
-                else:
+                if not empty_space_check(dotsOnlyBound, zResB, boundaryValue):
                     print(f'Boundary is bad')
-            else:
-                print(f'{minDistance / minDistanceNew: .3f}', [float(f'{a:.2f}') for a in newCoeff])
-                minDistance = minDistanceNew
-                coeff = newCoeff
+                    continue
+                else:
+                    print(f'Boundary is good')
+            if testvisual:
+                print('test visual')
+                if not test_visual(dotsOnly, coeff, xyzMeshPlot, knot='hopf'):
+                    print('visualy no')
+                    continue
+            print(f'{minDistance / minDistanceNew: .3f}', [float(f'{a:.2f}') for a in newCoeff])
+            minDistance = minDistanceNew
+            coeff = newCoeff
 
     return coeff
