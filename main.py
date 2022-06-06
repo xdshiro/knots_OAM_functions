@@ -1,13 +1,6 @@
-import scipy.io as sio
-import numpy as np
-import matplotlib.pyplot as plt
-
 # mine
-import functions_general as fg
-import functions_high_lvl as fhl
-import functions_OAM_knots as fOAM
-import knot_class as kc
-from knots_optimization import *
+from my_modules import functions_high_lvl as fhl
+from my_modules.knots_optimization_functions import *
 
 # aCoeff = [1.371, -4.1911, 7.9556, -3.4812, -4.2231]
 # aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
@@ -21,10 +14,6 @@ from knots_optimization import *
 # exit()
 
 if __name__ == '__main__':
-    knot_optimization = False
-    if knot_optimization:
-        fhl.hopf_optimization()
-        # fhl.knot_optimization()
 
     milnor_research = False
     if milnor_research:
@@ -67,28 +56,6 @@ if __name__ == '__main__':
     knot_from_math = False
     if knot_from_math:
         fhl.knot_from_math_f()
-
-    creating_table_knots = False  # making_table1
-
-    if creating_table_knots:
-        SR = '0.9 (coef 3)'
-        knot = 'Hopf'
-        w = 'Real'  # Dima Cmex-
-        # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
-        #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
-        # directoryName = (
-        #     f'C:\\WORK\\CODES\\knots_OAM_functions'
-        #     f'\\temp_data\\SR = {SR}\\{knot}\\w = {w}\\')
-        directoryName = (
-                f'C:\\WORK\\CODES\\knots_OAM_functions'
-                f'\\temp_data\\Real\\{knot}\\SR = {SR}\\')
-        # directoryName = (
-        #     f'C:\\SCIENCE\\programming\\Python\\gitHub\\knots_OAM_functions'
-        #     f'\\temp_data\\SR = {SR}\\{knot}\\w = {w}\\')
-        tableName = f'{knot}, SR={SR}, w={w}'
-        kc.creat_knot_table(directoryName, tableName, single=None, show=True, cut=0.35)
-
-    # metasurface for Jiannan
 
     metasurface_Jiannan = False
     if metasurface_Jiannan:

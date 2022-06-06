@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.special import assoc_laguerre
-import functions_general as fg
+import my_modules.functions_general as fg
 import matplotlib.pyplot as plt
 
 def laguerre_polynomial(x, l, p):
@@ -126,23 +126,23 @@ def knot_all(x, y, z, w, width=1, k0=1, z0=0., knot=None):
         return trefoil_mod(x, y, z, w, width=width, k0=k0, z0=z0)
 
 
-# this one hasn't been checked yet
-def Jz_calc(EArray, xArray, yArray):
-    x0 = (xArray[-1] + xArray[0]) / 2
-    y0 = (yArray[-1] + yArray[0]) / 2
-    sum = 0
-    dx = xArray[1] - xArray[0]
-    dy = yArray[1] - yArray[0]
-    x = xArray - x0
-    y = yArray - y0
-    for i in range(1, len(xArray) - 1, 1):
-        for j in range(1, len(yArray) - 1, 1):
-            dEx = (EArray[i + 1, j] - EArray[i - 1, j]) / (2 * dx)
-            dEy = (EArray[i, j + 1] - EArray[i, j - 1]) / (2 * dy)
-            sum += (np.conj(EArray[i, j]) *
-                    (x[i] * dEy - y[j] * dEx))
-
-    return np.imag(sum * dx * dy)
+# # this one hasn't been checked yet
+# def Jz_calc(EArray, xArray, yArray):
+#     x0 = (xArray[-1] + xArray[0]) / 2
+#     y0 = (yArray[-1] + yArray[0]) / 2
+#     sum = 0
+#     dx = xArray[1] - xArray[0]
+#     dy = yArray[1] - yArray[0]
+#     x = xArray - x0
+#     y = yArray - y0
+#     for i in range(1, len(xArray) - 1, 1):
+#         for j in range(1, len(yArray) - 1, 1):
+#             dEx = (EArray[i + 1, j] - EArray[i - 1, j]) / (2 * dx)
+#             dEy = (EArray[i, j + 1] - EArray[i, j - 1]) / (2 * dy)
+#             sum += (np.conj(EArray[i, j]) *
+#                     (x[i] * dEy - y[j] * dEx))
+#
+#     return np.imag(sum * dx * dy)
 
 
 # ploting and saving math trefoil
@@ -220,10 +220,19 @@ def milnor_Pol_u_v_any(x, y, z, uOrder, vOrder, H=1):
 # plotting dot's only from the Array of +-1
 def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
                    size=plt.rcParams['lines.markersize'] ** 2, color=None):
-    dotsFull, dotsOnly = fg.cut_non_oam(np.angle(field),
-                                        bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
+    if isinstance(field, dict):
+        dotsOnly = field
+    else:
+        dotsFull, dotsOnly = fg.cut_non_oam(np.angle(field),
+                                            bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
     dotsPlus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == 1])
     dotsMinus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == -1])
     ax = fg.plot_scatter_3D(dotsPlus[:, 0], dotsPlus[:, 1], dotsPlus[:, 2], size=size, color=color)
     fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
     plt.show()
+
+def save_knot_dots(field,filename, bigSingularity=False, axesAll=True, cbrt=False):
+    dotsFull, dotsOnly = fg.cut_non_oam(np.angle(field),
+                                        bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
+
+    np.save(filename, dotsOnly)

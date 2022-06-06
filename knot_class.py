@@ -5,7 +5,7 @@ import sympy
 import pyknotid.spacecurves as sp
 import pandas as pd
 
-import functions_general as fg
+import my_modules.functions_general as fg
 
 
 def vectorDotProduct(vector1, vector2):
@@ -344,6 +344,43 @@ def making_knot(name, show=True, cut=1, showAll=False):
         return 0
 
 
+def creat_knot_table_dict_dots(directoryName, tableName, single=None):
+    from my_modules import functions_OAM_knots as fOAM
+    if single is not None:
+        end = single
+    else:
+        end = ".npy"
+    listOfFiles = [f for f in os.listdir(directoryName) if f.endswith(end)]
+    list_of_file_names = []
+    list_of_file_names_bad = []
+    list_of_alex = []
+    print(listOfFiles)
+    for fileName in listOfFiles[::]:
+        print(fileName[:-4])
+        pathName = directoryName[-20:-0]
+        newField = np.load(fileName, allow_pickle=True).item()
+        fOAM.plot_knot_dots(newField, axesAll=True, size=250, color='b')
+        plt.show()
+        list_of_file_names.append(f'{pathName}{fileName}')
+        formula = input()
+
+        list_of_alex.append(formula)
+        plt.close('all')
+    if single is None:
+        good = pd.DataFrame({'file': list_of_file_names,
+                             'alex': list_of_alex})
+        bad = pd.DataFrame({'file': list_of_file_names_bad})
+        knot_sheets = {'good': good, 'bad': bad}
+        writer = pd.ExcelWriter(f'{tableName}.xlsx', engine='xlsxwriter')
+
+        for sheet_name in knot_sheets.keys():
+            knot_sheets[sheet_name].to_excel(writer, sheet_name=sheet_name, index=False)
+
+        writer.save()
+    else:
+        print(f'we are not saving the table with a single knot!')
+
+
 def creat_knot_table(directoryName, tableName, show=True, cut=1, single=None):
     if single is not None:
         end = single
@@ -378,14 +415,16 @@ def creat_knot_table(directoryName, tableName, show=True, cut=1, single=None):
             list_of_file_names.append(f'{pathName}{fileName}')
             list_of_alex.append(str(ap))
         plt.close('all')
+    if single is None:
+        good = pd.DataFrame({'file': list_of_file_names,
+                             'alex': list_of_alex})
+        bad = pd.DataFrame({'file': list_of_file_names_bad})
+        knot_sheets = {'good': good, 'bad': bad}
+        writer = pd.ExcelWriter(f'{tableName}.xlsx', engine='xlsxwriter')
 
-    good = pd.DataFrame({'file': list_of_file_names,
-                         'alex': list_of_alex})
-    bad = pd.DataFrame({'file': list_of_file_names_bad})
-    knot_sheets = {'good': good, 'bad': bad}
-    writer = pd.ExcelWriter(f'{tableName}.xlsx', engine='xlsxwriter')
+        for sheet_name in knot_sheets.keys():
+            knot_sheets[sheet_name].to_excel(writer, sheet_name=sheet_name, index=False)
 
-    for sheet_name in knot_sheets.keys():
-        knot_sheets[sheet_name].to_excel(writer, sheet_name=sheet_name, index=False)
-
-    writer.save()
+        writer.save()
+    else:
+        print(f'we are not saving the table with a single knot!')

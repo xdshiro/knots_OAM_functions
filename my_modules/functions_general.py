@@ -644,8 +644,10 @@ def region_increase(field, xyMinMax=5, xy_increase=2, xy_res_increase=2, k_incre
     kRes = int(xRes * k_res_increase)
     kxArray = np.linspace(-k_increase * np.pi / xyMinMax, k_increase * np.pi / xyMinMax, kRes)
     kyArray = np.linspace(-k_increase * np.pi / xyMinMax, k_increase * np.pi / xyMinMax, kRes)
-    fieldSpec = ft_forward_2D(field, xArray, yArray, kxArray, kyArray)
     xyResNew = int(xRes * xy_res_increase)
+    print(xyResNew)
+    exit()
+    fieldSpec = ft_forward_2D(field, xArray, yArray, kxArray, kyArray)
     radiusCut = int(xyResNew / xy_increase / k_res_increase)  # / xy_res_increase
     xArrayNew = np.linspace(-xyMinMax * xy_increase, xyMinMax * xy_increase, xyResNew)
     yArrayNew = np.linspace(-xyMinMax * xy_increase, xyMinMax * xy_increase, xyResNew)
@@ -660,3 +662,31 @@ def region_increase(field, xyMinMax=5, xy_increase=2, xy_res_increase=2, k_incre
                                 phaseOnly=True)  # нужно не все отрезать, а сделать там модуль. Тогда будет хорошо
         plot_2D(np.angle(fieldHiger), title='spec circled')
     return fieldHiger
+
+
+def Jz_calc(EArray, xArray=None, yArray=None):
+    EArray = np.array(EArray)
+    if xArray is None or yArray is None:
+        shape = np.shape(EArray)
+        xArray = np.arange(shape[0])
+        yArray = np.arange(shape[1])
+    x0 = (xArray[-1] + xArray[0]) / 2
+    y0 = (yArray[-1] + yArray[0]) / 2
+    x = np.array(xArray) - x0
+    y = np.array(yArray) - y0
+    dx = xArray[1] - xArray[0]
+    dy = yArray[1] - yArray[0]
+    sumJz = 0
+    for i in range(1, len(xArray) - 1, 1):
+        for j in range(1, len(yArray) - 1, 1):
+            dEx = (EArray[i + 1, j] - EArray[i - 1, j]) / (2 * dx)
+            dEy = (EArray[i, j + 1] - EArray[i, j - 1]) / (2 * dy)
+            sumJz += (np.conj(EArray[i, j]) *
+                      (x[i] * dEy - y[j] * dEx))
+    # Total moment
+    Jz = np.imag(sumJz * dx * dy)
+    W = np.sum(np.conj(EArray) * EArray, axis=0) * dx * dy
+    # total power
+    W = np.real(np.sum(W, axis=0))
+    print(f'Total OAM = {Jz / W}\tW={W}')
+    return Jz / W
