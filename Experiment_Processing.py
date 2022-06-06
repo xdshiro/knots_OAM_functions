@@ -16,9 +16,9 @@ def read_file_experiment_knot(fileName):
     print(np.shape(field_experiment))
     fg.plot_2D(np.abs(field_experiment) ** 2, axis_equal=True)
     fg.plot_2D(np.angle(field_experiment), axis_equal=True)
-    fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=1.5, stepsNumber=30, n0=1, k0=1)
+    fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=1.5*5, stepsNumber=30, n0=1, k0=1)
     fieldAfterProp = fg.cut_filter(fieldAfterProp, radiusPix=np.shape(fieldAfterProp)[0] // 3.5, circle=True)
-    fOAM.plot_knot_dots(fieldAfterProp, axesAll=True, size=250, color='b')
+    fOAM.plot_knot_dots(fieldAfterProp, axesAll=False, size=250, color='b')
     plt.show()
 
 
@@ -36,7 +36,7 @@ def create_the_folder_from_experiment(directory, directorySave):
         if not os.path.exists(directorySave):
             os.makedirs(directorySave)
         fOAM.save_knot_dots(fieldAfterProp, directorySave + files)
-read_file_experiment_knot('3foil_noturb (9).mat')
+read_file_experiment_knot('3foil_field2_modIntensity_f.mat')
 exit()
 # directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\DATA_FINAL\\Trefoil Exp\\SR = 0.9\\'
 # directorySave = '.\\experiment\\trefoil\\SR = 0.9\\'
@@ -45,7 +45,7 @@ exit()
 # name = '3foil_turb_SR_9.000000e-01_num_2.mat'
 # fileName = directory + name
 plot2D = True
-save = True
+save = False
 resNew = 80
 res_increase = 1.5
 #
@@ -64,7 +64,7 @@ if save:
     )
     np.save('test_delete8', newField)
 
-newField = np.load('test_delete8.npy')
+newField = np.load('test_delete.npy')
 # newField = field_experiment
 # newField = np.load('test_delete.npy', allow_pickle=True).item()
 if plot2D:

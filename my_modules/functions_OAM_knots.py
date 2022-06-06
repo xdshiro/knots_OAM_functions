@@ -3,6 +3,7 @@ from scipy.special import assoc_laguerre
 import my_modules.functions_general as fg
 import matplotlib.pyplot as plt
 
+
 def laguerre_polynomial(x, l, p):
     return assoc_laguerre(x, p, l)
 
@@ -83,6 +84,7 @@ def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
              )
     return field
 
+
 def hopf_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
     z = z - z0
     H = 1.0
@@ -162,8 +164,8 @@ def knot_field_plot_save(xyMax=3, zMax=1, xyRes=50, zRes=50, w=1, width=1, k0=1,
     if save:
         np.save(saveName, field)
 
-def trefoil_test(x, y, z, *args):
 
+def trefoil_test(x, y, z, *args):
     a00 = 0.61
     a01 = -2.56
     a02 = 6.15
@@ -182,6 +184,7 @@ def trefoil_test(x, y, z, *args):
 
     return field
 
+
 def milnor_Pol_testing(x, y, z, *args):
     R = fg.rho(x, y)
     f = fg.phi(x, y)
@@ -190,7 +193,7 @@ def milnor_Pol_testing(x, y, z, *args):
     u = (-1 ** 2 + R ** 2 + 2j * z * 1 + z ** 2) / (1 ** 2 + R ** 2 + z ** 2)
     v = (2 * R * 1 * np.exp(1j * f)) / (1 ** 2 + R ** 2 + z ** 2)
     divider = (1 + R ** 2 + z ** 2)
-    return u ** 3 - v / 10 #/ divider ** 2
+    return u ** 3 - v / 10  # / divider ** 2
     # return (
     #         (-2 * np.exp(1j * f) * R * (1 + R ** 2 + z ** 2) ** 2
     #          + (-1 + R ** 2 + 2 * 1j * z + z ** 2) ** 5)
@@ -231,7 +234,8 @@ def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
     fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
     plt.show()
 
-def save_knot_dots(field,filename, bigSingularity=False, axesAll=True, cbrt=False):
+
+def save_knot_dots(field, filename, bigSingularity=False, axesAll=True, cbrt=False):
     dotsFull, dotsOnly = fg.cut_non_oam(np.angle(field),
                                         bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
 

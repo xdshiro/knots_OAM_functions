@@ -73,7 +73,7 @@ def plot_percentage_vs_w(ax=None):
 
 def plot_SR_percentage(ax=None):
     xArray = [0.95, 0.9, 0.8, 0.7]
-    yArray = [84, 57, 8, 0]
+    yArray = [84, 37, 8, 0]
     xArray2 = [0.95, 0.9, 0.8, 0.7]
     yArray2 = [34, 5, 1, 0]
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
@@ -90,7 +90,8 @@ def plot_SR_percentage(ax=None):
         xname='Strehl ratio', yname='Recovered knots %',
         loc='upper right', ax=ax, title='Trefoil'
     )
-    # plt.scatter([0.9], [5], c='r', marker='o', size=)
+    plt.scatter([0.9], [57], c='y', marker='o', s=80)
+    plt.scatter([0.95], [65], c='k', marker='x', s=80)
     # ax.invert_xaxis()
     plt.xlim(0.97, 0.68)
     plt.ylim(-3, 100)
@@ -143,6 +144,6 @@ def plot_w_percentage(ax=None):
     # fig.set_facecolor('floralwhite')
     # ax.set_facecolor('seashell')
     return ax
-# plot_SR_percentage()
-plot_w_percentage()
+plot_SR_percentage()
+# plot_w_percentage()
 plt.show()
