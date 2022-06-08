@@ -40,7 +40,7 @@ def plot_1():
 
 def plot_percentage_vs_w(ax=None):
     xArray = [1, 1.05, 1.1, 1.125, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6]
-    yArray = [0, 4, 6, 6.67, 6, 5.5, 4, 2, 1.5, 1, 0.5]
+    yArray = [0, 4, 6, 6.5, 6, 5.5, 4, 2, 1, 0.67, 0.33]  # 6.67
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
     # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
     if ax is None:
@@ -71,10 +71,12 @@ def plot_percentage_vs_w(ax=None):
 
 
 def plot_SR_percentage(ax=None):
-    xArray = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7]
+    xArray = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7]  # our
     yArray = [84, 37, 17, 8, 4, 0]
-    xArray2 = [0.95, 0.9, 0.8, 0.7]
+    xArray2 = [0.95, 0.9, 0.8, 0.7]  # pap
     yArray2 = [34, 5, 1, 0]
+    xArray3 = [0.95, 0.9, 0.8, 0.7]  # 2
+    yArray3 = [6.5, 1, 0, 0]
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
     # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
     if ax is None:
@@ -85,12 +87,17 @@ def plot_SR_percentage(ax=None):
         loc='upper right', ax=ax, title=None
     )
     fg.plot_1D(
-        xArray2, yArray2, color='b', marker='o', label='Paper',
+        xArray2, yArray2, color='b', marker='o', label='Dennis',
         xname='Strehl ratio', yname='Recovered knots %',
         loc='upper right', ax=ax, title='Trefoil'
     )
-    plt.scatter([0.9], [57], c='y', marker='o', s=80)
-    plt.scatter([0.95], [65], c='k', marker='x', s=80)
+    fg.plot_1D(
+        xArray3, yArray3, color='g', marker='o', label='Math',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax, title='Trefoil'
+    )
+    # plt.scatter([0.9], [57], c='y', marker='o', s=80)
+    # plt.scatter([0.95], [65, 53, 60], c='k', marker='x', s=80)
     # ax.invert_xaxis()
     plt.xlim(0.97, 0.68)
     plt.ylim(-3, 100)
