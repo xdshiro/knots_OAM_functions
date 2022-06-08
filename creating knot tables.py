@@ -22,7 +22,7 @@ def read_file_experiment_knot(fileName):
 _home = False
 SR = '0.95 (opt w)'
 knot = 'hopf'
-w = '1.05' # Dima Cmex-
+w = '1.125 (2)' # Dima Cmex-
 folderInside = f'SR = {SR}\\w = {w}'
 directoryName = (
     f'.\\temp_data\\{folderInside}\\')

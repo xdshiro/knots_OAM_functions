@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.special import assoc_laguerre
-import my_modules.functions_general as fg
+from . import functions_general as fg
 import matplotlib.pyplot as plt
 
 

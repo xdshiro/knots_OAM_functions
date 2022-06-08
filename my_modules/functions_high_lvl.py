@@ -1,4 +1,4 @@
-from my_modules.knots_optimization_functions import *
+from .knots_optimization_functions import *
 
 # used for the comparison between different sizes of the phase screens for knots
 def knot_from_math_f():

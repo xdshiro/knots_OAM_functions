@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # mine
-import my_modules.functions_general as fg
-import my_modules.functions_OAM_knots as fOAM
+from . import functions_general as fg
+from . import functions_OAM_knots as fOAM
 
 import winsound
 
