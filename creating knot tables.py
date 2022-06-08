@@ -20,10 +20,10 @@ def read_file_experiment_knot(fileName):
 
 # read_file_experiment_knot('3foil_noturb (5).mat')
 _home = False
-SR = '0.9'
+SR = '0.95 (opt w)'
 knot = 'hopf'
-w = '0' # Dima Cmex-
-folderInside = f'Real\\Hopf\\SR = all\\hopf\\{SR}'
+w = '1.05' # Dima Cmex-
+folderInside = f'SR = {SR}\\w = {w}'
 directoryName = (
     f'.\\temp_data\\{folderInside}\\')
 
@@ -34,10 +34,10 @@ tableName = tableName.replace('\\', '_')
 # directoryName = (
 #     f'C:\\WORK\\CODES\\knots_OAM_functions'
 #     f'\\temp_data\\SR = {SR}\\{knot}\\w = {w}\\')
-if _home:
-    directoryName.replace('C:\\WORK\\CODES\\', 'C:\\SCIENCE\\programming\\Python\\gitHub\\')
+# if _home:
+#     directoryName.replace('C:\\WORK\\CODES\\', 'C:\\SCIENCE\\programming\\Python\\gitHub\\')
 
-kc.creat_knot_table(directoryName, tableName, single=None, show=True, cut=0.35)
+kc.creat_knot_table(directoryName, tableName, single=None, show=False, cut=0.35)
 exit()
 directoryName =f'.\\experiment\\trefoil\\SR = 0.9\\'
 kc.creat_knot_table_dict_dots(directoryName, tableName)
