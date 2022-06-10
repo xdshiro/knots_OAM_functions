@@ -20,12 +20,14 @@ def read_file_experiment_knot(fileName):
 
 # read_file_experiment_knot('3foil_noturb (5).mat')
 _home = False
-SR = '0.95'
+SR = '0.9 2'
 knot = 'trefoil'
 w = '1.6 (3)' # Dima Cmex-
 folderInside = f'Real\\3foil_w1125\\SR = {SR}'
 folderInside = f'\\SR = {SR} (opt w)\\w = {w}'
 folderInside = f'Real\\Hopf_5_v2\\SR = 9.500000e-01'
+folderInside = f'Real\\Hopf\\SR = all\\hopf\\{SR}'
+folderInside = f'Real\\Hopf_best4\\SR = {SR}'
 directoryName = (
     f'.\\temp_data\\{folderInside}\\')
 

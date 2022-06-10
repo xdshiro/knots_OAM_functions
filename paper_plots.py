@@ -77,24 +77,31 @@ def plot_SR_percentage(ax=None):
     yArray2 = [34, 5, 1, 0]
     xArray3 = [0.95, 0.9, 0.8, 0.7]  # 2
     yArray3 = [6.5, 1, 0, 0]
+    xArrayHopf = [0.95, 0.9, 0.8, 0.7]  # our
+    yArrayHopf = [65, 30.5, 18.5, 7,2, 3]  # 1 2 1(est' 2) 1 1 1
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
     # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
     if ax is None:
         fig, ax = plt.subplots()  # figsize=(8, 6)
     fg.plot_1D(
-        xArray, yArray, color='r', marker='o', label='Optimized',
+        xArray, yArray, color='r', marker='o', label='Optimized Trefoil',
         xname='Strehl ratio', yname='Recovered knots %',
         loc='upper right', ax=ax, title=None
     )
     fg.plot_1D(
-        xArray2, yArray2, color='b', marker='o', label='Dennis',
+        xArray2, yArray2, color='m', marker='o', label='Dennis Trefoil',
         xname='Strehl ratio', yname='Recovered knots %',
         loc='upper right', ax=ax, title='Trefoil'
     )
     fg.plot_1D(
-        xArray3, yArray3, color='g', marker='o', label='Math',
+        xArray3, yArray3, color='g', marker='o', label='Math Trefoil',
         xname='Strehl ratio', yname='Recovered knots %',
         loc='upper right', ax=ax, title='Trefoil'
+    )
+    fg.plot_1D(
+        xArrayHopf, yArrayHopf, color='b', marker='X', label='Optimized Hopf',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax, title=None, ls='dashed'
     )
     # plt.scatter([0.9], [57], c='y', marker='o', s=80)
     # plt.scatter([0.95], [65, 53, 60], c='k', marker='x', s=80)
@@ -117,7 +124,57 @@ def plot_SR_percentage(ax=None):
     # ax.set_facecolor('seashell')
     return ax
 
+
+def plot_SR_percentage_hopf(ax=None):
+    xArray = [0.95, 0.9, 0.8, 0.7]  # our
+    yArray = [65, 27, 7, 3]
+    xArray2 = [0.95, 0.9, 0.8, 0.7]  # pap
+    yArray2 = [0, 0, 0, 0]
+    xArray3 = [0.95, 0.9, 0.8, 0.7]  # 2
+    yArray3 = [0, 0, 0, 0]
+
+    # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
+    # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
+    if ax is None:
+        fig, ax = plt.subplots()  # figsize=(8, 6)
+    fg.plot_1D(
+        xArray, yArray, color='r', marker='o', label='Optimized',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax, title=None
+    )
+    fg.plot_1D(
+        xArray2, yArray2, color='b', marker='o', label='Dennis',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax, title=None
+    )
+    fg.plot_1D(
+        xArray3, yArray3, color='g', marker='o', label='Math',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax, title='Hopf'
+    )
+    # plt.scatter([0.9], [57], c='y', marker='o', s=80)
+    # plt.scatter([0.95], [65, 53, 60], c='k', marker='x', s=80)
+    # ax.invert_xaxis()
+    plt.xlim(0.97, 0.68)
+    plt.ylim(-3, 100)
+    # ax.text('SR=0.001')
+    # ax.set_xscale('log')
+    # ax.fill_between([0.0018, 0.0175], [0, 0], [102.5, 102.5],
+    #                 facecolor='g',
+    #                 alpha=0.3,
+    #                 color='green',
+    #                 edgecolor='black',
+    #                 linewidth=1,
+    #                 linestyle='--')
+    # plt.xticks([0.02, 0.01, 0.001])
+    # fig.set_figwidth(12)
+    # fig.set_figheight(6)
+    # fig.set_facecolor('floralwhite')
+    # ax.set_facecolor('seashell')
+    return ax
+
+
 plot_SR_percentage()
 plot_percentage_vs_w(ax=None)
-
+# plot_SR_percentage_hopf()
 plt.show()
