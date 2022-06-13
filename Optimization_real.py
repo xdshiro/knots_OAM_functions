@@ -6,9 +6,16 @@ import my_modules.functions_OAM_knots as fOAM
 import my_modules.functions_general as fg
 import matplotlib.pyplot as plt
 import numpy as np
+import timeit
 
 
-class singularities3D:
+def min_dist(dot, dots):
+    elements = [(fg.distance_between_points(dot, d), i) for i, d in enumerate(dots)]
+    minEl = min(elements, key=lambda i: i[0])
+    return minEl
+
+
+class Singularities3D:
     """
     Work with singularities of any 3D complex field
     """
@@ -18,9 +25,10 @@ class singularities3D:
         :param field3D: any 3D complex field
         """
         self.field3D = field3D
-        self.dots = None
-        self.dotsXY = None
-        self.dotsAll = None
+        self.dots = None  # self.dotsXY or self.dotsAll (can switch with self.swap()
+        self.dotsXY = None  # singularities from XY planes
+        self.dotsAll = None  # singularities from XY+XZ+YZ planes
+        self.create_dots_from_field3D(_dotsXY=True)
 
     def plot_plane_2D(self, zPlane, **kwargs):
         """
@@ -46,7 +54,7 @@ class singularities3D:
         :kwargs: Everything for fOAM.plot_knot_dots()
         :return: None
         """
-        fOAM.plot_knot_dots(self.field3D, **kwargs)
+        fg.plot_3D_density(np.angle(self.field3D), **kwargs)
         plt.show()
 
     def create_dots_from_field3D(self, _dotsXY=True, **kwargs):
@@ -116,30 +124,112 @@ class singularities3D:
         fOAM.plot_knot_dots(self.dots, **kwargs)
 
 
-class knot(singularities3D):
+
+        # fg.distance_between_points()
+    # def addClosest(self):
+    #     tempIndex = -19
+    #     tempDistance = self.distCheck * self.dz
+    #     foundDot = False
+    #     for i in range(len(self.dots)):
+    #         if abs(self.dots[i][2] - self.knot[-1][2]) < (
+    #                 self.layersStep + 1) * self.dz:  # and self.dots[i][2] - self.knot[-1][2] != 0:  #self.dots[i][2] != self.knot[-1][2] or self.dots[i][2] == self.knot[-1][2]
+    #             distance = distancePoints2D(self.dots[i], self.knot[-1])  # distancePoints2D
+    #             if distance < tempDistance:
+    #                 tempDistance = distance
+    #                 tempIndex = i
+    #                 foundDot = True
+    #     if foundDot:
+    #         self.knot = np.append(self.knot, [self.dots[tempIndex]], axis=0)
+    #         self.dots = np.delete(self.dots, tempIndex, axis=0)
+    #         self.knotCurrentAngleCheck()
+    #         return True
+    #     else:
+    #         print(f"\033[03m We haven't found a dot:\n\t\t current length: {len(self.knot)}, "
+    #               f"total amount: {len(self.initialDots)} (before cleaning)")
+    #         return False
+
+
+class Knot(Singularities3D):
     """
     Knot field (unknots also are knots in that case)
     """
 
     def __init__(self, field3D=None):
         """
+        :param field3D: any 3D complex field
+        """
+        super().__init__(field3D)
+        self.dotsList = []  # the actual knot (ordered line)
+
+    def plot_knot(self, **kwargs):
+        """
+        plot the knot
+        """
+        if not self.dotsList:
+            self.fill_dotsList()
+        fOAM.plot_knot_dots(self.dotsList, **kwargs)
+
+    def fill_dotsList(self):
+        """
+        fill in self.dotsList by removing charge sign and placing everything into the list [[x, y, z], [x, y, z]...]
+        :return: None
+        """
+        dotsDict = {}
+        for [x, y, z] in self.dots:
+            if not (z in dotsDict):
+                dotsDict[z] = []
+            dotsDict[z].append([x, y])
+        indZ = next(iter(dotsDict))  # z coordinate
+        indInZ = 0  # dot number in XY plane at z
+        indexes = np.array([-1, 0, 1])  # which layers we are looking at
+        currentDot = dotsDict[indZ].pop(indInZ)
+        while dotsDict:
+            minList = []  # [min, layer, position in Layer] for all indexes + indZ layers
+            for i in indexes + indZ:  # searching the closest element among indexes + indZ
+                if not (i in dotsDict):
+                    continue
+                minVal, min1Ind = min_dist(currentDot, dotsDict[i])
+                minList.append([minVal, i, min1Ind])
+            minFin = min(minList, key=lambda i: i[0])
+            self.dotsList.append([minFin[1], *dotsDict[minFin[1]].pop(minFin[2])])
+            currentDot = self.dotsList[-1][1:]  # changing the current dot to a new one
+            indZ = minFin[1]
+            if not dotsDict[indZ]:  # removing the empty plane (0 dots left)
+                del dotsDict[indZ]
+
+
+class Trefoil(Knot):
+    """
+    Trefoil
+    """
+
+    def __init__(self, field3D=None):
+        """
         initialization of the field. if field3D is none, initialization with a standard trefoil in
         the low resolution
-        :param field3D:
+        :param field3D: any 3D complex field
         """
         if field3D is None:
             xyMinMax = 4
-            zMinMax = 0.9
+            zMinMax = 0.6
             zRes = 40
-            xRes = yRes = 40
+            xRes = yRes = 90
             xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
-            field3D = fOAM.trefoil_mod(*xyzMesh, w=1.6, width=1, k0=1, z0=0., coeff=None, coeffPrint=False)
+            field3D = fOAM.trefoil_mod(*xyzMesh, w=1.4, width=1, k0=1, z0=0., coeff=None, coeffPrint=False)
         super().__init__(field3D)
+
+    def trefoil_check_automated(self):
+        print(self.dots)
 
 
 if __name__ == '__main__':
-    trefoilW16 = knot()
+    trefoilW16 = Trefoil()
+    # trefoilW16.dots_swap()
+    # trefoilW16.plot_center_2D()
+    # trefoilW16.fill_dotsList()
     trefoilW16.plot_dots()
-    print(trefoilW16.dotsAll)
-    trefoilW16.dots_swap()
-    trefoilW16.plot_dots()
+    # trefoilW16.plot_dots()
+    # trefoilW16.plot_center_2D()
+    # trefoilW16.plot_density()
+
+    # runs = timeit.repeat(func, number=1000)

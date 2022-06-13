@@ -297,7 +297,7 @@ class Knots(object):
     def __init__(self, knot=None, alexType=None):
         self.knots = []
         if knot is not None:
-            self.knots.append(knot.knot)
+            self.knots.append(knot.Knot)
         if alexType is None:
             t = sympy.symbols("t")
             k = sp.Knot(knot.knot, add_closure=False)
@@ -306,8 +306,8 @@ class Knots(object):
             self.alex = alexType
 
     def addKnot(self, knot):
-        if len(self.knots[0]) / 3 < len(knot.knot):
-            self.knots.append(knot.knot)
+        if len(self.knots[0]) / 3 < len(knot.Knot):
+            self.knots.append(knot.Knot)
 
 
 def making_knot(name, show=True, cut=1, showAll=False):
