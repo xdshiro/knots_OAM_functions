@@ -23,16 +23,15 @@ _home = False
 SR = '0.9 2'
 knot = 'trefoil'
 w = '1.6 (3)' # Dima Cmex-
-folderInside = f'Real\\3foil_w1125\\SR = {SR}'
-folderInside = f'\\SR = {SR} (opt w)\\w = {w}'
-folderInside = f'Real\\Hopf_5_v2\\SR = 9.500000e-01'
-folderInside = f'Real\\Hopf\\SR = all\\hopf\\{SR}'
-folderInside = f'Real\\Hopf_best4\\SR = {SR}'
+
+folderInside = f'Real\\Trefoil_w\\SR = 8.500000e-01'
 directoryName = (
     f'.\\temp_data\\{folderInside}\\')
 
-tableName = f'{knot}, SR={SR}, {folderInside}'
-tableName = tableName.replace('\\', '_')
+table = folderInside.replace("\\", "_")
+tableName = f'.\\exels\\{table}'
+# tableName = tableName.replace('\\', '_')
+
 # directoryName = (f'C:\\Users\\Cmex-\Box\\Knots Exp\\New_Data\\'
 #                  f'SR = {SR} (new)\\{knot}\\w = {w}/')
 # directoryName = (

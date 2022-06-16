@@ -9,6 +9,18 @@ import numpy as np
 import timeit
 import pyknotid.spacecurves as sp
 import sympy
+from python_tsp.distances import tsplib_distance_matrix
+from python_tsp.exact import solve_tsp_dynamic_programming
+from python_tsp.distances import euclidean_distance_matrix
+from python_tsp.heuristics import solve_tsp_local_search, solve_tsp_simulated_annealing
+
+"""
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+We can make a graph for tsp, so it is not searching for all the dots, only close z
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+trefoilW16.fill_dotsList() this function is what makes everything slow 
+"""
+
 
 def min_dist(dot, dots):
     elements = [(fg.distance_between_points(dot, d), i) for i, d in enumerate(dots)]
@@ -26,10 +38,17 @@ class Singularities3D:
         :param field3D: any 3D complex field
         """
         self.field3D = field3D
-        self.dots = None  # self.dotsXY or self.dotsAll (can switch with self.swap()
+        self.dotsDict = None  # self.dotsXY or self.dotsAll (can switch with self.swap()
         self.dotsXY = None  # singularities from XY planes
         self.dotsAll = None  # singularities from XY+XZ+YZ planes
-        self.create_dots_from_field3D(_dotsXY=True)
+        self.dotsList = None  # np.array [[x,y,z], [x,y,z], ...] random order
+        self.fill_dotsDict_from_field3D(_dotsXY=True)
+
+    def field_LG_combination(self, mesh, coefficients, modes):
+        field = 0
+        for num, coeff in enumerate(coefficients):
+            field += coeff * LG(modes[num])
+        self.field3D = field
 
     def plot_plane_2D(self, zPlane, **kwargs):
         """
@@ -49,6 +68,20 @@ class Singularities3D:
         shape = np.shape(self.field3D)
         self.plot_plane_2D(shape[2] // 2, **kwargs)
 
+    def plot_dots(self, **kwargs):
+        """
+        Plot self.dots (scatter) using fOAM.plot_knot_dots()
+        if self.dots is not initialized, initialization with self.fill_dotsDict_from_field3D()
+        :param kwargs: Everything for fOAM.plot_knot_dots()
+         also for self.fill_dotsDict_from_field3D()
+        :return: None
+        """
+        if self.dotsDict is None:
+            self.fill_dotsDict_from_field3D(**kwargs)
+        fOAM.plot_knot_dots(self.dotsDict, **kwargs)
+
+        # fg.distance_between_points()
+
     def plot_density(self, **kwargs):
         """
         Plot density on the browser
@@ -58,7 +91,7 @@ class Singularities3D:
         fg.plot_3D_density(np.angle(self.field3D), **kwargs)
         plt.show()
 
-    def create_dots_from_field3D(self, _dotsXY=True, **kwargs):
+    def fill_dotsDict_from_field3D(self, _dotsXY=True, **kwargs):
         """
         Filing self.dots with self.dotsXY. for self.dotsALL use parameter _dotsXY
         :param kwargs: Everything for fg.cut_non_oam()
@@ -68,12 +101,15 @@ class Singularities3D:
         if _dotsXY:
             if self.dotsXY is None:
                 self.fill_dotsXY(**kwargs)
-            self.dots = self.dotsXY
+            self.dotsDict = self.dotsXY
         else:
             if self.dotsAll is None:
                 self.fill_dotsAll(**kwargs)
-            self.dots = self.dotsAll
-        return len(self.dots)
+            self.dotsDict = self.dotsAll
+        return len(self.dotsDict)
+
+    def fill_dotsList(self):
+        self.dotsList = np.array([[x, y, z] for (x, y, z) in self.dotsDict])
 
     def fill_dotsXY(self, **kwargs):
         """
@@ -94,58 +130,23 @@ class Singularities3D:
     def dots_swap(self, **kwargs):
         """
         change self.dots between self.dotsXY and self.dotsAll
-        if self.dots is not either of those -> self.create_dots_from_field3D()
+        if self.dots is not either of those -> self.fill_dotsDict_from_field3D()
         print the new self.dots
         :return: None
         """
-        if self.dots is self.dotsXY:
+        if self.dotsDict is self.dotsXY:
             if self.dotsAll is None:
                 self.fill_dotsAll()
-            self.dots = self.dotsAll
+            self.dotsDict = self.dotsAll
             print(f'Dots are now in all 3 planes')
-        elif self.dots is self.dotsAll:
+        elif self.dotsDict is self.dotsAll:
             if self.dotsXY is None:
                 self.fill_dotsXY()
-            self.dots = self.dotsXY
+            self.dotsDict = self.dotsXY
             print(f'Dots are now in the XY-plane')
         else:
-            self.create_dots_from_field3D(*kwargs)
+            self.fill_dotsDict_from_field3D(*kwargs)
             print(f'Dots were not dotsXY or dotsAll. Now dots are in the XY-plane')
-
-    def plot_dots(self, **kwargs):
-        """
-        Plot self.dots (scatter) using fOAM.plot_knot_dots()
-        if self.dots is not initialized, initialization with self.create_dots_from_field3D()
-        :param kwargs: Everything for fOAM.plot_knot_dots()
-         also for self.create_dots_from_field3D()
-        :return: None
-        """
-        if self.dots is None:
-            self.create_dots_from_field3D(**kwargs)
-        fOAM.plot_knot_dots(self.dots, **kwargs)
-
-        # fg.distance_between_points()
-    # def addClosest(self):
-    #     tempIndex = -19
-    #     tempDistance = self.distCheck * self.dz
-    #     foundDot = False
-    #     for i in range(len(self.dots)):
-    #         if abs(self.dots[i][2] - self.knot[-1][2]) < (
-    #                 self.layersStep + 1) * self.dz:  # and self.dots[i][2] - self.knot[-1][2] != 0:  #self.dots[i][2] != self.knot[-1][2] or self.dots[i][2] == self.knot[-1][2]
-    #             distance = distancePoints2D(self.dots[i], self.knot[-1])  # distancePoints2D
-    #             if distance < tempDistance:
-    #                 tempDistance = distance
-    #                 tempIndex = i
-    #                 foundDot = True
-    #     if foundDot:
-    #         self.knot = np.append(self.knot, [self.dots[tempIndex]], axis=0)
-    #         self.dots = np.delete(self.dots, tempIndex, axis=0)
-    #         self.knotCurrentAngleCheck()
-    #         return True
-    #     else:
-    #         print(f"\033[03m We haven't found a dot:\n\t\t current length: {len(self.knot)}, "
-    #               f"total amount: {len(self.initialDots)} (before cleaning)")
-    #         return False
 
 
 class Knot(Singularities3D):
@@ -157,8 +158,8 @@ class Knot(Singularities3D):
         """
         :param field3D: any 3D complex field
         """
-        super().__init__(field3D)
-        self.dotsList = []  # the actual knot (ordered line)
+        Singularities3D.__init__(self, field3D)
+        self.dotsKnotList = None  # the actual knot (ordered line)
         self.knotSP = None
 
     def build_knot_pyknotid(self, **kwargs):
@@ -166,32 +167,42 @@ class Knot(Singularities3D):
         function build normilized pyknotid knot
         :return:
         """
-        if not self.dotsList:
-            self.fill_dotsList()
-        zMid = (max(z for x, y, z in self.dotsList) + min(z for x, y, z in self.dotsList)) / 2
-        xMid = (max(x for x, y, z in self.dotsList) + min(x for x, y, z in self.dotsList)) / 2
-        yMid = (max(y for x, y, z in self.dotsList) + min(y for x, y, z in self.dotsList)) / 2
-        self.knotSP = sp.Knot(np.array(self.dotsList) - [xMid, yMid, zMid], add_closure=False, **kwargs)
+        if self.dotsKnotList is None:
+            self.fill_dotsKnotList()
+        zMid = (max(z for x, y, z in self.dotsKnotList) + min(z for x, y, z in self.dotsKnotList)) / 2
+        xMid = (max(x for x, y, z in self.dotsKnotList) + min(x for x, y, z in self.dotsKnotList)) / 2
+        yMid = (max(y for x, y, z in self.dotsKnotList) + min(y for x, y, z in self.dotsKnotList)) / 2
+        self.knotSP = sp.Knot(np.array(self.dotsKnotList) - [xMid, yMid, zMid], add_closure=False, **kwargs)
 
     def plot_knot(self, **kwargs):
         """
         plot the knot
         """
-        if not self.dotsList:
-            self.fill_dotsList()
+        if self.dotsKnotList is None:
+            self.fill_dotsKnotList()
         if self.knotSP is None:
             self.build_knot_pyknotid(**kwargs)
         plt.plot([1], [1])
         self.knotSP.plot()
         plt.show()
 
-    def fill_dotsList(self):
+    def fill_dotsKnotList(self):
+        if self.dotsList is None:
+            self.fill_dotsList()
+        distance_matrix = euclidean_distance_matrix(self.dotsList, self.dotsList)
+        permutation, distance = solve_tsp_local_search(distance_matrix)
+        # print(dots[permutation])
+        # print(permutation)
+        self.dotsKnotList = self.dotsList[permutation]
+
+    def fill_dotsKnotList_mine(self):
         """
         fill in self.dotsList by removing charge sign and placing everything into the list [[x, y, z], [x, y, z]...]
         :return: None
         """
+        self.dotsKnotList = []
         dotsDict = {}
-        for [x, y, z] in self.dots:
+        for [x, y, z] in self.dotsDict:
             if not (z in dotsDict):
                 dotsDict[z] = []
             dotsDict[z].append([x, y])
@@ -226,8 +237,8 @@ class Knot(Singularities3D):
                 print(f'dots are still there, the knot builred cannot use them all\nnew plane: {newPlane}')
             minFin = min(minList, key=lambda i: i[0])
             # if minFin[1] != indZ:
-            self.dotsList.append([*dotsDict[minFin[1]].pop(minFin[2]), minFin[1]])
-            currentDot = self.dotsList[-1][:-1]  # changing the current dot to a new one
+            self.dotsKnotList.append([*dotsDict[minFin[1]].pop(minFin[2]), minFin[1]])
+            currentDot = self.dotsKnotList[-1][:-1]  # changing the current dot to a new one
             indZ = minFin[1]
             # else:
             #     dotsDict[minFin[1]].pop(minFin[2])
@@ -239,8 +250,23 @@ class Knot(Singularities3D):
             if not dotsDict[indZ]:  # removing the empty plane (0 dots left)
                 del dotsDict[indZ]
 
+    def check_knot(self) -> bool:
+        checkVal = None
+        if self.knotSP is None:
+            self.build_knot_pyknotid()
+        t = sympy.symbols("t")
+        self.alexPol = self.knotSP.alexander_polynomial(variable=t)
+        if self.__class__.__name__ == 'Trefoil':
+            checkVal = -t ** 2 + t - 1
+        if checkVal is None:
+            print(f'There is no check value for this type of knots')
+            return False
+        if self.alexPol == checkVal:
+            return True
+        return False
+
     """
-        def fill_dotsList(self):
+        def fill_dotsKnotList(self):
 
         dotsDict = {}
         for [x, y, z] in self.dots:
@@ -290,23 +316,19 @@ class Trefoil(Knot):
         if field3D is None:
             xyMinMax = 2
             zMinMax = 0.8
-            zRes = 60
-            xRes = yRes = 60
+            zRes = 80
+            xRes = yRes = 80
             xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
             field3D = fOAM.trefoil_mod(*xyzMesh, w=1.7, width=1, k0=1, z0=0., coeff=None, coeffPrint=False)
-        super().__init__(field3D)
-
-    def trefoil_check_automated(self):
-        print(self.dots)
+        Knot.__init__(self, field3D)
 
 
 if __name__ == '__main__':
-    def func_time():
-
+    def func_time_main():
         trefoilW16 = Trefoil()
         # trefoilW16.dots_swap()
         # trefoilW16.plot_center_2D()
-        # trefoilW16.fill_dotsList()
+        # trefoilW16.fill_dotsKnotList()
         # trefoilW16.dots_swap()
         trefoilW16.plot_dots()
         # trefoilW16.plot_knot()
@@ -314,8 +336,29 @@ if __name__ == '__main__':
         t = sympy.symbols("t")
         print(trefoilW16.knotSP.alexander_polynomial(variable=t))
 
+
+    def func_time1():
+        trefoilW16 = Trefoil()
+        # trefoilW16.fill_dotsKnotList_mine()
+        print(trefoilW16.check_knot())
+        # trefoilW16.fill_dotsList()
+        # trefoilW16.build_knot_pyknotid()
+        # trefoilW16.plot_knot()
+        exit()
+
+
+    def func_time2():
+        trefoilW16 = Trefoil()
+
+        trefoilW16.fill_dotsList()
+        trefoilW16.fill_dotsKnotList_mine()
+        trefoilW16.build_knot_pyknotid()
+        trefoilW16.plot_knot()
+
+
     # trefoilW16.plot_dots()
     # trefoilW16.plot_center_2D()
     # trefoilW16.plot_density()
-    runs = timeit.timeit(func_time, number=1)
-    print(runs)
+    runs1 = timeit.timeit(func_time1, number=1)
+    runs2 = timeit.timeit(func_time2, number=1)
+    print(runs1, runs2)
