@@ -92,7 +92,7 @@ def plot_percentage_Hopf_vs_w(ax=None):
 
 def plot_percentage_trefoil_vs_w(ax=None):
     xArray = [1, 1.05, 1.1, 1.125, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6]
-    yArray = [0, 4, 6, 6.5, 6, 5.5, 4, 2, 1, 0.67, 0.33]  # 6.67
+    yArray = [0, 4, 6.75, 8, 7, 5.5, 4, 2, 1, 0.67, 0.33]  # 6.67
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
     # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
     if ax is None:
@@ -104,7 +104,7 @@ def plot_percentage_trefoil_vs_w(ax=None):
     )
     # ax.invert_xaxis()
     plt.xlim(0.98, 1.62)
-    plt.ylim(-.2, 7)
+    plt.ylim(-.2, 8.5)
     # ax.text('SR=0.001')
     # ax.set_xscale('log')
     # ax.fill_between([0.0018, 0.0175], [0, 0], [102.5, 102.5],
@@ -124,7 +124,7 @@ def plot_percentage_trefoil_vs_w(ax=None):
 
 def plot_percentage_vs_w(ax=None):
     xArray = [1, 1.05, 1.1, 1.125, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5, 1.6]
-    yArray = [0, 4, 6, 6.5, 6, 5.5, 4, 2, 1, 0.67, 0.33]  # 6.67
+    yArray = [0, 4, 6.75, 8, 7, 5.5, 4, 2, 1, 0.67, 0.33]  # 6.67
     xArrayH = [1.375, 1.4, 1.45, 1.475, 1.5, 1.525, 1.55, 1.6, 1.65]
     yArrayH = [0, 12, 30, 33, 31, 28, 25, 21, 19]
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
@@ -168,7 +168,7 @@ def plot_SR_percentage_Trefoil(ax=None):
     xArray2 = [0.95, 0.9, 0.85, 0.8, 0.7, 0.6]  # pap
     yArray2 = [34, 8.5, 4, 1, 0, 0]  # for 0.9 was 5, now 12;  !!!!! 0.95 check
     xArray3 = [0.95, 0.9, 0.85, 0.8, 0.7]  # 2
-    yArray3 = [6.5, 1, 2, 0]
+    yArray3 = [8, 4, 2, 0, 0]  # 9 5 2
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
     # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
     if ax is None:
@@ -257,9 +257,51 @@ def plot_SR_percentage_hopf(ax=None):
     # fig.set_facecolor('floralwhite')
     # ax.set_facecolor('seashell')
     return ax
+
+def plot_SR_percentage_hopf_trefoil_comp(ax=None):
+    xArrayH = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0]  # our
+    yArrayH = [57, 30.5, 17, 9.5, 3, 1.5, 0]
+    xArrayTr = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.6]  # our
+    yArrayTr = [78, 39.5, 16.5, 7.5, 5.5, 2, 0.5]
+
+    # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
+    # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
+    if ax is None:
+        fig, ax = plt.subplots()  # figsize=(8, 6)
+    fg.plot_1D(
+        xArrayTr, yArrayTr, color='r', marker='o', label='Optimized Trefoil',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax, title=None
+    )
+    fg.plot_1D(
+        xArrayH, yArrayH, color='b', marker='o', label='Optimized Hopf',
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax, title=None
+    )
+    # plt.scatter([0.9], [57], c='y', marker='o', s=80)
+    # plt.scatter([0.95], [65, 53, 60], c='k', marker='x', s=80)
+    # ax.invert_xaxis()
+    plt.xlim(0.97, 0.68)
+    plt.ylim(-3, 100)
+    # ax.text('SR=0.001')
+    # ax.set_xscale('log')
+    # ax.fill_between([0.0018, 0.0175], [0, 0], [102.5, 102.5],
+    #                 facecolor='g',
+    #                 alpha=0.3,
+    #                 color='green',
+    #                 edgecolor='black',
+    #                 linewidth=1,
+    #                 linestyle='--')
+    # plt.xticks([0.02, 0.01, 0.001])
+    # fig.set_figwidth(12)
+    # fig.set_figheight(6)
+    # fig.set_facecolor('floralwhite')
+    # ax.set_facecolor('seashell')
+    return ax
 plot_percentage_vs_w()
 plot_percentage_trefoil_vs_w()
 plot_SR_percentage_Trefoil(ax=None)
 plot_percentage_Hopf_vs_w(ax=None)
 plot_SR_percentage_hopf()
+plot_SR_percentage_hopf_trefoil_comp()
 plt.show()
