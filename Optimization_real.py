@@ -44,7 +44,9 @@ class Singularities3D:
         self.dotsXY = None  # singularities from XY planes
         self.dotsAll = None  # singularities from XY+XZ+YZ planes
         self.dotsList = None  # np.array [[x,y,z], [x,y,z], ...] random order
-        self.mesh = None
+        self.mesh = None  # np.meshgrid from field_LG_combination
+        self.coefficients = None  # [Cl1p1, Cl2p2...] from field_LG_combination
+        self.modes = None  # [(l1,p1), (l2,p2) ...] from field_LG_combination
         # self.fill_dotsDict_from_field3D(_dotsXY=True)
 
     def field_LG_combination(self, mesh, coefficients, modes, **kwargs):
@@ -52,11 +54,13 @@ class Singularities3D:
         creating the field of any combination of LG beams
         Sum(Cl1p1 * LG_simple(*mesh, l=l1, p=p1, **kwargs))
         :param mesh: np.meshgrid
-        :param coefficients: [Cl1p1, Cl2p2] ...
+        :param coefficients: [Cl1p1, Cl2p2...] ...
         :param modes: [(l1,p1), (l2,p2) ...]
         """
         field = 0
         self.mesh = mesh
+        self.coefficients = coefficients
+        self.modes = modes
         for num, coefficient in enumerate(coefficients):
             field += coefficient * fOAM.LG_simple(*mesh, l=modes[num][0], p=modes[num][1], **kwargs)
         self.field3D = field
@@ -158,6 +162,16 @@ class Singularities3D:
         else:
             self.fill_dotsDict_from_field3D(*kwargs)
             print(f'Dots were not dotsXY or dotsAll. Now dots are in the XY-plane')
+
+    def boundary_step_test(self, coeffNum, step, funcCheck, **kwargs):
+        if self.coefficients is None:
+            print(f'No coefficients in the field are given')
+            return 0
+        coefficientsTest = np.copy(self.coefficients)
+        coefficientsTest[coeffNum] += step
+        fieldTest = Singularities3D()
+        fieldTest.field_LG_combination(self.mesh, coefficientsTest, self.modes, **kwargs)
+        fieldTest.plot_dots()
 
 
 class Knot(Singularities3D):
@@ -330,21 +344,22 @@ class Trefoil(Knot):
             zRes = 80
             xRes = yRes = 80
             xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
-            field3D = fOAM.trefoil_mod(*xyzMesh, w=1.7, width=1, k0=1, z0=0., coeff=None, coeffPrint=False)
+            field3D = fOAM.trefoil_mod(*xyzMesh, w=1.7, width=1, k0=1, z0=0., aCoeff=None, coeffPrint=False)
         Knot.__init__(self, field3D)
 
 
 if __name__ == '__main__':
     def func_time_main():
-        trefoilW16 = Trefoil()
+        # trefoilW16 = Trefoil()
         xyMinMax = 2
         zMinMax = 0.8
-        zRes = 40
-        xRes = yRes = 40
+        zRes = 60
+        xRes = yRes = 60
+        Hopf = Singularities3D()
         xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
-        trefoilW16.field_LG_combination(xyzMesh, [1, 2, 4], [(0,0), (0, 1), (1, 0)])
-        print(np.shape(trefoilW16.field3D))
-        trefoilW16.plot_dots()
+        Hopf.field_LG_combination(xyzMesh, [2.63, -6.32, 4.21, -5.95], [(0, 0), (0, 1), (0, 2), (2, 0)])
+        Hopf.plot_dots()
+        Hopf.boundary_step_test(coeffNum=2, step=1, funcCheck=None)
         # trefoilW16.plot_knot()
         # trefoilW16.build_knot_pyknotid()
         # t = sympy.symbols("t")

@@ -53,10 +53,10 @@ def trefoil(x, y, z, w, width=1, k0=1, z0=0.):
     return field
 
 
-def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
+def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0., aCoeff=None, coeffPrint=False):
     z = z - z0
     H = 1.0
-    if coeff is not None or coeff is False:
+    if aCoeff is not None or aCoeff is False:
         aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
         aCoeff /= aSumSqr
     else:
@@ -83,10 +83,10 @@ def trefoil_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
     return field
 
 
-def hopf_mod_4(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
+def hopf_mod_4(x, y, z, w, width=1, k0=1, z0=0., aCoeff=None, coeffPrint=False):
     z = z - z0
     H = 1.0
-    if coeff is not None or coeff is False:
+    if aCoeff is not None or aCoeff is False:
         aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
         aCoeff /= aSumSqr
     else:
@@ -257,13 +257,15 @@ def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
                                             bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
     dotsPlus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == 1])
     dotsMinus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == -1])
-    if len(np.shape(dotsMinus)) == 3:
+    if len(np.shape(dotsMinus)) > 0:
         ax = fg.plot_scatter_3D(dotsPlus[:, 0], dotsPlus[:, 1], dotsPlus[:, 2], size=size, color=color)
-        if len(np.shape(dotsPlus)) == 3:
+        if len(np.shape(dotsPlus)) > 0:
             fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
     else:
-        if len(np.shape(dotsPlus)) == 3:
+        if len(np.shape(dotsPlus)) > 0:
             fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], size=size, color=color)
+        else:
+            print(f'no singularities to plot')
     plt.show()
 
 
