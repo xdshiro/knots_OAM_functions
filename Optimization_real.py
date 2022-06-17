@@ -19,6 +19,8 @@ from python_tsp.heuristics import solve_tsp_local_search, solve_tsp_simulated_an
 We can make a graph for tsp, so it is not searching for all the dots, only close z
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 trefoilW16.fill_dotsList() this function is what makes everything slow 
+
+Stop if the distance is too big. To find a hopf 
 """
 
 
@@ -33,7 +35,7 @@ class Singularities3D:
     Work with singularities of any 3D complex field
     """
 
-    def __init__(self, field3D):
+    def __init__(self, field3D=None):
         """
         :param field3D: any 3D complex field
         """
@@ -42,12 +44,21 @@ class Singularities3D:
         self.dotsXY = None  # singularities from XY planes
         self.dotsAll = None  # singularities from XY+XZ+YZ planes
         self.dotsList = None  # np.array [[x,y,z], [x,y,z], ...] random order
-        self.fill_dotsDict_from_field3D(_dotsXY=True)
+        self.mesh = None
+        # self.fill_dotsDict_from_field3D(_dotsXY=True)
 
-    def field_LG_combination(self, mesh, coefficients, modes):
+    def field_LG_combination(self, mesh, coefficients, modes, **kwargs):
+        """
+        creating the field of any combination of LG beams
+        Sum(Cl1p1 * LG_simple(*mesh, l=l1, p=p1, **kwargs))
+        :param mesh: np.meshgrid
+        :param coefficients: [Cl1p1, Cl2p2] ...
+        :param modes: [(l1,p1), (l2,p2) ...]
+        """
         field = 0
-        for num, coeff in enumerate(coefficients):
-            field += coeff * LG(modes[num])
+        self.mesh = mesh
+        for num, coefficient in enumerate(coefficients):
+            field += coefficient * fOAM.LG_simple(*mesh, l=modes[num][0], p=modes[num][1], **kwargs)
         self.field3D = field
 
     def plot_plane_2D(self, zPlane, **kwargs):
@@ -326,15 +337,18 @@ class Trefoil(Knot):
 if __name__ == '__main__':
     def func_time_main():
         trefoilW16 = Trefoil()
-        # trefoilW16.dots_swap()
-        # trefoilW16.plot_center_2D()
-        # trefoilW16.fill_dotsKnotList()
-        # trefoilW16.dots_swap()
+        xyMinMax = 2
+        zMinMax = 0.8
+        zRes = 40
+        xRes = yRes = 40
+        xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
+        trefoilW16.field_LG_combination(xyzMesh, [1, 2, 4], [(0,0), (0, 1), (1, 0)])
+        print(np.shape(trefoilW16.field3D))
         trefoilW16.plot_dots()
         # trefoilW16.plot_knot()
-        trefoilW16.build_knot_pyknotid()
-        t = sympy.symbols("t")
-        print(trefoilW16.knotSP.alexander_polynomial(variable=t))
+        # trefoilW16.build_knot_pyknotid()
+        # t = sympy.symbols("t")
+        # print(trefoilW16.knotSP.alexander_polynomial(variable=t))
 
 
     def func_time1():
@@ -356,9 +370,10 @@ if __name__ == '__main__':
         trefoilW16.plot_knot()
 
 
+    func_time_main()
     # trefoilW16.plot_dots()
     # trefoilW16.plot_center_2D()
     # trefoilW16.plot_density()
-    runs1 = timeit.timeit(func_time1, number=1)
-    runs2 = timeit.timeit(func_time2, number=1)
-    print(runs1, runs2)
+    # runs1 = timeit.timeit(func_time1, number=1)
+    # runs2 = timeit.timeit(func_time2, number=1)
+    # print(runs1, runs2)

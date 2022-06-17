@@ -257,8 +257,13 @@ def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
                                             bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
     dotsPlus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == 1])
     dotsMinus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == -1])
-    ax = fg.plot_scatter_3D(dotsPlus[:, 0], dotsPlus[:, 1], dotsPlus[:, 2], size=size, color=color)
-    fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
+    if len(np.shape(dotsMinus)) == 3:
+        ax = fg.plot_scatter_3D(dotsPlus[:, 0], dotsPlus[:, 1], dotsPlus[:, 2], size=size, color=color)
+        if len(np.shape(dotsPlus)) == 3:
+            fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
+    else:
+        if len(np.shape(dotsPlus)) == 3:
+            fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], size=size, color=color)
     plt.show()
 
 
