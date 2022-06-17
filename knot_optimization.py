@@ -35,7 +35,7 @@ def trefoil_optimization():
         xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
         fieldTest = fOAM.trefoil_mod(
             *xyzMesh, w=1.3, width=1.2, k0=1, z0=0.,
-            coeff=coeffTest, coeffPrint=False
+            aCoeff=coeffTest, coeffPrint=False
         )
         # fg.plot_3D_density(np.angle(fieldTest))
         fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)

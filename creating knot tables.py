@@ -24,7 +24,7 @@ SR = '0.9 2'
 knot = 'trefoil'
 w = '1.6 (3)' # Dima Cmex-
 
-folderInside = f'Real\\Trefoil_w\\SR = 8.500000e-01'
+folderInside = f'Real\\Hopf_test_best_12\\SR = 9.500000e-01'
 directoryName = (
     f'.\\temp_data\\{folderInside}\\')
 

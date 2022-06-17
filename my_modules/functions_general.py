@@ -506,7 +506,9 @@ def size_array_increase_3D(field, cropX=None, cropY=None, cropZ=None, percentage
     ] = field
     return answer
 
-
+"""
+fill_valuefloat, optional
+Value used to fill in for requested points outside of the convex hull of the input points. If not provided, then the default is nan."""
 # function interpolate real 2D array of any data into the function(x, y)
 def interpolation_real(field, xArray=None, yArray=None):
     xResolution, yResolution = np.shape(field)

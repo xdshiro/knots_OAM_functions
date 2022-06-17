@@ -348,18 +348,23 @@ class Trefoil(Knot):
         Knot.__init__(self, field3D)
 
 
+def
+
+
 if __name__ == '__main__':
     def func_time_main():
         # trefoilW16 = Trefoil()
-        xyMinMax = 2
-        zMinMax = 0.8
-        zRes = 60
-        xRes = yRes = 60
+        xyMinMax = 1
+        zMinMax = 0.4
+        zRes = 70
+        xRes = yRes = 70
         Hopf = Singularities3D()
         xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
-        Hopf.field_LG_combination(xyzMesh, [2.63, -6.32, 4.21, -5.95], [(0, 0), (0, 1), (0, 2), (2, 0)])
-        Hopf.plot_dots()
-        Hopf.boundary_step_test(coeffNum=2, step=1, funcCheck=None)
+        Hopf.field_LG_combination(xyzMesh, [8, -9, -6], [(0, 0), (0, 1), (1, 0)])
+        # Hopf.plot_dots()
+        # Hopf.plot_density()
+
+        # Hopf.boundary_step_test(coeffNum=2, step=1, funcCheck=None)
         # trefoilW16.plot_knot()
         # trefoilW16.build_knot_pyknotid()
         # t = sympy.symbols("t")
@@ -385,7 +390,7 @@ if __name__ == '__main__':
         trefoilW16.plot_knot()
 
 
-    func_time_main()
+    timeit.timeit(func_time_main(), number=1)
     # trefoilW16.plot_dots()
     # trefoilW16.plot_center_2D()
     # trefoilW16.plot_density()
