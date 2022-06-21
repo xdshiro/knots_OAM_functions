@@ -83,7 +83,7 @@ class Singularities3D:
         shape = np.shape(self.field3D)
         self.plot_plane_2D(shape[2] // 2, **kwargs)
 
-    def plot_dots(self, **kwargs):
+    def plot_dots(self, show=True, **kwargs):
         """
         Plot self.dots (scatter) using fOAM.plot_knot_dots()
         if self.dots is not initialized, initialization with self.fill_dotsDict_from_field3D()
@@ -93,8 +93,10 @@ class Singularities3D:
         """
         if self.dotsDict is None:
             self.fill_dotsDict_from_field3D(**kwargs)
-        fOAM.plot_knot_dots(self.dotsDict, **kwargs)
-
+        ax = fOAM.plot_knot_dots(self.dotsDict, **kwargs)
+        if show:
+            plt.show()
+        return ax
         # fg.distance_between_points()
 
     def plot_density(self, **kwargs):
@@ -348,21 +350,19 @@ class Trefoil(Knot):
         Knot.__init__(self, field3D)
 
 
-def
-
-
 if __name__ == '__main__':
     def func_time_main():
         # trefoilW16 = Trefoil()
         xyMinMax = 1
-        zMinMax = 0.4
-        zRes = 70
+        zMinMax = 0.35
+        zRes = 120
         xRes = yRes = 70
-        Hopf = Singularities3D()
-        xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
-        Hopf.field_LG_combination(xyzMesh, [8, -9, -6], [(0, 0), (0, 1), (1, 0)])
-        # Hopf.plot_dots()
-        # Hopf.plot_density()
+        unknot = Singularities3D()
+        xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax * 0.8, zMinMax, xRes, yRes, zRes, xMin=-0.4, zMin=None)
+        unknot.field_LG_combination(xyzMesh, [8, -9, -6], [(0, 0), (0, 1), (1, 0)])
+        ax = unknot.plot_dots(show=False)
+
+        # unknot.plot_density()
 
         # Hopf.boundary_step_test(coeffNum=2, step=1, funcCheck=None)
         # trefoilW16.plot_knot()
@@ -390,7 +390,7 @@ if __name__ == '__main__':
         trefoilW16.plot_knot()
 
 
-    timeit.timeit(func_time_main(), number=1)
+    timeit.timeit(func_time_main, number=1)
     # trefoilW16.plot_dots()
     # trefoilW16.plot_center_2D()
     # trefoilW16.plot_density()

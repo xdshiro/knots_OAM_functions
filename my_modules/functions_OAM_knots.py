@@ -248,7 +248,7 @@ def milnor_Pol_u_v_any(x, y, z, uOrder, vOrder, H=1):
 
 
 # plotting dot's only from the Array of +-1
-def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
+def  plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
                    size=plt.rcParams['lines.markersize'] ** 2, color=None):
     if isinstance(field, dict):
         dotsOnly = field
@@ -257,16 +257,18 @@ def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
                                             bigSingularity=bigSingularity, axesAll=axesAll, cbrt=cbrt)
     dotsPlus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == 1])
     dotsMinus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == -1])
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
     if len(np.shape(dotsMinus)) > 0:
         ax = fg.plot_scatter_3D(dotsPlus[:, 0], dotsPlus[:, 1], dotsPlus[:, 2], size=size, color=color)
         if len(np.shape(dotsPlus)) > 0:
             fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
     else:
         if len(np.shape(dotsPlus)) > 0:
-            fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], size=size, color=color)
+            ax = fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], size=size, color=color)
         else:
             print(f'no singularities to plot')
-    plt.show()
+    return ax
 
 
 def save_knot_dots(field, filename, bigSingularity=False, axesAll=True, cbrt=False):
