@@ -113,7 +113,7 @@ def hopf_mod_4(x, y, z, w, width=1, k0=1, z0=0., aCoeff=None, coeffPrint=False):
 def hopf_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
     z = z - z0
     H = 1.0
-    if coeff is not None or coeff is False:
+    if coeff is not None or coeff is True:
         paper = [2.63, -6.32, 4.21, -5.95]
         aCoeff = coeff
         aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
@@ -135,8 +135,7 @@ def hopf_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
     field = (aCoeff[0] * LG_simple(x, y, z, l=0, p=0, width=width, k0=k0) +
              aCoeff[1] * LG_simple(x, y, z, l=0, p=1, width=width, k0=k0) +
              aCoeff[2] * LG_simple(x, y, z, l=0, p=2, width=width, k0=k0) +
-             aCoeff[3] * LG_simple(x, y, z, l=2, p=0, width=width, k0=k0) +
-             aCoeff[4] * LG_simple(x, y, z, l=0, p=3, width=width, k0=k0)
+             aCoeff[3] * LG_simple(x, y, z, l=2, p=0, width=width, k0=k0)
              )
     return field
 

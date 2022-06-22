@@ -42,7 +42,7 @@ def circle_test(field, radius, testValue=1.):
 def check_knot_paper(xyzMesh, coeff, deltaCoeff, iMin, i0, radiustest=0.05, steps=1000, ):
     field = fOAM.trefoil_mod(
         *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-        coeff=coeff
+        aCoeff=coeff
         , coeffPrint=False,
     )
     sum = cost_function_paper(field, iMin=iMin, i0=i0)
@@ -51,7 +51,7 @@ def check_knot_paper(xyzMesh, coeff, deltaCoeff, iMin, i0, radiustest=0.05, step
         newCoeff = fg.random_list(coeff, deltaCoeff)
         newField = fOAM.trefoil_mod(
             *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-            coeff=newCoeff, coeffPrint=False)
+            aCoeff=newCoeff, coeffPrint=False)
         newSum = cost_function_paper(newField, iMin=iMin, i0=i0)
         if newSum < sum:
             if circle_test(np.angle(newField)[:, :, np.shape(newField)[2] // 2],
@@ -106,7 +106,7 @@ def test_visual(dotsOnly, coeff=None, xyzMeshVisual=None, sound=True, knot='tref
         if knot == 'trefoil':
             fieldTest = fOAM.trefoil_mod(
                 *xyzMeshVisual, w=1.2, width=1.2, k0=1, z0=0.,
-                coeff=coeff, coeffPrint=False
+                aCoeff=coeff, coeffPrint=False
             )
         else:
             fieldTest = fOAM.hopf_mod(
@@ -216,11 +216,11 @@ def empty_space_check(dotsOnly, zRes, valueTest):
     # add here the distance in between
 
 
-def check_knot_mine(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True, checkboundaries=False, boundaryValue=0.2,
+def check_knot_mine(xyzMesh, coeff, deltaCoeff, steps=1000,width=1.3, six_dots=True, checkboundaries=False, boundaryValue=0.2,
                     circletest=True, radiustest=0.05, testvisual=False, xyzMeshPlot=None):
     field = fOAM.trefoil_mod(
-        *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-        coeff=coeff
+        *xyzMesh, w=1.2, width=width, k0=1, z0=0.,
+        aCoeff=coeff
         , coeffPrint=False,
     )
     xRes, yRes, zRes = np.shape(xyzMesh)[1:]
@@ -230,8 +230,8 @@ def check_knot_mine(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True, check
     for i in range(steps):
         newCoeff = fg.random_list(coeff, deltaCoeff)
         newField = fOAM.trefoil_mod(
-            *xyzMesh, w=1.2, width=1.2, k0=1, z0=0.,
-            coeff=newCoeff
+            *xyzMesh, w=1.2, width=width, k0=1, z0=0.,
+            aCoeff=newCoeff
             , coeffPrint=False,
         )
         dotsOnly = fg.cut_non_oam(np.angle(newField[:, :, :]),

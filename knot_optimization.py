@@ -19,13 +19,14 @@ def trefoil_optimization():
     # coeffTest /= np.sqrt(sum([a ** 2 for a in coeffTest])) * 0.1
     # coeffTest = np.array(coeffTest) * 1.51 / 1.5308532
     # Mod/Stand=0.95284, Mod/Test=1.03021 (i0=0.05)[1.41, -3.71, 7.44, -2.09, -4.26]
-    coeffTest = coeffMod
+    coeffTest = None
     i0 = 0.01
     iMin = i0 / 100
     xyMinMax = 4
     zMinMax = 1.1  # 2.6
-    zRes = 121
-    xRes = yRes = 191
+    zRes = 71
+    xRes = yRes = 121
+    width = 1.3
     xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
 
     # perfect from the paper
@@ -34,7 +35,7 @@ def trefoil_optimization():
     if plot_test:
         xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
         fieldTest = fOAM.trefoil_mod(
-            *xyzMesh, w=1.3, width=1.2, k0=1, z0=0.,
+            *xyzMesh, w=1.125, width=1.3, k0=1, z0=0.,
             aCoeff=coeffTest, coeffPrint=False
         )
         # fg.plot_3D_density(np.angle(fieldTest))
@@ -50,8 +51,8 @@ def trefoil_optimization():
                 plt.show()
 
         exit()
-    check_knot_mine(xyzMesh, coeffTest, deltaCoeff=[0.3] * 5, steps=5000,
-                    six_dots=True, testvisual=True,
+    check_knot_mine(xyzMesh, coeffTest, deltaCoeff=[0.3] * 5, steps=1,
+                    six_dots=True, testvisual=False, width=width,
                     circletest=True, radiustest=0.02,  # # # # # # # # # ## #
                     checkboundaries=True, boundaryValue=0.1,
                     xyzMeshPlot=fg.create_mesh_XYZ(xyMinMax * 1.3, xyMinMax * 1.3, zMinMax * 2.5,
@@ -77,25 +78,26 @@ def hopf_optimization():
     coeff = [3.171231805813835, -5.982511722377574, 4.805000010039758, 5.23178437509335, 0.19882157934428407]
     coeff = [3.17, -5.98, 4.81, 5.23, 0.2]
     coeff = [3.19, -6.3, 5.09, 5.04, 0.6]
-
-    width = 1.4
+    coeff = coeffTest121313
+    coeff = None
+    width = 1.3
     # [3.1183383245351384, -6.487464929941611, 4.539015096229947, 5.339462907691034]
     # [3.212293593009031, -6.392995869495429, 4.629882224195264, 5.242451210074536]
-    xyMinMax = 4 # * 2
-    zMinMax = 1.1 # * 4
+    xyMinMax = 4  # * 2
+    zMinMax = 1.1  # * 4
     zRes = 71
-    xRes = yRes = 111
+    xRes = yRes = 121
     plot_test = True
     if plot_test:
         xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
         fieldTest = fOAM.hopf_mod(
-            *xyzMesh, w=1.5, width=width, k0=1, z0=0.,
+            *xyzMesh, w=1.475, width=width, k0=1, z0=0.,
             coeff=coeff, coeffPrint=True
         )
         # fg.plot_3D_density(np.angle(fieldTest))
         fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2, axis_equal=True)
         fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
-        fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
+        # fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
         plt.show()
         if 0:
             field, dotsOnly = fg.cut_non_oam(np.angle(fieldTest),
@@ -106,7 +108,7 @@ def hopf_optimization():
 
         exit()
     xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
-    check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff=[0.2] * 5, steps=1000,
+    check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff=[0.2] * 5, steps=1,
                          six_dots=False, testvisual=False, width=width,
                          circletest=False, radiustest=0.02,  # # # # # # # # # ## #
                          checkboundaries=True, boundaryValue=0.1,
@@ -114,4 +116,5 @@ def hopf_optimization():
                                                         51, 51, 141, zMin=None))
 
 
-hopf_optimization()
+trefoil_optimization()
+# hopf_optimization()

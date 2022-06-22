@@ -506,9 +506,12 @@ def size_array_increase_3D(field, cropX=None, cropY=None, cropZ=None, percentage
     ] = field
     return answer
 
+
 """
 fill_valuefloat, optional
 Value used to fill in for requested points outside of the convex hull of the input points. If not provided, then the default is nan."""
+
+
 # function interpolate real 2D array of any data into the function(x, y)
 def interpolation_real(field, xArray=None, yArray=None):
     xResolution, yResolution = np.shape(field)
@@ -693,6 +696,7 @@ def Jz_calc(EArray, xArray=None, yArray=None):
     print(f'Total OAM = {Jz / W}\tW={W}')
     return Jz / W
 
+
 def W_energy(EArray, xArray=None, yArray=None):
     if xArray is None or yArray is None:
         shape = np.shape(EArray)
@@ -700,10 +704,9 @@ def W_energy(EArray, xArray=None, yArray=None):
         yArray = np.arange(shape[1])
     dx = xArray[1] - xArray[0]
     dy = yArray[1] - yArray[0]
-    W = np.sum(np.conj(EArray) * EArray, axis=0) * dx * dy
-    # total power
-    W = np.real(np.sum(W, axis=0))
+    W = np.real(np.sum(np.conj(EArray) * EArray) * dx * dy)
     return W
+
 
 def Jz_calc_no_conj(EArray, xArray=None, yArray=None):
     EArray = np.array(EArray)
@@ -725,13 +728,19 @@ def Jz_calc_no_conj(EArray, xArray=None, yArray=None):
             dEry = (Er[i, j + 1] - Er[i, j - 1]) / (2 * dy)
             dEix = (Ei[i + 1, j] - Ei[i - 1, j]) / (2 * dx)
             dEiy = (Ei[i, j + 1] - Ei[i, j - 1]) / (2 * dy)
+            # dErx = (Er[i + 1, j] - Er[i, j]) / (dx)
+            # dEry = (Er[i, j + 1] - Er[i, j]) / (dy)
+            # dEix = (Ei[i + 1, j] - Ei[i, j]) / (dx * 2)
+            # dEiy = (Ei[i, j + 1] - Ei[i, j]) / (dy)
+            # print(x[i] * Er[i, j] * dEiy, - y[j] * Er[i, j] * dEix, -
+            #           x[i] * Ei[i, j] * dEry, + y[j] * Ei[i, j] * dErx)
             sumJz += (x[i] * Er[i, j] * dEiy - y[j] * Er[i, j] * dEix -
                       x[i] * Ei[i, j] * dEry + y[j] * Ei[i, j] * dErx)
     # Total moment
     Jz = (sumJz * dx * dy)
     W = W_energy(EArray)
     print(f'Total OAM = {Jz / W}\tW={W}')
-    return Jz / W
+    return Jz
 
 
 def deltaW(EArray, dEr, dEi, xArray=None, yArray=None):
@@ -745,5 +754,228 @@ def deltaW(EArray, dEr, dEi, xArray=None, yArray=None):
         yArray = np.arange(shape[1])
     dx = xArray[1] - xArray[0]
     dy = yArray[1] - yArray[0]
-    dW = 2 * np.sum(Er * dEr + Ei * dEi, axis=0) * dx * dy
-    # total power
+    dW = 2 * np.sqrt(np.sum(np.abs(Er) ** 2 * dEr ** 2 + np.abs(Ei) ** 2 * dEi ** 2)) * dx * dy
+    # dW = 2 * np.sqrt(np.sum(np.abs(Er) ** 2 * dEr ** 2) + np.sum(np.abs(Ei) ** 2 * dEi ** 2)) * dx * dy
+    # dW = 2 * np.sum(np.sqrt(np.abs(Er) ** 2 * dEr ** 2 + np.abs(Ei) ** 2 * dEi ** 2)) * dx * dy
+    return dW
+
+
+def deltaJzDemo(EArray, dEr, dEi, xArray=None, yArray=None):
+    EArray = np.array(EArray)
+    dEr = np.array(dEr)
+    dEi = np.array(dEi)
+    Er, Ei = np.real(EArray), np.imag(EArray)
+    if xArray is None or yArray is None:
+        shape = np.shape(EArray)
+        xArray = np.arange(shape[0])
+        yArray = np.arange(shape[1])
+    dx = xArray[1] - xArray[0]
+    dy = yArray[1] - yArray[0]
+    x0 = (xArray[-1] + xArray[0]) / 2
+    y0 = (yArray[-1] + yArray[0]) / 2
+    x = np.array(xArray) - x0
+    y = np.array(yArray) - y0
+    sumdJz = 0
+    for i in range(1, len(xArray) - 2, 1):
+        for j in range(1, len(yArray) - 2, 1):
+            dErx = (Er[i + 1, j] - Er[i - 1, j]) / (2 * dx)
+            dEry = (Er[i, j + 1] - Er[i, j - 1]) / (2 * dy)
+            dEix = (Ei[i + 1, j] - Ei[i - 1, j]) / (2 * dx)
+            dEiy = (Ei[i, j + 1] - Ei[i, j - 1]) / (2 * dy)
+            # if Er[i, j] == 0:
+            #     dErx = 0
+            #     dEry = 0
+            # else:
+            #     dErx = (Er[i + 1, j] - Er[i, j]) / (dx)
+            #     dEry = (Er[i, j + 1] - Er[i, j]) / (dy)
+            # if Ei[i, j] == 0:
+            #     dEix = 0
+            #     dEiy = 0
+            # else:
+            #     dEix = (Ei[i + 1, j] - Ei[i, j]) / (dx)
+            #     dEiy = (Ei[i, j + 1] - Ei[i, j]) / (dy)
+            d2Erx = (Er[i + 1, j] + Er[i - 1, j] - 2 * Er[i, j]) / (dx ** 2)
+            d2Ery = (Er[i, j + 1] + Er[i, j - 1] - 2 * Er[i, j]) / (dy ** 2)
+            d2Eix = (Ei[i + 1, j] + Ei[i - 1, j] - 2 * Ei[i, j]) / (dx ** 2)
+            d2Eiy = (Ei[i, j + 1] + Ei[i, j - 1] - 2 * Ei[i, j]) / (dy ** 2)
+            dErxP1 = (Er[i + 1, j + 1] - Er[i - 1, j + 1]) / (2 * dx)
+            dEryP1 = (Er[i + 1, j + 1] - Er[i + 1, j - 1]) / (2 * dy)
+            dEixP1 = (Ei[i + 1, j + 1] - Ei[i - 1, j + 1]) / (2 * dx)
+            dEiyP1 = (Ei[i + 1, j + 1] - Ei[i + 1, j - 1]) / (2 * dy)
+            d2Erxy = (dEryP1 - dEry) / dx
+            d2Eryx = (dErxP1 - dErx) / dy
+            d2Eixy = (dEiyP1 - dEiy) / dx
+            d2Eiyx = (dEixP1 - dEix) / dy
+            if (not (dEix + dEiy) and (dEix != 0)) or (not (dErx + dEry) and (dErx != 0)):
+                print(f'the same derivitivies')
+                continue
+            if not dErx:
+                s1r = 0
+            else:
+                s1r = (d2Erx + d2Eryx * dy / dx) / (dErx + dEry * dy / dx)
+            if not dEry:
+                s2r = 0
+            else:
+                s2r = (d2Erxy + d2Ery * dy / dx) / (dErx + dEry * dy / dx)
+            if not dEix:
+                s1i = 0
+            else:
+                s1i = (d2Eix + d2Eiyx * dy / dx) / (dEix + dEiy * dy / dx)
+            if not dEiy:
+                s2i = 0
+            else:
+                s2i = (d2Eixy + d2Eiy * dy / dx) / (dEix + dEiy * dy / dx)
+
+            # print(dErx, dEry, dEix, dEiy, d2Erx, d2Eryx, d2Eix, d2Eiyx)
+            _x, _y = x[i], y[j]
+            _Er, _Ei = Er[i, j], Ei[i, j]
+            # print(_x * dEiy, - _y * dEix, - _x * _Ei * s2r, + _y * _Ei * s1r)
+            a = _x * dEiy - _y * dEix - _x * _Ei * s2r + _y * _Ei * s1r
+            b = _x * _Er * s2i - _y * _Er * s1i - _x * dEry + _y * dErx
+            sumdJz += (np.abs(a) * dEr[i, j] +
+                       np.abs(b) * dEi[i, j])
+            c = _x * _Er * dEiy - _y * _Er * dEix - _x * _Ei * dEry + _y * _Ei * dErx
+            if c == 0 and a != 0:
+                print(a, b, c)
+                print(_x * dEiy, - _y * dEix, - _x * _Ei * s2r, + _y * _Ei * s1r)
+                print(_x * _Er * dEiy, - _y * _Er * dEix, - _x * _Ei * dEry, + _y * _Ei * dErx)
+                exit()
+            # print(a, b, c)
+    dJz = (sumdJz * dx * dy)
+    return dJz
+
+
+def deltaJz1(EArray, dEr, dEi, xArray=None, yArray=None):
+    EArray = np.array(EArray)
+    dEr = np.array(dEr)
+    dEi = np.array(dEi)
+    Er, Ei = np.real(EArray), np.imag(EArray)
+    if xArray is None or yArray is None:
+        shape = np.shape(EArray)
+        xArray = np.arange(shape[0])
+        yArray = np.arange(shape[1])
+    dx = xArray[1] - xArray[0]
+    dy = yArray[1] - yArray[0]
+    x0 = (xArray[-1] + xArray[0]) / 2
+    y0 = (yArray[-1] + yArray[0]) / 2
+    x = np.array(xArray) - x0
+    y = np.array(yArray) - y0
+    sumdJz = 0
+    for i in range(1, len(xArray) - 2, 1):
+        for j in range(1, len(yArray) - 2, 1):
+            dErx = (Er[i + 1, j] - Er[i - 1, j]) / (2 * dx)
+            dEry = (Er[i, j + 1] - Er[i, j - 1]) / (2 * dy)
+            dEix = (Ei[i + 1, j] - Ei[i - 1, j]) / (2 * dx)
+            dEiy = (Ei[i, j + 1] - Ei[i, j - 1]) / (2 * dy)
+            _x, _y = x[i], y[j]
+            _Er, _Ei = Er[i, j], Ei[i, j]
+            # print(_x * dEiy, - _y * dEix, - _x * _Ei * s2r, + _y * _Ei * s1r)
+            sEr00 = _x * dEiy - _y * dEix + _x * _Ei / dy - _y * _Ei / dx
+            sEi00 = -_x * _Er / dy + _y * _Er / dx - _x * dEry + _y * dErx
+            sEi01 = _x * _Er / dy
+            sEi10 = - _y * _Er / dx
+            sEr01 = - _x * _Ei / dy
+            sEr10 = _y * _Ei / dx
+            sumdJz += (abs(sEr00) * dEr[i, j] + abs(sEi00) * dEi[i, j] + abs(sEi01) * dEi[i, j + 1]
+                       + abs(sEi10) * dEi[i + 1, j] + abs(sEr01) * dEr[i, j + 1] + abs(sEr10) * dEr[i + 1, j])
+
+            # # print(x[i] * Er[i, j] * dEiy, - y[j] * Er[i, j] * dEix, -
+            # #           x[i] * Ei[i, j] * dEry, + y[j] * Ei[i, j] * dErx)
+            # sumJz += (x[i] * Er[i, j] * dEiy - y[j] * Er[i, j] * dEix -
+            #           x[i] * Ei[i, j] * dEry + y[j] * Ei[i, j] * dErx)
+
+            # print(a, b, c)
+    dJz = (sumdJz * dx * dy)
+    return dJz
+
+
+def deltaJz2(EArray, dEr, dEi, xArray=None, yArray=None):
+    EArray = np.array(EArray)
+    dEr = np.array(dEr)
+    dEi = np.array(dEi)
+    Er, Ei = np.real(EArray), np.imag(EArray)
+    if xArray is None or yArray is None:
+        shape = np.shape(EArray)
+        xArray = np.arange(shape[0])
+        yArray = np.arange(shape[1])
+    dx = xArray[1] - xArray[0]
+    dy = yArray[1] - yArray[0]
+    x0 = (xArray[-1] + xArray[0]) / 2
+    y0 = (yArray[-1] + yArray[0]) / 2
+    x = np.array(xArray) - x0
+    y = np.array(yArray) - y0
+    sumdJz = 0
+    for i in range(1, len(xArray) - 2, 1):
+        for j in range(1, len(yArray) - 2, 1):
+            dErx = (Er[i + 1, j] - Er[i - 1, j]) / (2 * dx)
+            dEry = (Er[i, j + 1] - Er[i, j - 1]) / (2 * dy)
+            dEix = (Ei[i + 1, j] - Ei[i - 1, j]) / (2 * dx)
+            dEiy = (Ei[i, j + 1] - Ei[i, j - 1]) / (2 * dy)
+            _x, _y = x[i], y[j]
+            _Er, _Ei = Er[i, j], Ei[i, j]
+            # print(_x * dEiy, - _y * dEix, - _x * _Ei * s2r, + _y * _Ei * s1r)
+            sEr00 = _x * dEiy - _y * dEix
+            sEi00 = - _x * dEry + _y * dErx
+            sEi01 = _x * _Er / dy / 2
+            sEi10 = - _y * _Er / dx / 2
+            sEr01 = - _x * _Ei / dy / 2
+            sEr10 = _y * _Ei / dx / 2
+            sEi0_1 = - _x * _Er / dy / 2
+            sEi_10 = _y * _Er / dx / 2
+            sEr0_1 = _x * _Ei / dy / 2
+            sEr_10 = - _y * _Ei / dx / 2
+            sArray = [sEr00, sEi00,
+                      sEi01, sEi10, sEr01, sEr10,
+                      sEi0_1, sEi_10, sEr0_1, sEr_10]
+            dEArray = [dEr[i, j], dEi[i, j],
+                       dEi[i, j + 1], dEi[i + 1, j], dEr[i, j + 1], dEr[i + 1, j],
+                       dEi[i, j - 1], dEi[i - 1, j], dEr[i, j - 1], dEr[i - 1, j]]
+            error = 0
+            for ind, s in enumerate(sArray):
+                error += s ** 2 * dEArray[ind] ** 2
+            sumdJz += np.sqrt(error)
+            # # print(x[i] * Er[i, j] * dEiy, - y[j] * Er[i, j] * dEix, -
+            # #           x[i] * Ei[i, j] * dEry, + y[j] * Ei[i, j] * dErx)
+            # sumJz += (x[i] * Er[i, j] * dEiy - y[j] * Er[i, j] * dEix -
+            #           x[i] * Ei[i, j] * dEry + y[j] * Ei[i, j] * dErx)
+
+            # print(a, b, c)
+    dJz = (sumdJz * dx * dy)
+    return dJz
+
+
+def deltaJz(EArray, dEr, dEi, xArray=None, yArray=None):
+    EArray = np.array(EArray)
+    dEr = np.array(dEr)
+    dEi = np.array(dEi)
+    Er, Ei = np.real(EArray), np.imag(EArray)
+    shape = np.shape(EArray)
+    if xArray is None or yArray is None:
+        xArray = np.arange(shape[0])
+        yArray = np.arange(shape[1])
+    dx = xArray[1] - xArray[0]
+    dy = yArray[1] - yArray[0]
+    x0 = (xArray[-1] + xArray[0]) / 2
+    y0 = (yArray[-1] + yArray[0]) / 2
+    x = np.array(xArray) - x0
+    y = np.array(yArray) - y0
+    sumdJz = np.zeros(shape)
+    for i in range(1, len(xArray) - 2, 1):
+        for j in range(1, len(yArray) - 2, 1):
+            dErx = (Er[i + 1, j] - Er[i - 1, j]) / (2 * dx)
+            dEry = (Er[i, j + 1] - Er[i, j - 1]) / (2 * dy)
+            dEix = (Ei[i + 1, j] - Ei[i - 1, j]) / (2 * dx)
+            dEiy = (Ei[i, j + 1] - Ei[i, j - 1]) / (2 * dy)
+            _x, _y = x[i], y[j]
+            _Er, _Ei = Er[i, j], Ei[i, j]
+
+            error = (_x * dEiy - _y * dEix - _x * dEry + _y * dErx
+                     + _y * Er[i + 1, j] / dx / 2 - _y * Ei[i + 1, j] / dx / 2
+                     - _x * Er[i, j + 1] / dy / 2 + _x * Ei[i, j + 1] / dy / 2
+                     + _y * Er[i - 1, j] / dx / 2 - _y * Ei[i - 1, j] / dx / 2
+                     - _x * Er[i, j - 1] / dy / 2 + _x * Ei[i, j - 1] / dy / 2
+                     )
+            sumdJz[i, j] = error
+
+    dJz = 2 * np.sqrt(np.sum(np.abs(sumdJz) ** 2 * dEr ** 2)) * dx * dy
+    return dJz
