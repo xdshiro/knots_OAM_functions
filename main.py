@@ -57,11 +57,13 @@ if __name__ == '__main__':
     if knot_from_math:
         fhl.knot_from_math_f()
 
-    metasurface_Jiannan = False
+    metasurface_Jiannan = True
     if metasurface_Jiannan:
         def discretization_helper(x, steps, min, max):
             steps += 1  # 8 [0, 1, 2, 3, 4, 5, 6, 7, 8] where 0 and 8 are the same numbers
+                        #   [0, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
             discrArray = np.linspace(min, max, steps)
+            # print(discrArray)
             return np.arange(steps)[np.abs(discrArray - x).argmin()]
 
 
@@ -76,10 +78,14 @@ if __name__ == '__main__':
             return answer
 
 
-        A = fg.readingFile('trefoil_300x300um.mat', fieldToRead='z', printV=False)
+        A = fg.readingFile('.\\temp_data\Jiannan\\OAM3_phase_300x300um_1.mat', fieldToRead='g', printV=False)
         A2 = (discretization_phase(A, 8, min=A.min(), max=A.max()))
         fg.plot_2D(A)
+        # A = A - np.pi
+        # A = np.angle(np.exp(1j * A))
+        # fg.plot_2D(A)
         fg.plot_2D(A2)
+        print(A2)
         plt.show()
         exit()
 

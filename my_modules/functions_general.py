@@ -959,7 +959,8 @@ def deltaJz(EArray, dEr, dEi, xArray=None, yArray=None):
     y0 = (yArray[-1] + yArray[0]) / 2
     x = np.array(xArray) - x0
     y = np.array(yArray) - y0
-    sumdJz = np.zeros(shape)
+    sumdJzR = np.zeros(shape)
+    sumdJzI = np.zeros(shape)
     for i in range(1, len(xArray) - 2, 1):
         for j in range(1, len(yArray) - 2, 1):
             dErx = (Er[i + 1, j] - Er[i - 1, j]) / (2 * dx)
@@ -968,14 +969,28 @@ def deltaJz(EArray, dEr, dEi, xArray=None, yArray=None):
             dEiy = (Ei[i, j + 1] - Ei[i, j - 1]) / (2 * dy)
             _x, _y = x[i], y[j]
             _Er, _Ei = Er[i, j], Ei[i, j]
+            # error = (_x * dEiy - _y * dEix - _x * dEry + _y * dErx
+            #           + _y * Er[i + 1, j] / dx / 2 - _y * Ei[i + 1, j] / dx / 2
+            #           - _x * Er[i, j + 1] / dy / 2 + _x * Ei[i, j + 1] / dy / 2
+            #           + _y * Er[i - 1, j] / dx / 2 - _y * Ei[i - 1, j] / dx / 2
+            #           - _x * Er[i, j - 1] / dy / 2 + _x * Ei[i, j - 1] / dy / 2
+            #           )
+            errorR = (- _x * dEry + _y * dErx
+                      + _y * Er[i + 1, j] / dx / 2
+                      - _x * Er[i, j + 1] / dy / 2
+                      + _y * Er[i - 1, j] / dx / 2
+                      - _x * Er[i, j - 1] / dy / 2
+                      )
+            errorI = (_x * dEiy - _y * dEix
+                      - _y * Ei[i + 1, j] / dx / 2
+                      + _x * Ei[i, j + 1] / dy / 2
+                      - _y * Ei[i - 1, j] / dx / 2
+                      + _x * Ei[i, j - 1] / dy / 2
+                      )
+            sumdJzR = errorR
+            sumdJzI = errorI
+            # sumdJz[i, j] = error
 
-            error = (_x * dEiy - _y * dEix - _x * dEry + _y * dErx
-                     + _y * Er[i + 1, j] / dx / 2 - _y * Ei[i + 1, j] / dx / 2
-                     - _x * Er[i, j + 1] / dy / 2 + _x * Ei[i, j + 1] / dy / 2
-                     + _y * Er[i - 1, j] / dx / 2 - _y * Ei[i - 1, j] / dx / 2
-                     - _x * Er[i, j - 1] / dy / 2 + _x * Ei[i, j - 1] / dy / 2
-                     )
-            sumdJz[i, j] = error
-
-    dJz = 2 * np.sqrt(np.sum(np.abs(sumdJz) ** 2 * dEr ** 2)) * dx * dy
+    # dJz = 2 * np.sqrt(np.sum(np.abs(sumdJz) ** 2 * dEr ** 2)) * dx * dy
+    dJz = 2 * np.sqrt(np.sum(np.abs(sumdJzR) ** 2 * dEr ** 2 + np.abs(sumdJzI) ** 2 * dEi ** 2)) * dx * dy
     return dJz

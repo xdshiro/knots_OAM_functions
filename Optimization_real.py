@@ -24,12 +24,6 @@ Stop if the distance is too big. To find a hopf
 """
 
 
-def min_dist(dot, dots):
-    elements = [(fg.distance_between_points(dot, d), i) for i, d in enumerate(dots)]
-    minEl = min(elements, key=lambda i: i[0])
-    return minEl
-
-
 class Singularities3D:
     """
     Work with singularities of any 3D complex field
@@ -106,7 +100,6 @@ class Singularities3D:
         :return: None
         """
         fg.plot_3D_density(np.angle(self.field3D), **kwargs)
-        plt.show()
 
     def fill_dotsDict_from_field3D(self, _dotsXY=True, **kwargs):
         """
@@ -135,6 +128,7 @@ class Singularities3D:
         :return:
         """
         garbage, self.dotsXY = fg.cut_non_oam(np.angle(self.field3D), axesAll=False, **kwargs)
+        self.dotsDict = self.dotsXY
 
     def fill_dotsAll(self, **kwargs):
         """
@@ -143,6 +137,7 @@ class Singularities3D:
         :return:
         """
         garbage, self.dotsAll = fg.cut_non_oam(np.angle(self.field3D), axesAll=True, **kwargs)
+        self.dotsDict = self.dotsAll
 
     def dots_swap(self, **kwargs):
         """
@@ -227,6 +222,12 @@ class Knot(Singularities3D):
         fill in self.dotsList by removing charge sign and placing everything into the list [[x, y, z], [x, y, z]...]
         :return: None
         """
+
+        def min_dist(dot, dots):
+            elements = [(fg.distance_between_points(dot, d), i) for i, d in enumerate(dots)]
+            minEl = min(elements, key=lambda i: i[0])
+            return minEl
+
         self.dotsKnotList = []
         dotsDict = {}
         for [x, y, z] in self.dotsDict:
@@ -277,7 +278,7 @@ class Knot(Singularities3D):
             if not dotsDict[indZ]:  # removing the empty plane (0 dots left)
                 del dotsDict[indZ]
 
-    def check_knot(self) -> bool:
+    def check_knot_alex(self) -> bool:
         checkVal = None
         if self.knotSP is None:
             self.build_knot_pyknotid()
@@ -352,16 +353,198 @@ class Trefoil(Knot):
 
 if __name__ == '__main__':
     def func_time_main():
-        # trefoilW16 = Trefoil()
-        xyMinMax = 1
-        zMinMax = 0.35
-        zRes = 120
-        xRes = yRes = 70
-        unknot = Singularities3D()
-        xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax * 0.8, zMinMax, xRes, yRes, zRes, xMin=-0.4, zMin=None)
-        unknot.field_LG_combination(xyzMesh, [8, -9, -6], [(0, 0), (0, 1), (1, 0)])
-        ax = unknot.plot_dots(show=False)
+        def check_simple_sphere(singular: Singularities3D, xyzMesh, dotCenter=(0, 0, 0), radiusOuter=None,
+                                radiusInner=None):
+            if singular.dotsDict is None:
+                singular.fill_dotsXY()
+            if len(singular.dotsDict) < 5:
+                return False
+            if radiusInner is not None:
+                for dot in singular.dotsDict:
+                    dotXYZ = [xyzMesh[i][dot] for i in range(len(dot))]
+                    if fg.distance_between_points(dotXYZ, dotCenter) < radiusInner:
+                        return False
+            if radiusOuter is not None:
+                for dot in singular.dotsDict:
+                    dotXYZ = [xyzMesh[i][dot] for i in range(len(dot))]
+                    if fg.distance_between_points(dotXYZ, dotCenter) > radiusOuter:
+                        return False
+            return True
 
+        def check_one_direction(check_func):
+            xMinMax = 1
+            yMinMax = 0.8
+            xMin = -0.4
+            zMinMax = 0.35
+            zRes = 20
+            xRes = yRes = 20
+            unknot = Singularities3D()
+            xyzMesh = fg.create_mesh_XYZ(xMinMax, yMinMax, zMinMax, xRes, yRes, zRes, xMin=xMin, zMin=None)
+
+            # print(unknot.dotsDict, unknot.dotsXY)
+            # unknot.plot_dots()
+            dotCenter = ((xMinMax + xMin) / 2, 0, 0)
+            point = [8, -9.5, -5]
+            pointB = [0, 0, 0]
+            ind = 0
+            min1 = point[ind]
+            h1 = -0.05
+            for i in range(10):
+                point[ind] += h1
+                unknot.field_LG_combination(xyzMesh, point, [(0, 0), (0, 1), (1, 0)])
+                unknot.fill_dotsXY()
+                check = check_func(unknot, xyzMesh, dotCenter=dotCenter, radiusInner=0.40, radiusOuter=0.65)
+                # print(check, point)
+                if check:
+                    h1 *= 2
+                else:
+                    break
+            max1 = point[ind]
+            for i in range(10):
+                point[ind] = (min1 + max1) / 2
+                unknot.field_LG_combination(xyzMesh, point, [(0, 0), (0, 1), (1, 0)])
+                unknot.fill_dotsXY()
+                check = check_func(unknot, xyzMesh, dotCenter=dotCenter, radiusInner=0.40, radiusOuter=0.65)
+                # print(check, point)
+                if check:
+                    min1 = point[ind]
+                else:
+                    max1 = point[ind]
+            pointB[ind] = (min1 + max1) / 2
+            print(pointB)
+            point = [8, -9.5, -5]
+
+            ind = 1
+            min1 = point[ind]
+            for i in range(10):
+                point[ind] += h1
+                unknot.field_LG_combination(xyzMesh, point, [(0, 0), (0, 1), (1, 0)])
+                unknot.fill_dotsXY()
+                check = check_func(unknot, xyzMesh, dotCenter=dotCenter, radiusInner=0.40, radiusOuter=0.65)
+                # print(check, point)
+                if check:
+                    h1 *= 2
+                else:
+                    break
+            max1 = point[ind]
+            for i in range(10):
+                point[ind] = (min1 + max1) / 2
+                unknot.field_LG_combination(xyzMesh, point, [(0, 0), (0, 1), (1, 0)])
+                unknot.fill_dotsXY()
+                check = check_func(unknot, xyzMesh, dotCenter=dotCenter, radiusInner=0.40, radiusOuter=0.65)
+                # print(check, point)
+                if check:
+                    min1 = point[ind]
+                else:
+                    max1 = point[ind]
+            pointB[ind] = (min1 + max1) / 2
+            print(pointB)
+            point = [8, -9.5, -5]
+            ind = 2
+            min1 = point[ind]
+            for i in range(10):
+                point[ind] += h1
+                unknot.field_LG_combination(xyzMesh, point, [(0, 0), (0, 1), (1, 0)])
+                unknot.fill_dotsXY()
+                check = check_func(unknot, xyzMesh, dotCenter=dotCenter, radiusInner=0.40, radiusOuter=0.65)
+                # print(check, point)
+                if check:
+                    h1 *= 2
+                else:
+                    break
+            max1 = point[ind]
+            for i in range(10):
+                point[ind] = (min1 + max1) / 2
+                unknot.field_LG_combination(xyzMesh, point, [(0, 0), (0, 1), (1, 0)])
+                unknot.fill_dotsXY()
+                check = check_func(unknot, xyzMesh, dotCenter=dotCenter, radiusInner=0.40, radiusOuter=0.65)
+                # print(check, point)
+                if check:
+                    min1 = point[ind]
+                else:
+                    max1 = point[ind]
+            pointB[ind] = (min1 + max1) / 2
+            print(pointB)
+            point = [8, -9.5, -5]
+            a00Ar = np.linspace(7.4693603515625, 8.5269775390625, 10)
+            a01Ar = np.linspace(-10.857617187499999, -8.892382812499998, 10)
+            a10Ar = np.linspace(-6.07265625, -3.998046875, 10)
+            ans = []
+            for a00 in a00Ar:
+                for a01 in a01Ar:
+                    for a10 in a10Ar:
+                        point = [a00, a01, a10]
+                        unknot.field_LG_combination(xyzMesh, point, [(0, 0), (0, 1), (1, 0)])
+                        unknot.fill_dotsXY()
+                        check = check_func(unknot, xyzMesh, dotCenter=dotCenter, radiusInner=0.40, radiusOuter=0.65)
+                        #
+                        # print(point)
+                        if check:
+                            ans.append(point)
+
+            ans = np.array(ans)
+
+            fg.plot_scatter_3D(ans[:, 0], ans[:, 1], ans[:, 2])
+            plt.show()
+
+        # check_one_direction(check_simple_sphere)
+
+        xMinMax = 3
+        yMinMax = 3
+        zMinMax = 0.8
+        zRes = 70
+        xRes = yRes = 70
+        xyzMesh = fg.create_mesh_XYZ(xMinMax, yMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
+        beam = Singularities3D()
+        coeff = [1.715, -5.662, 6.381 * 17/16, -2.305, -4.356]
+        phase = [0, 0, np.pi / 32 * 0, 0, 0]
+        coeff = [a * np.exp(1j*p) for a, p in zip(coeff, phase)]
+        beam.field_LG_combination(xyzMesh, coeff, [(0, 0), (0, 1), (0, 2), (0, 3), (3, 0)])
+        # beam.plot_center_2D(axis_equal=True)
+        beam.fill_dotsAll()
+        beam.plot_dots()
+        exit()
+
+        trefoil = Knot()
+        w = 1.6
+        H = 1
+        a00 = 1 * (H ** 6 - H ** 4 * w ** 2 - 2 * H ** 2 * w ** 4 + 6 * w ** 6) / H ** 6
+        a01 = (w ** 2 * (1 * H ** 4 + 4 * w ** 2 * H ** 2 - 18 * w ** 4)) / H ** 6
+        a02 = (- 2 * w ** 4 * (H ** 2 - 9 * w ** 2)) / H ** 6
+        a03 = (-6 * w ** 6) / H ** 6
+        a30 = (-8 * np.sqrt(6) * w ** 3) / H ** 3
+        trefoilCoeff = [a00, a01, a02, a03, a30]
+
+        trefoil.field_LG_combination(xyzMesh, trefoilCoeff,
+                                    [(0, 0), (0, 1), (0, 2), (0, 3), (3, 0)])
+        # unknot.fill_dotsXY()
+        trefoil.plot_center_2D(axis_equal=True)
+        hopf = Knot()
+        w = 1.475
+        a00 = 1 - 2 * w ** 2 + 2 * w ** 4
+        a01 = 2 * w ** 2 - 4 * w ** 4
+        a02 = 2 * w ** 4
+        a20 = 4 * np.sqrt(2) * w ** 2
+        hopfCoeff = [a00, a01, a02, a20]
+        xyzMesh = fg.create_mesh_XYZ(xMinMax, yMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
+        hopf.field_LG_combination(xyzMesh, hopfCoeff,
+                                     [(0, 0), (0, 1), (0, 2), (2, 0)])
+        # unknot.fill_dotsXY()
+        hopf.plot_center_2D()
+        # print(unknot.dotsDict)
+        # fig = plt.figure()
+        # # ax = fig.add_subplot(111, projection='3d')
+        # for dot in unknot.dotsDict:
+        #     dotXYZ = (xyzMesh[i][dot] for i in range(len(dot)))
+        #     # print(xyzMesh[0][dot], xyzMesh[1][dot], xyzMesh[2][dot])
+        #     # fg.plot_scatter_3D(*dotXYZ, ax=ax)
+        # # plt.show()
+        exit()
+        # unknot.plot_dots(show=True)
+        # unknot.plot_dots(show=True)
+        # plt.show()
+        # unknot.plot_density()
+        # plt.show()
         # unknot.plot_density()
 
         # Hopf.boundary_step_test(coeffNum=2, step=1, funcCheck=None)

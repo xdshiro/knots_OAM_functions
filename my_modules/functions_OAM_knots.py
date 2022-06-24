@@ -110,6 +110,7 @@ def hopf_mod_4(x, y, z, w, width=1, k0=1, z0=0., aCoeff=None, coeffPrint=False):
              )
     return field
 
+
 def hopf_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
     z = z - z0
     H = 1.0
@@ -138,7 +139,6 @@ def hopf_mod(x, y, z, w, width=1, k0=1, z0=0., coeff=None, coeffPrint=False):
              aCoeff[3] * LG_simple(x, y, z, l=2, p=0, width=width, k0=k0)
              )
     return field
-
 
 
 def knot_all(x, y, z, w, width=1, k0=1, z0=0., knot=None):
@@ -247,7 +247,7 @@ def milnor_Pol_u_v_any(x, y, z, uOrder, vOrder, H=1):
 
 
 # plotting dot's only from the Array of +-1
-def  plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
+def plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
                    size=plt.rcParams['lines.markersize'] ** 2, color=None):
     if isinstance(field, dict):
         dotsOnly = field
@@ -258,13 +258,13 @@ def  plot_knot_dots(field, bigSingularity=False, axesAll=True, cbrt=False,
     dotsMinus = np.array([list(dots) for (dots, OAM) in dotsOnly.items() if OAM == -1])
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    if len(np.shape(dotsMinus)) > 0:
-        ax = fg.plot_scatter_3D(dotsPlus[:, 0], dotsPlus[:, 1], dotsPlus[:, 2], size=size, color=color)
-        if len(np.shape(dotsPlus)) > 0:
+    if len(np.shape(dotsPlus)) == 2:
+        fg.plot_scatter_3D(dotsPlus[:, 0], dotsPlus[:, 1], dotsPlus[:, 2], ax=ax, size=size, color=color)
+        if len(np.shape(dotsMinus)) == 2:
             fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
     else:
-        if len(np.shape(dotsPlus)) > 0:
-            ax = fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], size=size, color=color)
+        if len(np.shape(dotsPlus)) == 2:
+            fg.plot_scatter_3D(dotsMinus[:, 0], dotsMinus[:, 1], dotsMinus[:, 2], ax=ax, size=size, color=color)
         else:
             print(f'no singularities to plot')
     return ax

@@ -263,7 +263,7 @@ def check_knot_mine(xyzMesh, coeff, deltaCoeff, steps=1000,width=1.3, six_dots=T
 
 
 def check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff, steps=1000, six_dots=True, checkboundaries=False,
-                         boundaryValue=0.2, width=1.4,
+                         boundaryValue=0.2, width=1.3,
                          circletest=True, radiustest=0.05, testvisual=False, xyzMeshPlot=None):
     field = fOAM.hopf_mod(
         *xyzMesh, w=1.4, width=width, k0=1, z0=0.,
