@@ -2,8 +2,8 @@
 This module optimize the knot in turbulence based on the region in N-D amplitudes space.
 Finds the "knot-amplitude-space" and find the centre of it based on the weight coefficients
 """
-import my_modules.functions_OAM_knots as fOAM
-import my_modules.functions_general as fg
+import functions_OAM_knots as fOAM
+import functions_general as fg
 import matplotlib.pyplot as plt
 import numpy as np
 import timeit

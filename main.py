@@ -1,6 +1,6 @@
 # mine
-from my_modules import functions_high_lvl as fhl
-from my_modules.knots_optimization_functions import *
+import functions_high_lvl as fhl
+from knots_optimization_functions import *
 
 # aCoeff = [1.371, -4.1911, 7.9556, -3.4812, -4.2231]
 # aSumSqr = 0.1 * np.sqrt(sum([a ** 2 for a in aCoeff]))
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     if metasurface_Jiannan:
         def discretization_helper(x, steps, min, max):
             steps += 1  # 8 [0, 1, 2, 3, 4, 5, 6, 7, 8] where 0 and 8 are the same numbers
-                        #   [0, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
+            #   [0, 1/8, 2/8, 3/8, 4/8, 5/8, 6/8, 7/8, 8/8]
             discrArray = np.linspace(min, max, steps)
             # print(discrArray)
             return np.arange(steps)[np.abs(discrArray - x).argmin()]
@@ -78,14 +78,44 @@ if __name__ == '__main__':
             return answer
 
 
-        A = fg.readingFile('.\\temp_data\Jiannan\\OAM3_phase_300x300um_1.mat', fieldToRead='g', printV=False)
-        A2 = (discretization_phase(A, 8, min=A.min(), max=A.max()))
-        fg.plot_2D(A)
-        # A = A - np.pi
-        # A = np.angle(np.exp(1j * A))
-        # fg.plot_2D(A)
-        fg.plot_2D(A2)
-        print(A2)
+        from scipy import io
+        import os
+
+        directory = f'.\\temp_data\Jiannan\\'
+        listOfFiles = [f for f in os.listdir(directory)]
+        for filename in listOfFiles:
+            # filename = '3foil_phase_300x300um_1.mat'
+            A = fg.readingFile(f'{directory}{filename}', fieldToRead='g', printV=False)
+            A2 = (discretization_phase(A, 8, min=A.min(), max=A.max()))
+            print(np.shape(A), 300 / 0.9)
+            fg.plot_2D(A2)
+            plt.show()
+            exit()
+            np.savetxt(f'{directory }' + filename[:-4] +'num' +'.txt', A2.astype(int), fmt='%1.0f')
+            io.savemat(f'{directory}' + filename[:-4] + 'numMat.mat', {'num': A2})
+            # A = A - np.pi
+            # A = np.angle(np.exp(1j * A))
+            # fg.plot_2D(A)
+            # fg.plot_2D(A2)
+            dictNum = {0: (525, 735), 1: (500, 750),
+                       2: (525, 550), 3: (550, 470),
+                       4: (345, 745), 5: (300, 685),
+                       6: (300, 525), 7: (300, 375)}
+            shape = np.shape(A2)
+            xyMatrix = np.zeros((*shape, 2))
+            # # xyMatrix *= shape[1]
+            # print((*shape, 2), np.shape(xyMatrix), shape)
+            # exit()
+            # print(xyMatrix)
+            # A2 = list(A2)
+            for i in range(shape[0]):
+                for j in range(shape[1]):
+                    # print(A2[i, j], dictNum[A2[i, j]])
+                    xyMatrix[i, j, 0] = dictNum[A2[i, j]][0]
+                    xyMatrix[i, j, 1] = dictNum[A2[i, j]][1]
+                # xyMatrix.append([])
+            io.savemat(f'{directory}' + filename[:-4] + 'xy.mat', {'xy': xyMatrix})
+
         plt.show()
         exit()
 

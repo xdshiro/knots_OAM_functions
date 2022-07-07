@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # mine
-import my_modules.functions_general as fg
-import my_modules.functions_OAM_knots as fOAM
+import functions_general as fg
+import functions_OAM_knots as fOAM
 import os
 
 
@@ -16,10 +16,14 @@ def read_file_experiment_knot(fileName):
     print(np.shape(field_experiment))
     fg.plot_2D(np.abs(field_experiment) ** 2, axis_equal=True)
     fg.plot_2D(np.angle(field_experiment), axis_equal=True)
-    fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=1.5*5, stepsNumber=30, n0=1, k0=1)
+    fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=8, stepsNumber=30, n0=1, k0=1)
     fieldAfterProp = fg.cut_filter(fieldAfterProp, radiusPix=np.shape(fieldAfterProp)[0] // 3.5, circle=True)
     fOAM.plot_knot_dots(fieldAfterProp, axesAll=False, size=250, color='b')
     plt.show()
+
+read_file_experiment_knot('3foil_field2_modIntensity_f.mat')
+exit()
+
 
 
 def create_the_folder_from_experiment(directory, directorySave):
@@ -36,8 +40,7 @@ def create_the_folder_from_experiment(directory, directorySave):
         if not os.path.exists(directorySave):
             os.makedirs(directorySave)
         fOAM.save_knot_dots(fieldAfterProp, directorySave + files)
-read_file_experiment_knot('3foil_field2_modIntensity_f.mat')
-exit()
+
 # directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\DATA_FINAL\\Trefoil Exp\\SR = 0.9\\'
 # directorySave = '.\\experiment\\trefoil\\SR = 0.9\\'
 # create_the_folder_from_experiment(directory, directorySave)

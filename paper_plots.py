@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from my_modules import functions_general as fg
+import functions_general as fg
 
 """
 HOPF:
