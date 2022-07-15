@@ -21,30 +21,33 @@ def read_file_experiment_knot(fileName):
     fOAM.plot_knot_dots(fieldAfterProp, axesAll=False, size=250, color='b')
     plt.show()
 
-read_file_experiment_knot('3foil_field2_modIntensity_f.mat')
-exit()
 
+# read_file_experiment_knot('3foil_field2_modIntensity_f.mat')
+# exit()
 
 
 def create_the_folder_from_experiment(directory, directorySave):
     listOfFiles = [f for f in os.listdir(directory)]
     for num, files in enumerate(listOfFiles):
-        files = files.replace('.mat', '')
+        print(files)
+        fileName = directory + '\\' + files#  + files.replace('.mat', '')
+        # fileName = directory + '\\' + files#  + files.replace('.mat', '')
         print(num)
-        field_experiment = fg.readingFile(fileName=fileName, fieldToRead='Uz',
+        field_experiment = fg.readingFile(fileName=fileName, fieldToRead='U',
                                           printV=False)
-        fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=1.1 * 6, stepsNumber=22, n0=1, k0=1)
+        fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=9, stepsNumber=40, n0=1, k0=1)
         fieldAfterProp = fg.cut_filter(fieldAfterProp, radiusPix=np.shape(fieldAfterProp)[0] // 4, circle=True)
         # fOAM.plot_knot_dots(fieldAfterProp, axesAll=True, size=250, color='b')
 
         if not os.path.exists(directorySave):
             os.makedirs(directorySave)
-        fOAM.save_knot_dots(fieldAfterProp, directorySave + files)
+        fOAM.save_knot_dots(fieldAfterProp, directorySave + files.replace('.mat', ''))
 
-# directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\DATA_FINAL\\Trefoil Exp\\SR = 0.9\\'
-# directorySave = '.\\experiment\\trefoil\\SR = 0.9\\'
-# create_the_folder_from_experiment(directory, directorySave)
-# exit()
+
+directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\7-13-2022\\SR = 0.92'
+directorySave = '.\\SR = 0.92\\'
+create_the_folder_from_experiment(directory, directorySave)
+exit()
 # name = '3foil_turb_SR_9.000000e-01_num_2.mat'
 # fileName = directory + name
 plot2D = True

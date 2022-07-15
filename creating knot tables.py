@@ -1,8 +1,14 @@
 import knot_class as kc
-import my_modules.functions_general as fg
-import my_modules.functions_OAM_knots as fOAM
+import functions_general as fg
+import functions_OAM_knots as fOAM
 import numpy as np
 import matplotlib.pyplot as plt
+
+tableName = f'C:\\WORK\\CODES\\knots_OAM_functions\\SR = 0.92\\SR92exel'
+directoryName =f'C:\\WORK\\CODES\\knots_OAM_functions\\SR = 0.92\\'
+kc.creat_knot_table_dict_dots(directoryName, tableName)
+exit()
+
 def read_file_experiment_knot(fileName):
     # fileName = '3foil_field2_modIntensity_f.mat'
     field_experiment = fg.readingFile(fileName=fileName, fieldToRead='Uz',
@@ -13,7 +19,7 @@ def read_file_experiment_knot(fileName):
     # exit()
     # field_experiment = field_experiment[::4, ::4]
     fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=1.1 * 6.5, stepsNumber=30, n0=1, k0=1)
-    fieldAfterProp = fg.cut_filter(fieldAfterProp, radiusPix=np.shape(fieldAfterProp)[0] // 3.5, circle=True)
+    fieldAfterProp = fg.cut_filter(fieldAfterProp, radiusPix=np.shape(fieldAfterProp)[0] // 3, circle=True)
     fOAM.plot_knot_dots(fieldAfterProp, axesAll=False, size=250, color='b')
     plt.show()
     exit()
@@ -41,7 +47,4 @@ tableName = f'.\\exels\\{table}'
 #     directoryName.replace('C:\\WORK\\CODES\\', 'C:\\SCIENCE\\programming\\Python\\gitHub\\')
 
 kc.creat_knot_table(directoryName, tableName, single=None, show=True, cut=0.35)
-exit()
-directoryName =f'.\\experiment\\trefoil\\SR = 0.9\\'
-kc.creat_knot_table_dict_dots(directoryName, tableName)
 exit()

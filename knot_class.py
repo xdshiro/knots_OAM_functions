@@ -5,7 +5,7 @@ import sympy
 import pyknotid.spacecurves as sp
 import pandas as pd
 
-import my_modules.functions_general as fg
+import functions_general as fg
 
 
 def vectorDotProduct(vector1, vector2):
@@ -345,7 +345,7 @@ def making_knot(name, show=True, cut=1, showAll=False):
 
 
 def creat_knot_table_dict_dots(directoryName, tableName, single=None):
-    from my_modules import functions_OAM_knots as fOAM
+    import functions_OAM_knots as fOAM
     if single is not None:
         end = single
     else:
@@ -358,8 +358,9 @@ def creat_knot_table_dict_dots(directoryName, tableName, single=None):
     for fileName in listOfFiles[::]:
         print(fileName[:-4])
         pathName = directoryName[-20:-0]
-        newField = np.load(fileName, allow_pickle=True).item()
-        fOAM.plot_knot_dots(newField, axesAll=True, size=250, color='b')
+        print(fileName)
+        newField = np.load(directoryName + fileName, allow_pickle=True).item()
+        fOAM.plot_knot_dots(newField, axesAll=True, size=150, color='b')
         plt.show()
         list_of_file_names.append(f'{pathName}{fileName}')
         formula = input()
