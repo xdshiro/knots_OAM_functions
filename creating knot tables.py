@@ -4,8 +4,8 @@ import functions_OAM_knots as fOAM
 import numpy as np
 import matplotlib.pyplot as plt
 
-tableName = f'C:\\WORK\\CODES\\knots_OAM_functions\\SR = 0.92\\SR92exel'
-directoryName =f'C:\\WORK\\CODES\\knots_OAM_functions\\SR = 0.92\\'
+tableName = f'C:\\WORK\\CODES\\knots_OAM_functions\\exp\\trefoil\\SR=0.892\\trefSR892exel'
+directoryName =f'C:\\WORK\\CODES\\knots_OAM_functions\\exp\\trefoil\\SR=0.892\\'
 kc.creat_knot_table_dict_dots(directoryName, tableName)
 exit()
 

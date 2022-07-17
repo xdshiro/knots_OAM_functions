@@ -35,7 +35,7 @@ def create_the_folder_from_experiment(directory, directorySave):
         print(num)
         field_experiment = fg.readingFile(fileName=fileName, fieldToRead='U',
                                           printV=False)
-        fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=9, stepsNumber=40, n0=1, k0=1)
+        fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=10.5, stepsNumber=32, n0=1, k0=1)
         fieldAfterProp = fg.cut_filter(fieldAfterProp, radiusPix=np.shape(fieldAfterProp)[0] // 4, circle=True)
         # fOAM.plot_knot_dots(fieldAfterProp, axesAll=True, size=250, color='b')
 
@@ -44,8 +44,11 @@ def create_the_folder_from_experiment(directory, directorySave):
         fOAM.save_knot_dots(fieldAfterProp, directorySave + files.replace('.mat', ''))
 
 
-directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\7-13-2022\\SR = 0.92'
-directorySave = '.\\SR = 0.92\\'
+directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\7-13-2022\\Field SR=0.8\\'
+directorySave = '.\\exp\\trefoil\\SR=0.8\\'
+create_the_folder_from_experiment(directory, directorySave)
+directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\7-13-2022\\Fields SR = 0.891 (2)\\'
+directorySave = '.\\exp\\trefoil\\SR=0.891 (2)\\'
 create_the_folder_from_experiment(directory, directorySave)
 exit()
 # name = '3foil_turb_SR_9.000000e-01_num_2.mat'
