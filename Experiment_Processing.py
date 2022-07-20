@@ -41,15 +41,16 @@ def create_the_folder_from_experiment(directory, directorySave):
 
         if not os.path.exists(directorySave):
             os.makedirs(directorySave)
-        fOAM.save_knot_dots(fieldAfterProp, directorySave + files.replace('.mat', ''))
+        fOAM.save_knot_dots(fieldAfterProp, directorySave + files.replace('.mat', ''), axesAll=False)
 
 
-directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\7-13-2022\\Field SR=0.8\\'
-directorySave = '.\\exp\\trefoil\\SR=0.8\\'
+# directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\7-13-2022\\Field SR = 0.85\\'
+# directorySave = '.\\exp\\trefoil\\SR=0.85\\'
+# create_the_folder_from_experiment(directory, directorySave)
+directory = 'C:\\Users\\Dima\\Box\\Knots Exp\Experimental Data\\7-13-2022\\3foil Paper opt\\3foil SR = 0.9 (2)\\'
+directorySave = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\3foil SR = 0.9 (2)\\'
 create_the_folder_from_experiment(directory, directorySave)
-directory = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\7-13-2022\\Fields SR = 0.891 (2)\\'
-directorySave = '.\\exp\\trefoil\\SR=0.891 (2)\\'
-create_the_folder_from_experiment(directory, directorySave)
+
 exit()
 # name = '3foil_turb_SR_9.000000e-01_num_2.mat'
 # fileName = directory + name

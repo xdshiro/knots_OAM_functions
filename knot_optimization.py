@@ -1,4 +1,4 @@
-from my_modules.knots_optimization_functions import *
+from knots_optimization_functions import *
 
 
 def trefoil_optimization():
@@ -79,7 +79,7 @@ def hopf_optimization():
     coeff = [3.17, -5.98, 4.81, 5.23, 0.2]
     coeff = [3.19, -6.3, 5.09, 5.04, 0.6]
     coeff = coeffTest121313
-    coeff = None
+    # coeff = None
     width = 1.3
     # [3.1183383245351384, -6.487464929941611, 4.539015096229947, 5.339462907691034]
     # [3.212293593009031, -6.392995869495429, 4.629882224195264, 5.242451210074536]
@@ -87,28 +87,28 @@ def hopf_optimization():
     zMinMax = 1.1  # * 4
     zRes = 71
     xRes = yRes = 121
-    plot_test = True
-    if plot_test:
-        xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
-        fieldTest = fOAM.hopf_mod(
-            *xyzMesh, w=1.475, width=width, k0=1, z0=0.,
-            coeff=coeff, coeffPrint=True
-        )
-        # fg.plot_3D_density(np.angle(fieldTest))
-        fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2, axis_equal=True)
-        fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
-        # fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
-        plt.show()
-        if 0:
-            field, dotsOnly = fg.cut_non_oam(np.angle(fieldTest),
-                                             bigSingularity=False, axesAll=False, cbrt=False)
-            for i in range(zRes // 2, zRes):
-                fg.plot_2D(field[:, :, i])
-                plt.show()
-
-        exit()
+    # plot_test = True
+    # if plot_test:
+    #     xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=None)
+    #     fieldTest = fOAM.hopf_mod(
+    #         *xyzMesh, w=1.475, width=width, k0=1, z0=0.,
+    #         coeff=coeff, coeffPrint=True
+    #     )
+    #     # fg.plot_3D_density(np.angle(fieldTest))
+    #     fg.plot_2D(np.abs(fieldTest)[:, :, np.shape(fieldTest)[2] // 2] ** 2, axis_equal=True)
+    #     fg.plot_2D(np.angle(fieldTest)[:, :, np.shape(fieldTest)[2] // 2], axis_equal=True)
+    #     # fOAM.plot_knot_dots(fieldTest, axesAll=True, color='r', size=200)
+    #     plt.show()
+    #     if 0:
+    #         field, dotsOnly = fg.cut_non_oam(np.angle(fieldTest),
+    #                                          bigSingularity=False, axesAll=False, cbrt=False)
+    #         for i in range(zRes // 2, zRes):
+    #             fg.plot_2D(field[:, :, i])
+    #             plt.show()
+    #
+    #     exit()
     xyzMesh = fg.create_mesh_XYZ(xyMinMax, xyMinMax, zMinMax, xRes, yRes, zRes, zMin=0)
-    check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff=[0.2] * 5, steps=1,
+    check_knot_mine_hopf(xyzMesh, coeff, deltaCoeff=[0.2] * 5, steps=100,
                          six_dots=False, testvisual=False, width=width,
                          circletest=False, radiustest=0.02,  # # # # # # # # # ## #
                          checkboundaries=True, boundaryValue=0.1,

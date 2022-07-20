@@ -4,10 +4,11 @@ import functions_OAM_knots as fOAM
 import numpy as np
 import matplotlib.pyplot as plt
 
-tableName = f'C:\\WORK\\CODES\\knots_OAM_functions\\exp\\trefoil\\SR=0.892\\trefSR892exel'
-directoryName =f'C:\\WORK\\CODES\\knots_OAM_functions\\exp\\trefoil\\SR=0.892\\'
+tableName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\3foil SR = 0.9 (2)'
+directoryName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\3foil SR = 0.9 (2)\\'
 kc.creat_knot_table_dict_dots(directoryName, tableName)
 exit()
+
 
 def read_file_experiment_knot(fileName):
     # fileName = '3foil_field2_modIntensity_f.mat'
@@ -24,11 +25,12 @@ def read_file_experiment_knot(fileName):
     plt.show()
     exit()
 
+
 # read_file_experiment_knot('3foil_noturb (5).mat')
 _home = False
 SR = '0.9 2'
 knot = 'trefoil'
-w = '1.6 (3)' # Dima Cmex-
+w = '1.6 (3)'  # Dima Cmex-
 
 folderInside = f'Real\\Hopf_test_best_12\\SR = 9.500000e-01'
 directoryName = (

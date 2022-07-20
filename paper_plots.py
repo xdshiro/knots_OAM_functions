@@ -167,12 +167,24 @@ def plot_SR_percentage_Trefoil(ax=None):
     yArray = [78, 39.5, 16.5, 7.5, 5.5, 2, 0.5]
     xArray2 = [0.95, 0.9, 0.85, 0.8, 0.7, 0.6]  # pap
     yArray2 = [34, 8.5, 4, 1, 0, 0]  # for 0.9 was 5, now 12;  !!!!! 0.95 check
-    xArray3 = [0.95, 0.9, 0.85, 0.8, 0.7]  # 2
-    yArray3 = [8, 4, 2, 0, 0]  # 9 5 2
+    xArray2 = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7]  # pap without error
+    yArray2 = [41, 16, 4.5, 2, 0, 0]  # for 0.95 was 39
+    # yArray2 = [34, 12, 4, 1, 0, 0]  # for 0.9 was 5, now 12;  !!!!! 0.95 check
+    xArray3 = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7]  # 2
+    yArray3 = [8, 4, 2, 0, 0, 0]  # 9 5 2
+    xExp_opt = [0.95, 0.92, 0.9, 0.89, 0.85, 0.8, 0.75, 0.7]  # 2
+    yExp_opt = [71, 52, 32, 27.5, 10, 6, 1, 0]
+    # xExp_opt = [0.9, 0.8, 0.75, 0.85, 0.89, 0.92, 0.85_2, 0.75_2]  # 2
+    # yExp_opt = [31, 6, 0, 6, 27.5, 52, 10, 0.5]
+    # xExp_pap = [0.95, 0.9, 0.89, 0.85, 0.9]  # 2 real
+    # yExp_pap = [52, 15, 21, 1, 5]
+    xExp_pap = [0.95, 0.9, 0.85]  # 2
+    yExp_pap = [52, 13.5, 1]
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
     # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
     if ax is None:
         fig, ax = plt.subplots()  # figsize=(8, 6)
+    # ax.scatter(xExp_opt, yExp_opt)
     fg.plot_1D(
         xArray, yArray, color='r', marker='o', label='Optimized',
         xname='Strehl ratio', yname='Recovered knots %',
@@ -188,12 +200,34 @@ def plot_SR_percentage_Trefoil(ax=None):
         xname='Strehl ratio', yname='Recovered knots %',
         loc='upper right', ax=ax, title='Trefoil'
     )
-
+    fg.plot_1D(
+        xExp_opt, yExp_opt, color='k', marker='>', markeredgecolor='r', lw=2, markersize=12,
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax
+    )
+    fg.plot_1D(
+        xExp_pap, yExp_pap, color='k', marker='<', markeredgecolor='b', lw=2, markersize=12,
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax
+    )
+    # for x, y in zip(xExp_opt, yExp_opt):
+    #     fg.plot_1D(
+    #         x, y, color='r', marker='>', markersize=15,
+    #         xname='Strehl ratio', yname='Recovered knots %',
+    #         loc='upper right', ax=ax
+    #     )
+    #
+    # for x, y in zip(xExp_pap, yExp_pap):
+    #     fg.plot_1D(
+    #         x, y, color='b', marker='<', markersize=15,
+    #         xname='Strehl ratio', yname='Recovered knots %',
+    #         loc='upper right', ax=ax
+    #     )
     # plt.scatter([0.9], [57], c='y', marker='o', s=80)
     # plt.scatter([0.95], [65, 53, 60], c='k', marker='x', s=80)
     # ax.invert_xaxis()
     plt.xlim(0.97, 0.68)
-    plt.ylim(-3, 100)
+    plt.ylim(-0.1, 100)
     # ax.text('SR=0.001')
     # ax.set_xscale('log')
     # ax.fill_between([0.0018, 0.0175], [0, 0], [102.5, 102.5],
@@ -298,10 +332,10 @@ def plot_SR_percentage_hopf_trefoil_comp(ax=None):
     # fig.set_facecolor('floralwhite')
     # ax.set_facecolor('seashell')
     return ax
-plot_percentage_vs_w()
-plot_percentage_trefoil_vs_w()
 plot_SR_percentage_Trefoil(ax=None)
-plot_percentage_Hopf_vs_w(ax=None)
-plot_SR_percentage_hopf()
-plot_SR_percentage_hopf_trefoil_comp()
+# plot_percentage_vs_w()
+# plot_percentage_trefoil_vs_w()
+# plot_percentage_Hopf_vs_w(ax=None)
+# plot_SR_percentage_hopf()
+# plot_SR_percentage_hopf_trefoil_comp()
 plt.show()
