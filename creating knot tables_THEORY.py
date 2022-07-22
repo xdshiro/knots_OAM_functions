@@ -32,7 +32,7 @@ SR = '0.9 2'
 knot = 'trefoil'
 w = '1.6 (3)'  # Dima Cmex-
 
-directoryName = f'C:\\WORK\\CODES\\knots_OAM_functions\\temp_data\Real\\trefoil_Denis\\SR2 = 9.000000e-01\\'
+directoryName = f'C:\\WORK\\CODES\\knots_OAM_functions\\temp_data\Real\\Hopf_121313\\SR2 = 9.500000e-01\\'
 
 table = directoryName.replace("\\", "_")[-25:-1]
 
@@ -47,5 +47,5 @@ tableName = f'.\\exels\\{table}'
 # if _home:
 #     directoryName.replace('C:\\WORK\\CODES\\', 'C:\\SCIENCE\\programming\\Python\\gitHub\\')
 
-kc.creat_knot_table(directoryName, tableName, single=None, show=False, cut=0.35)
+kc.creat_knot_table(directoryName, tableName, single=None, show=True, cut=0.35)
 exit()

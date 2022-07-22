@@ -3,9 +3,16 @@ import functions_general as fg
 import functions_OAM_knots as fOAM
 import numpy as np
 import matplotlib.pyplot as plt
-
-tableName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\3foil SR = 0.9 (2)'
-directoryName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\3foil SR = 0.9 (2)\\'
+# fileName = f'C:\\Users\\Dima\\Box\\Knots Exp\Experimental Data\\7-13-2022\\Field SR = 0.95\\3foil_turb_25.npy'
+# field_experiment = fg.readingFile(fileName=fileName, fieldToRead='U',
+#                                           printV=False)
+# fg.plot_2D(field_experiment)
+# plt.show()
+# fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=10.5, stepsNumber=32, n0=1, k0=1)
+# fieldAfterProp = fg.cut_filter(fieldAfterProp, radiusPix=np.shape(fieldAfterProp)[0] // 4, circle=True)
+# exit()
+tableName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\3foil SR = 0.85 (3)'
+directoryName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\3foil SR = 0.85 (3)\\'
 kc.creat_knot_table_dict_dots(directoryName, tableName)
 exit()
 
