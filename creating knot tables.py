@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 # fieldAfterProp = fg.one_plane_propagator(field_experiment, dz=10.5, stepsNumber=32, n0=1, k0=1)
 # fieldAfterProp = fg.cut_filter(fieldAfterProp, radiusPix=np.shape(fieldAfterProp)[0] // 4, circle=True)
 # exit()
-tableName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\3foil SR = 0.85 (3)'
-directoryName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\3foil SR = 0.85 (3)\\'
+tableName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\Hopf noturb'
+directoryName = f'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\Hopf noturb\\'
 kc.creat_knot_table_dict_dots(directoryName, tableName)
 exit()
 

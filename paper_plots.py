@@ -178,8 +178,8 @@ def plot_SR_percentage_Trefoil(ax=None):
     # yExp_opt = [31, 6, 0, 6, 27.5, 52, 10, 0.5]
     # xExp_pap = [0.95, 0.9, 0.89, 0.85, 0.9]  # 2 real
     # yExp_pap = [52, 15, 21, 1, 5]
-    xExp_pap = [0.95, 0.9, 0.85] # [0.95, 0.9, 0.85]  # [0.95, 0.95]
-    yExp_pap = [42, 13.5, 1]# [52, 13.5, 1]  # [46, 39] 0.85: 1, 0.0?
+    xExp_pap = [0.95, 0.9, 0.85, 0.8] # [0.95, 0.9, 0.85]  # [0.95, 0.95]
+    yExp_pap = [42, 13.5, 2, 0]# [52, 13.5, 1]  # [46, 39] 0.85: 1, 0.0?
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
     # yArray = [0, 4.132231405, 24.79338843, 14.87603306, 20.66115702, 2.479338843]
     if ax is None:
@@ -257,6 +257,8 @@ def plot_SR_percentage_hopf(ax=None):
     yExp_opt = [27, 13, 4]
     xExp_opt2 = [0.95, 0.9, 0.85]  # 2
     yExp_opt2 = [51, 17, 3]
+    xExp_opt3 = [0.95, 0.9, 0.85]  # 2
+    yExp_opt3 = [37, 14, 3]
     xExp_math = [0.9]  # 2
     yExp_math = [7]
     # xArray = [1.05, 1.075, 1.1, 1.125, 1.2, 1.3]
@@ -284,7 +286,12 @@ def plot_SR_percentage_hopf(ax=None):
         loc='upper right', ax=ax
     )
     fg.plot_1D(
-        xExp_opt2, yExp_opt2, color='k', marker='>', markeredgecolor='r', lw=2, markersize=16,
+        xExp_opt2, yExp_opt2, color='k', marker='o', markeredgecolor='r', lw=2, markersize=16,
+        xname='Strehl ratio', yname='Recovered knots %',
+        loc='upper right', ax=ax
+    )
+    fg.plot_1D(
+        xExp_opt3, yExp_opt3, color='k', marker='x', markeredgecolor='r', lw=2, markersize=20,
         xname='Strehl ratio', yname='Recovered knots %',
         loc='upper right', ax=ax
     )

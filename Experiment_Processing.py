@@ -47,18 +47,10 @@ def create_the_folder_from_experiment(directory, directorySave):
 # directory = 'C:\\Users\\Dima\\Box\\Knots Exp\Experimental Data\\7-13-2022\\Hopf Field Opt\SR = 0.95 (2)\\'
 # directorySave = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\Hopf SR = 0.95 (2)\\'
 # create_the_folder_from_experiment(directory, directorySave)
-directory = 'C:\\Users\\Dima\\Box\\Knots Exp\Experimental Data\\7-13-2022\\Hopf Field Opt\\SR = 0.95 (3)\\'
-directorySave = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\Hopf_SR = 0.95 (3)\\'
+directory = 'C:\\Users\\Dima\\Box\\Knots Exp\Experimental Data\\7-13-2022\\Field 3foil noturb\\'
+directorySave = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\Field 3foil noturb\\'
 create_the_folder_from_experiment(directory, directorySave)
-directory = 'C:\\Users\\Dima\\Box\\Knots Exp\Experimental Data\\7-13-2022\\Hopf Field Opt\\SR = 0.9 (3)\\'
-directorySave = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\Hopf_SR = 0.9 (3)\\'
-create_the_folder_from_experiment(directory, directorySave)
-directory = 'C:\\Users\\Dima\\Box\\Knots Exp\Experimental Data\\7-13-2022\\Hopf Field Opt\\SR = 0.85 (3)\\'
-directorySave = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\Hopf_SR = 0.85 (3)\\'
-create_the_folder_from_experiment(directory, directorySave)
-directory = 'C:\\Users\\Dima\\Box\\Knots Exp\Experimental Data\\7-13-2022\\Hopf Field Opt\\SR = 0.8 (3)\\'
-directorySave = 'C:\\Users\\Dima\\Box\\Knots Exp\\Experimental Data\\dots\\trefoil\\Hopf_SR = 0.8 (3)\\'
-create_the_folder_from_experiment(directory, directorySave)
+
 
 
 exit()
